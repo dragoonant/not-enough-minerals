@@ -1,23 +1,45 @@
 // Maps presentation cues to sounds. Pure mapping: never computes rules, only restates what the cue already says.
+// Weapon sounds come from weaponFlavour (one sound per flavour); deaths, arrivals and shield hits go by the unit's race
+// through the optional `who` resolvers the host supplies (no faction ids live here beyond the three race names).
 import { weaponFlavour, type WeaponFlavour } from '../weaponFlavour'
+import { weaponSfxId } from './sfx'
 import type { Cue } from '../presentation/cues'
 
 export interface SoundCall { id: string; delayMs?: number; volume?: number }
 
-const SHOT: Record<WeaponFlavour, string> = {
-  pistol: 'shot-pistol', rifle: 'shot-rifle', shotgun: 'shot-shotgun', laser: 'laser', plasma: 'plasma', explosive: 'explosion',
-  blunt: 'melee-bat', blade: 'melee-blade', bite: 'melee-bite', claw: 'melee-claw',
+/** Resolvers for what a cue does not carry itself. */
+export interface CueWho {
+  raceOf?: (unitId: string) => string | undefined
+  /** True when the seat is played by a person on this screen (the turn chime is for them). */
+  isHuman?: (seat: string) => boolean
 }
-export const soundForFlavour = (f: WeaponFlavour): string => SHOT[f]
+
+export const soundForFlavour = (f: WeaponFlavour): string => weaponSfxId(f)
+
+const RACES = ['terran', 'zerg', 'protoss'] as const
+const raceKey = (race: string | undefined): (typeof RACES)[number] | null => (RACES as readonly string[]).includes(race ?? '') ? (race as (typeof RACES)[number]) : null
+
+export function deathSoundFor(race: string | undefined): string {
+  const r = raceKey(race)
+  return r ? `death-${r}` : 'death'
+}
+export function arrivalSoundFor(race: string | undefined): string {
+  switch (raceKey(race)) {
+    case 'protoss': return 'arrive-warp'
+    case 'zerg': return 'arrive-burrow'
+    default: return 'arrive-drop'
+  }
+}
 
 export type Outcome = 'victory' | 'defeat'
 
 /** `humanWon` tells a game-over banner whether to sting victory or defeat. */
-export function soundsForCue(cue: Cue, durationMs: number, humanWon?: boolean): SoundCall[] {
+export function soundsForCue(cue: Cue, durationMs: number, humanWon?: boolean, who: CueWho = {}): SoundCall[] {
   switch (cue.kind) {
     case 'banner':
       if (cue.tone === 'round') return [{ id: 'round-start' }]
-      if (cue.tone === 'turn') return [{ id: 'ui-confirm', volume: 0.4 }]
+      if (cue.tone === 'turn') return cue.seat && who.isHuman?.(cue.seat) ? [{ id: 'ui-turn', volume: 0.7 }] : [{ id: 'ui-confirm', volume: 0.3 }]
+      if (cue.tone === 'phase') return [{ id: 'ui-confirm', volume: 0.4 }]
       return [{ id: humanWon ? 'victory' : 'defeat' }]
     case 'move': {
       let len = 0
@@ -27,15 +49,22 @@ export function soundsForCue(cue: Cue, durationMs: number, humanWon?: boolean): 
       return Array.from({ length: steps }, (_, i) => ({ id: 'step', delayMs: (i / steps) * span, volume: 0.6 }))
     }
     case 'dice':
-      return [{ id: cue.dice.length > 4 ? 'dice-many' : 'dice-roll' }]
+      return [{ id: 'dice-roll', volume: cue.dice.length > 4 ? 1 : 0.8 }]
     case 'attack':
-      return [{ id: SHOT[weaponFlavour(cue.weaponId, cue.ns)], volume: 0.9 }]
-    case 'damage':
-      if (cue.removed) return [{ id: 'death', delayMs: 80 }]
-      if (cue.applied > 0) return [{ id: 'hit', delayMs: 60 }]
-      return [{ id: 'armor-clink', delayMs: 60 }]
-    case 'removed':
-      return [{ id: 'death' }]
+      return [{ id: soundForFlavour(weaponFlavour(cue.weaponId, cue.ns)), volume: 0.9 }]
+    case 'attackStage': {
+      if (cue.data.step === 'impact') return [{ id: 'dice-roll', volume: 0.6 }]
+      if (cue.data.step !== 'damage') return []
+      if (cue.data.total <= 0) return [{ id: 'armor-clink', delayMs: 60 }]
+      const shielded = cue.targetUnitId && raceKey(who.raceOf?.(cue.targetUnitId)) === 'protoss'
+      return [{ id: shielded ? 'shield-hit' : 'hit', delayMs: 60 }]
+    }
+    case 'casualties':
+      return [{ id: deathSoundFor(who.raceOf?.(cue.unitId)), delayMs: 80 }]
+    case 'arrival':
+      return cue.stage === 'arrived' ? [{ id: arrivalSoundFor(who.raceOf?.(cue.unitId)), volume: 0.9 }] : []
+    case 'marker':
+      return cue.change === 'claimed' || (cue.change === 'control' && cue.to) ? [{ id: 'marker-claim', volume: 0.8 }] : []
     default:
       return []
   }

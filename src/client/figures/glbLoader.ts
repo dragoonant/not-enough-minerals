@@ -54,3 +54,20 @@ export function useGlbInstance(url: string | undefined): Object3D | null {
 }
 
 export const glbStatus = (url: string): 'idle' | 'loading' | 'ready' | 'failed' => cache.get(url)?.status ?? 'idle'
+
+/** Start loading a url without rendering it (figures warm the cache before the bot is released). */
+export const preload = (url: string): void => { request(url) }
+
+/** True once every url has loaded or failed (a missing GLB never blocks the game: it falls back to the procedural body). */
+export function useGlbsSettled(urls: readonly string[]): boolean {
+  const [, setTick] = useState(0)
+  const key = urls.join('|')
+  useEffect(() => {
+    const l = () => setTick((n) => n + 1)
+    listeners.add(l)
+    for (const u of key ? key.split('|') : []) request(u)
+    return () => { listeners.delete(l) }
+  }, [key])
+  urls.forEach((u) => request(u))
+  return urls.every((u) => { const st = cache.get(u)?.status; return st === 'ready' || st === 'failed' })
+}

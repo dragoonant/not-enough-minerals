@@ -264,3 +264,14 @@ Windows PC with 40 figures (two Founders armies) and 15 terrain pieces.
     (`setupGame`, `setupModule`, CreateGameOpts `missionId`/`deploymentId`/`armies`/`preset`). `hooks.runHook` is a
     neutral no-op until the interpreter lands; hook point `onPlaceResolved` added to section 4.3.
   - `setup.ts` `modelDefaults`/`gameDefaults`/`seatDefaults` fill the new required fields (placeholder game only).
+- M3 (integration, 2026-10-13): `query.ts` adds `unitSupply(unit)` (supplyFor, purpose pool) for the Reserves tray,
+  `poolTable()` (`{round, pool | null}` per Round, null = unlimited final Round) for the briefing, and
+  `detectedUnits()` (units inside an enemy detector area, effects.inDetection) for the 'detected' status icon.
+  `contract.ts` exposes them as `useUnitSupply`, `usePoolTable`, `useDetectedUnits` (and in `queries`).
+- M3 (fix, 2026-10-13): additive `query.ts` changes. `shootOptions(unit)` returns per weapon and enemy unit either
+  eligible (with printed vs rolled Hit TN and `hitNotes`: indirectFire, longRange, cover, highGround) or a `reason`
+  code plus plain-words `text` with numbers (range, nearest distance), and a unit-level `canShoot`/`reason`, for the
+  weapon panel and action menu (eligibility is `shooting.planBatches`). `CoherencyPreview.links: [ModelId, ModelId][]`
+  (pairs with base edges within the coherency distance and a valid link). `ObjectiveStatus` gains `markerRadius`,
+  `contestRadius` (inches) and `contested` (two or more seats have a Unit that can contest the marker); the client
+  reads these instead of computing the ring.

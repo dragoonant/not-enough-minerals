@@ -9,8 +9,9 @@ export interface MoveTween { modelId: ModelId; points: Vec2[]; startedAt: number
 /** The beat playing now. */
 export interface ActiveBeat { id: number; cue: Cue; startedAt: number; durationMs: number; firstSeq: number; lastSeq: number }
 
-/** A dice cue as shown in the tray (stays after its beat ends; still rolling while now < startedAt + durationMs). */
-export interface ShownRoll { id: number; cue: CueOf<'dice'>; startedAt: number; durationMs: number }
+/** A roll as shown in the tray: a plain dice cue or an attack step with its dice (stays after its beat ends; still
+ *  rolling while now < startedAt + durationMs). */
+export interface ShownRoll { id: number; cue: CueOf<'dice'> | CueOf<'attackStage'>; startedAt: number; durationMs: number }
 
 /** A floating number/word over a model. */
 export interface DamagePop { id: number; modelId: ModelId; text: string; tone: 'damage' | 'miss' | 'removed' | 'condition'; startedAt: number; durationMs: number }

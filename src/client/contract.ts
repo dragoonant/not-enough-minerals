@@ -1,43 +1,56 @@
-// Client contract (frozen at M3). Board, figures, interaction, HUD and dice code import ONLY from here (plus engine/data
-// types). The start screen is the exception: it stays in the start chunk and imports store/launch.ts and
-// store/settingsStore.ts. Additive changes only; log them at the bottom of this file.
+// Client contract (FROZEN at M3). Board, figures, interaction, HUD and dice code import ONLY from here (plus engine/data
+// types). The start screen is the exception: it stays in the start chunk and imports store/launch.ts, store/catalog.ts
+// and store/settingsStore.ts. Additive changes only; log them at the bottom of this file.
 //
 // Rules for callers:
 //  - Render from the PRESENTED state (usePresented*), never the true state: it trails the animations.
-//  - Never compute a rules number. Odds, range, cover, damage, LOS and distances come from the query* helpers,
-//    pending.context / pending.options, or cue payloads. (M2 adds the StarCraft query helpers: hit odds, Surge, ...)
-//  - Answer decisions only through game.submit / game.answer / game.choose / game.pass.
+//  - Never compute a rules number. Odds, TNs, Supply, control, visibility, reach and coherency come from the query hooks
+//    below (engine/query.ts), pending.context / pending.options, or cue payloads.
+//  - Answer decisions only through game.submit / game.answer / game.choose / game.pass. Preview with game.dryRun.
 //  - Selectors return stable references, so they are safe as React hooks.
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useShallow } from 'zustand/react/shallow'
-import type { EditionBundle } from '../data/types'
-import { losVerdict } from '../engine/los'
-import { distanceBetween } from '../engine/measure'
-import type { Action, GameResult, GameState, LosVerdict, ModelId, ModelState, PendingDecision, SeatId, Vec2 } from '../engine/types'
-import { getBotDriver, setBotBrain, startBotDriver } from './bot/botDriver'
+import type { DeploymentDef, EditionBundle, KeywordDef, MissionDef, UnitDef } from '../data/types'
+import {
+  allAbilities, allWeapons, deploymentDef, keywordDef, markerSide, missionDef, rule, segmentToWorld, tableOf, unitDef, zoneRect,
+  type Rect, type RuleKey, type RuleValue,
+} from '../engine/edition'
+import * as query from '../engine/query'
+import { view as engineView } from '../engine/view'
+import type {
+  Action, Colour, GameResult, GameState, Id, MarkerState, ModelId, ModelState, PendingDecision, PlayerView, RoundPhase, SeatId,
+  UnitId, UnitState, Vec2,
+} from '../engine/types'
+import { getBotDriver, setBotBrain, setTierBrains, startBotDriver, type TierBrainFactory } from './bot/botDriver'
 import type { BotBrain, BotContext } from './bot/randomBot'
 import type { Params } from './params'
 import { useAnnounceStore, type Banner, type NarrationLine } from './presentation/announceStore'
-import type { BannerTone, Cue, CueKind, CueOf, RolledDie, SeqEvent } from './presentation/cues'
+import type { AtkStageData, BannerTone, Cue, CueKind, CueOf, RolledDie, SeqEvent } from './presentation/cues'
 import { directorNow, onCue, setPaused, skipAll, skipBeat, type CueListener } from './presentation/director'
-import { conditionWord, dataName, modelName, narrate, rollLabel, seatLabel } from './presentation/labels'
+import { conditionWord, dataName, modelName, narrate, phaseLabel, rollLabel, seatLabel, unitName } from './presentation/labels'
 import { usePresentedStore, type ActiveBeat, type DamagePop, type FeedEntry, type MoveTween, type ShownRoll } from './presentation/presentedStore'
 import {
   actionFor, clearRejection, deleteAutosave, dispatch, installAutosave, isHotSeat, isHumanDecision, legalFor, loadAutosave,
-  newGame, ownerSeat, preview, saveGame, setController, useGameStore,
-  type ClientRejection, type GameStoreState, type NewGameOptions, type SeatController,
+  newGame, ownerSeat, preview, rematch, saveGame, setController, useGameStore,
+  type ClientRejection, type GameStoreState, type NewGameOptions, type ResolvedLaunch, type SeatController,
 } from './store/gameStore'
-import { backToMenu, hasAutosave, type Launch } from './store/launch'
+import { backToMenu, hasAutosave, MATCHUPS, matchupOf, type Launch, type Matchup, type MatchupId } from './store/launch'
 import { SPEED_PRESETS, useSettingsStore, type Settings } from './store/settingsStore'
 import { installTestHooks, type GameTestApi } from './store/testHooks'
+import { focus, useFocusStore, type FocusState, type OverlayId, type RailId } from './store/uiStore'
 
 // ---------- types callers need ----------
 export type {
-  ActiveBeat, Banner, BannerTone, BotBrain, BotContext, ClientRejection, Cue, CueKind, CueListener, CueOf,
-  DamagePop, FeedEntry, GameTestApi, MoveTween, NarrationLine, NewGameOptions,
-  RolledDie, SeatController, SeqEvent, Settings, ShownRoll,
+  ActiveBeat, AtkStageData, Banner, BannerTone, BotBrain, BotContext, ClientRejection, Cue, CueKind, CueListener, CueOf,
+  DamagePop, FeedEntry, FocusState, GameTestApi, Matchup, MatchupId, MoveTween, NarrationLine, NewGameOptions, OverlayId,
+  RailId, ResolvedLaunch, RolledDie, SeatController, SeqEvent, Settings, ShownRoll, TierBrainFactory,
 }
-export { SPEED_PRESETS }
+export type {
+  AttackPreview, ChargeOdds, CoherencyPreview, CoverLevel, MissionScore, ObjectiveStatus, PoolRow, Reach, SupplyStatus,
+} from '../engine/query'
+export type { SeeVerdict, SeeReason } from '../engine/visibility'
+export type { Rect } from '../engine/edition'
+export { SPEED_PRESETS, MATCHUPS, matchupOf }
 
 // =====================================================================================================
 // Presented state (render from these)
@@ -49,11 +62,31 @@ export const usePresentedModel = (id: ModelId | null | undefined): ModelState | 
   usePresentedStore((s) => (id ? s.state?.models[id] : undefined))
 /** All models as presented. */
 export const usePresentedModels = (): Record<ModelId, ModelState> | null => usePresentedStore((s) => s.state?.models ?? null)
-/** Every model id in the presented state (shallow-stable). */
+/** Every model id in the presented state (shallow-stable). Reserve models are included: check model.offTable. */
 export const useModelIds = (): ModelId[] => usePresentedStore(useShallow((s) => (s.state ? Object.keys(s.state.models) : [])))
-/** Round and the seat whose turn it is, as presented. */
-export const usePresentedTurn = (): { round: number; seat: SeatId | null; phase: GameState['phase'] | null } =>
-  usePresentedStore(useShallow((s) => ({ round: s.state?.round ?? 0, seat: s.state?.turn?.seat ?? null, phase: s.state?.phase ?? null })))
+/** One unit as presented. */
+export const usePresentedUnit = (id: UnitId | null | undefined): UnitState | undefined =>
+  usePresentedStore((s) => (id ? s.state?.units[id] : undefined))
+export const usePresentedUnits = (): Record<UnitId, UnitState> | null => usePresentedStore((s) => s.state?.units ?? null)
+/** Unit ids (optionally of one seat), in muster order (shallow-stable). */
+export const useUnitIds = (seat?: SeatId): UnitId[] =>
+  usePresentedStore(useShallow((s) => (s.state ? Object.values(s.state.units).filter((u) => !seat || u.owner === seat).map((u) => u.id) : [])))
+/** Mission Markers as presented (onTable false = removed or carried). */
+export const usePresentedMarkers = (): MarkerState[] => usePresentedStore((s) => s.state?.markers ?? EMPTY_MARKERS)
+const EMPTY_MARKERS: MarkerState[] = []
+/** Round, Phase and turn as presented. `seat` = the seat acting now (active, else turn.seat). */
+export interface PresentedTurn {
+  round: number; maxRounds: number | null; phase: GameState['phase'] | null; roundPhase: RoundPhase | null
+  seat: SeatId | null; activeUnit: UnitId | null; firstPlayer: SeatId | null; passed: SeatId[]
+}
+export const usePresentedTurn = (): PresentedTurn => usePresentedStore(useShallow((s) => {
+  const st = s.state
+  return {
+    round: st?.round ?? 0, maxRounds: st?.maxRounds ?? null, phase: st?.phase ?? null, roundPhase: st?.roundPhase ?? null,
+    seat: st?.active ?? st?.turn?.seat ?? null, activeUnit: st?.activeUnit ?? null, firstPlayer: st?.firstPlayer ?? null, passed: st?.passed ?? EMPTY_SEATS,
+  }
+}))
+const EMPTY_SEATS: SeatId[] = []
 /** Game result once the presented state reaches the end, else null. */
 export const useGameResult = (): GameResult | null => usePresentedStore((s) => (s.state?.phase === 'over' ? s.state.result : null))
 
@@ -90,9 +123,9 @@ export const usePresentationIdle = (): boolean => usePresentedStore((s) => s.idl
 export const usePresentationPaused = (): boolean => usePresentedStore((s) => s.paused)
 /** The beat playing now (with its cue), or null. */
 export const useCurrentBeat = (): ActiveBeat | null => usePresentedStore((s) => s.beat)
-/** Last dice cue shown in the tray (still rolling while directorNow() < startedAt + durationMs). */
+/** Last dice or attackStage roll shown in the tray (still rolling while directorNow() < startedAt + durationMs). */
 export const useShownRoll = (): ShownRoll | null => usePresentedStore((s) => s.roll)
-/** Every dice cue shown this game, oldest first. */
+/** Every roll shown this game, oldest first. */
 export const useDiceLog = (): ShownRoll[] => usePresentedStore((s) => s.diceLog)
 /** Floating pops; drop each after startedAt + durationMs. */
 export const useDamagePops = (): DamagePop[] => usePresentedStore((s) => s.pops)
@@ -117,7 +150,7 @@ export function usePending(): PendingDecision | null {
   return useGameStore((g) => promptOf(g, idle))
 }
 const EMPTY: Action[] = []
-/** Legal answers for usePending() (option templates; parameterised ones such as move.to need extra fields). */
+/** Legal answers for usePending() (complete actions: the engine enumerates parameterised candidates too). */
 export function usePendingLegal(): Action[] {
   const p = usePending()
   const state = useGameStore((g) => g.state)
@@ -135,11 +168,15 @@ export function useWaitingFor(): { seat: SeatId; controller: SeatController; lab
   }))
 }
 /** Overview of the running game (true state). */
-export function useGame(): { state: GameState | null; controllers: Record<SeatId, SeatController>; seatOrder: SeatId[]; hotSeat: boolean; version: number; seed: string; scenarioId: string | null } {
-  return useGameStore(useShallow((g) => ({ state: g.state, controllers: g.controllers, seatOrder: g.seatOrder, hotSeat: isHotSeat(g), version: g.version, seed: g.seed, scenarioId: g.scenarioId })))
+export function useGame(): { state: GameState | null; controllers: Record<SeatId, SeatController>; seatOrder: SeatId[]; hotSeat: boolean; version: number; epoch: number; seed: string; launch: ResolvedLaunch | null } {
+  return useGameStore(useShallow((g) => ({ state: g.state, controllers: g.controllers, seatOrder: g.seatOrder, hotSeat: isHotSeat(g), version: g.version, epoch: g.epoch, seed: g.seed, launch: g.launch })))
 }
 export const useHasGame = (): boolean => useGameStore((g) => g.state !== null)
 export const useControllers = (): Record<SeatId, SeatController> => useGameStore((g) => g.controllers)
+/** The resolved launch (matchup, armies, mission, deployment, tier). */
+export const useLaunch = (): ResolvedLaunch | null => useGameStore((g) => g.launch)
+/** Bumps on every new game or load (open the briefing once per epoch). */
+export const useEpoch = (): number => useGameStore((g) => g.epoch)
 /** Last rejection (our words in .text, the engine's in .detail); cleared by the next accepted step. */
 export const useRejection = (): ClientRejection | null => useGameStore((g) => g.lastRejection)
 /** Engine crashed (bug): show a recovery prompt. */
@@ -148,12 +185,31 @@ export const useFatal = (): string | null => useGameStore((g) => g.fatal)
 export const useBundle = (): EditionBundle | null => useGameStore((g) => g.bundle)
 export const getBundle = (): EditionBundle | null => useGameStore.getState().bundle
 
+// ---------- whose eyes: the seat the screen is drawn for ----------
+/** The seat the screen shows: the human who answers the open decision (hot-seat hand-over), else the first human seat,
+ *  else seat 0 (bots only). Near-edge camera, "you" labels and view() follow it. */
+export function viewerSeatOf(g: GameStoreState): SeatId | null {
+  const humans = g.seatOrder.filter((s) => g.controllers[s] === 'human')
+  const owner = g.state ? ownerSeat(g.state.pending, g) : null
+  if (owner && humans.includes(owner) && humans.length > 1) return owner
+  return humans[0] ?? g.seatOrder[0] ?? null
+}
+export const useViewerSeat = (): SeatId | null => useGameStore((g) => viewerSeatOf(g))
+/** view(state, viewerSeat) of the TRUE state (deciders' eyes; spec 00 s5). */
+export function useView(): PlayerView | null {
+  const state = useGameStore((g) => g.state)
+  const seat = useViewerSeat()
+  return useMemo(() => (state && seat ? engineView(state, seat) : null), [state, seat])
+}
+
 // =====================================================================================================
 // Commands
 // =====================================================================================================
 export const game = {
-  /** Start a new game. Returns a rejection or null. */
+  /** Start a new game from launch options (matchup, missionId, deploymentId, seats, tier, seed). Returns a rejection or null. */
   newGame: (opts: NewGameOptions = {}): ClientRejection | null => newGame(opts),
+  /** Same launch and seats, fresh seed. */
+  rematch: (): ClientRejection | null => rematch(),
   /** Submit a full Action as a human (refused when the open decision is a bot's). */
   submit: (a: Action): ClientRejection | null => dispatch(a, 'human'),
   /** Submit a payload for the open decision; decisionId and seat are filled in. E.g. answer({ ...opt.action, path }). */
@@ -166,15 +222,19 @@ export const game = {
     const opt = useGameStore.getState().state?.pending.options.find((o) => o.id === optionId)
     return opt ? dispatch(opt.action, 'human') : null
   },
-  /** Pass the open decision when it offers a 'pass' option. */
+  /** Pass the open decision when it offers a pass option (turn.pass, or an option with id 'pass'). */
   pass(): ClientRejection | null {
-    const opt = useGameStore.getState().state?.pending.options.find((o) => o.action.type === 'pass' || o.id === 'pass')
+    const opt = useGameStore.getState().state?.pending.options.find((o) => o.action.type === 'turn.pass' || o.action.type === 'pass' || o.id === 'pass')
     return opt ? dispatch(opt.action, 'human') : null
   },
   /** Legal answers for the true open decision (cached per state). */
   legal: (): Action[] => legalFor(useGameStore.getState().state),
-  /** Dry run (no commit): would the engine accept this, and with what result state? For drag previews. */
+  /** Dry run (no commit): would the engine accept this, and with what result state? For drag and placement previews. */
+  dryRun: preview,
+  /** Same as dryRun (M0 name). */
   preview,
+  /** Fill decisionId and seat for the open decision. */
+  actionFor,
   clearRejection,
   setController,
   /** Save now to the autosave slot. */
@@ -202,34 +262,174 @@ export const settings = { set: (patch: Partial<Settings>) => useSettingsStore.ge
 export const bots = {
   /** Install a fixed bot brain (tests, tooling); null restores the tier brain. */
   setBrain: setBotBrain,
+  /** M4: install the tier brain factory (null = random for every tier). */
+  setTierBrains,
   setPaused: (p: boolean) => getBotDriver().setPaused(p),
 }
 
 // =====================================================================================================
-// Engine queries (bound to the TRUE state; prompts and tools run only while idle, when true == presented)
+// Shared view state (store/uiStore.ts): hover, selection, target preview, card hover glow, rails, briefing, overlays
+// =====================================================================================================
+/** Select from the focus store, e.g. useFocus((f) => f.selectedUnitId). Use useShallow-safe primitives or stable refs. */
+export function useFocus<T>(sel: (f: FocusState) => T): T { return useFocusStore(sel) }
+export { focus }
+/** Figures (P) call this with true once the current game's figures are on the table; the bot waits for it. */
+export function useReportFiguresReady(ready: boolean): void {
+  const epoch = useGameStore((g) => g.epoch)
+  useEffect(() => { focus.setFiguresReady(ready) }, [ready, epoch])
+}
+
+// =====================================================================================================
+// Data lookups (records by id; names and printed text, never rules arithmetic)
+// =====================================================================================================
+export const useUnitDef = (profileId: Id | null | undefined): UnitDef | undefined => {
+  const b = useBundle()
+  return useMemo(() => (b && profileId ? unitDef(b, profileId) : undefined), [b, profileId])
+}
+/** The datasheet of a (presented) unit. */
+export const useUnitDefOf = (unitId: UnitId | null | undefined): UnitDef | undefined => useUnitDef(usePresentedUnit(unitId)?.profileId)
+/** The Mission and Deployment Card of the running game (null before they are drafted). */
+export const useMission = (): MissionDef | null => {
+  const b = useBundle()
+  const id = useGameStore((g) => g.state?.missionId ?? null)
+  return useMemo(() => (b && id ? missionDef(b, id) ?? null : null), [b, id])
+}
+export const useDeployment = (): DeploymentDef | null => {
+  const b = useBundle()
+  const id = useGameStore((g) => g.state?.deploymentId ?? null)
+  return useMemo(() => (b && id ? deploymentDef(b, id) ?? null : null), [b, id])
+}
+/** A rules.json constant (engine edition.rule). */
+export function useRule<K extends RuleKey>(key: K): RuleValue<K> | null {
+  const b = useBundle()
+  return useMemo(() => (b ? rule(b, key) : null), [b, key])
+}
+export const data = {
+  unit: (id: Id): UnitDef | undefined => { const b = getBundle(); return b ? unitDef(b, id) : undefined },
+  keyword: (id: string): KeywordDef | undefined => { const b = getBundle(); return b ? keywordDef(b, id) : undefined },
+  /** Every weapon profile a unit can carry (defaults, then upgrade weapons). */
+  weapons: allWeapons,
+  /** Printed abilities plus those of the bought upgrades. */
+  abilities: allAbilities,
+  rule: <K extends RuleKey>(key: K): RuleValue<K> | null => { const b = getBundle(); return b ? rule(b, key) : null },
+}
+
+/** Table, Entry Edges (world segments) and Zones of Influence per seat, and Mission Marker sides: for the mat and the
+ *  briefing mini map. All geometry comes from engine/edition helpers. */
+export interface BoardGeometry {
+  table: { w: number; d: number }
+  edges: { seat: SeatId; colour: Colour; segments: [Vec2, Vec2][]; zones: Rect[] }[]
+  markerSides: Record<number, Colour | 'neutral'>
+  /** Contest range in inches from the marker edge, marker radius in inches, ring radius = both (engine constants). */
+  ring: { contestRange: number; markerRadius: number; radius: number }
+}
+export function useBoardGeometry(): BoardGeometry | null {
+  const b = useBundle()
+  const dep = useDeployment()
+  const seats = useGameStore(useShallow((g) => g.seatOrder.map((s) => `${s}:${g.state?.seats[s]?.colour ?? ''}`)))
+  const table = usePresentedStore((s) => s.state?.scenario.table)
+  return useMemo(() => {
+    if (!b || !table) return null
+    const contestRange = rule(b, 'contestRange')
+    const markerRadius = rule(b, 'markerDiameterMm') / 25.4 / 2
+    const edges: BoardGeometry['edges'] = []
+    if (dep) {
+      const size = { w: dep.size.w, h: dep.size.h }
+      const depth = rule(b, 'zoiDepth')
+      for (const pair of seats) {
+        const [seat, colour] = pair.split(':') as [SeatId, string]
+        if (colour !== 'red' && colour !== 'blue') continue
+        const segs = dep.entryEdges[colour]
+        edges.push({ seat, colour, segments: segs.map((g) => segmentToWorld(g, size)), zones: segs.map((g) => zoneRect(g, size, depth)) })
+      }
+    }
+    const markerSides: Record<number, Colour | 'neutral'> = {}
+    for (const m of dep?.markers ?? []) markerSides[m.n] = markerSide(m.n)
+    return { table: dep ? tableOf(dep) : table, edges, markerSides, ring: { contestRange, markerRadius, radius: contestRange + markerRadius } }
+  }, [b, dep, seats.join('|'), table])
+}
+
+// =====================================================================================================
+// Engine queries (spec 00 s6). Prompt-time queries read the TRUE state (prompts open only while idle, when true ==
+// presented); HUD read-outs (Supply, objectives, VP) read the PRESENTED state so they never run ahead of the animation.
 // =====================================================================================================
 const truth = (): { s: GameState; b: EditionBundle } | null => {
   const g = useGameStore.getState()
   return g.state && g.bundle ? { s: g.state, b: g.bundle } : null
 }
-export const queryLos = (viewer: ModelId, target: ModelId): LosVerdict | null => { const t = truth(); return t ? losVerdict(t.s, viewer, target) : null }
-/** Base-edge distance in inches between two models. */
-export const queryDistance = (a: ModelId, b: ModelId): number => { const t = truth(); return t ? distanceBetween(t.s, a, b) : NaN }
-/**
- * Memoised query hook, recomputed when the true state changes or deps change:
- *   const odds = useQuery((s, b) => query.hitOdds(s, b, a, t), [a, t])
- * Prefer the named hooks below.
- */
+const safe = <T>(f: () => T): T | null => { try { return f() } catch { return null } }
+
+/** Memoised query on the TRUE state, recomputed when it changes or deps change. Prefer the named hooks below. */
 export function useQuery<T>(fn: (state: GameState, bundle: EditionBundle) => T, deps: readonly unknown[]): T | null {
   const state = useGameStore((g) => g.state)
   const bundle = useGameStore((g) => g.bundle)
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  return useMemo(() => (state && bundle ? fn(state, bundle) : null), [state, bundle, ...deps])
+  return useMemo(() => (state && bundle ? safe(() => fn(state, bundle)) : null), [state, bundle, ...deps])
 }
-export const useLos = (a: ModelId | null, t: ModelId | null) => useQuery((s) => (a && t ? losVerdict(s, a, t) : null), [a, t])
+/** Memoised query on the PRESENTED state (HUD read-outs). */
+export function usePresentedQuery<T>(fn: (state: GameState, bundle: EditionBundle) => T, deps: readonly unknown[]): T | null {
+  const state = usePresentedStore((s) => s.state)
+  const bundle = useGameStore((g) => g.bundle)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  return useMemo(() => (state && bundle ? safe(() => fn(state, bundle)) : null), [state, bundle, ...deps])
+}
+
+// ---------- prompt-time (true state) ----------
+/** Odds panel: dice, Hit TN per model, Surge, Armour/Evade TNs (or why not), expected damage, kill odds, Supply removed. */
+export const useAttackPreview = (attackerUnitId: UnitId | null, weaponId: Id | null, targetUnitId: UnitId | null) =>
+  useQuery((s, b) => (attackerUnitId && weaponId && targetUnitId ? query.attackPreview(s, b, attackerUnitId, weaponId, targetUnitId) : null), [attackerUnitId, weaponId, targetUnitId])
+/** Roll needed to charge these targets and its chance. */
+export const useChargeOdds = (unitId: UnitId | null, targetIds: readonly UnitId[] | null) => {
+  const key = targetIds ? targetIds.join(',') : ''
+  return useQuery((s, b) => (unitId && targetIds && targetIds.length ? query.chargeOdds(s, b, unitId, [...targetIds]) : null), [unitId, key])
+}
+/** Can the actor unit target this unit (ranged, LoS), with reasons and the visible models. */
+export const useCanSee = (actorUnitId: UnitId | null, targetUnitId: UnitId | null) =>
+  useQuery((s, b) => (actorUnitId && targetUnitId ? query.canSee(s, b, actorUnitId, targetUnitId) : null), [actorUnitId, targetUnitId])
+export const useCover = (attackerUnitId: UnitId | null, targetUnitId: UnitId | null) =>
+  useQuery((s, b) => (attackerUnitId && targetUnitId ? query.coverFor(s, b, attackerUnitId, targetUnitId) : null), [attackerUnitId, targetUnitId])
+export const useEngaged = (unitId: UnitId | null) => useQuery((s, b) => (unitId ? query.engaged(s, b, unitId) : null), [unitId])
+/** Coherency of a proposed placement (pass a memoised placement object). */
+export const useCoherencyPreview = (unitId: UnitId | null, placement: Record<ModelId, Vec2> | null) =>
+  useQuery((s, b) => (unitId && placement ? query.coherencyPreview(s, b, unitId, placement) : null), [unitId, placement])
+/** Move, Run and Charge reach (threat overlay, ruler). */
+export const useReachOf = (unitId: UnitId | null) => useQuery((s, b) => (unitId ? query.reachOf(s, b, unitId) : null), [unitId])
+
+// ---------- HUD read-outs (presented state) ----------
+export const useSupplyStatus = (seat: SeatId | null) => usePresentedQuery((s, b) => (seat ? query.supplyStatus(s, b, seat) : null), [seat])
+/** Supply for every seat in seat order. */
+export const useSupplyAll = () => usePresentedQuery((s, b) => s.seatOrder.map((seat) => query.supplyStatus(s, b, seat)), [])
+/** Per marker on the table: contest totals, controller, Activated face, VP if scored now. */
+export const useObjectiveStatus = () => usePresentedQuery((s, b) => query.objectiveStatus(s, b), [])
+export const useMissionScore = (seat: SeatId | null) => usePresentedQuery((s, b) => (seat ? query.missionScore(s, b, seat) : null), [seat])
+/** Current Supply Value of one unit (Reserves tray, unit card). */
+export const useUnitSupply = (unitId: UnitId | null) => usePresentedQuery((s, b) => (unitId ? query.unitSupply(s, b, unitId) : null), [unitId])
+/** Supply per unit id for every unit (one query pass; Reserves tray). */
+export const useUnitSupplies = () => usePresentedQuery((s, b) => Object.fromEntries(Object.keys(s.units).map((id) => [id, query.unitSupply(s, b, id)])) as Record<UnitId, number>, [])
+/** The Supply Pool for every Round (null = unlimited). */
+export const usePoolTable = () => usePresentedQuery((s, b) => query.poolTable(s, b), [])
+/** Units inside an enemy detector area ('detected' status icon). */
+export const useDetectedUnits = () => usePresentedQuery((s, b) => query.detectedUnits(s, b), [])
+
+/** The same queries for event handlers (drag, click): bound to the TRUE state, null without a game. */
+export const queries = {
+  attackPreview: (a: UnitId, w: Id, t: UnitId) => { const x = truth(); return x ? safe(() => query.attackPreview(x.s, x.b, a, w, t)) : null },
+  chargeOdds: (u: UnitId, targets: UnitId[]) => { const x = truth(); return x ? safe(() => query.chargeOdds(x.s, x.b, u, targets)) : null },
+  canSee: (a: UnitId, t: UnitId) => { const x = truth(); return x ? safe(() => query.canSee(x.s, x.b, a, t)) : null },
+  coverFor: (a: UnitId, t: UnitId) => { const x = truth(); return x ? safe(() => query.coverFor(x.s, x.b, a, t)) : null },
+  engaged: (u: UnitId) => { const x = truth(); return x ? safe(() => query.engaged(x.s, x.b, u)) : null },
+  coherencyPreview: (u: UnitId, placement: Record<ModelId, Vec2>) => { const x = truth(); return x ? safe(() => query.coherencyPreview(x.s, x.b, u, placement)) : null },
+  reachOf: (u: UnitId) => { const x = truth(); return x ? safe(() => query.reachOf(x.s, x.b, u)) : null },
+  supplyStatus: (seat: SeatId) => { const x = truth(); return x ? safe(() => query.supplyStatus(x.s, x.b, seat)) : null },
+  objectiveStatus: () => { const x = truth(); return x ? safe(() => query.objectiveStatus(x.s, x.b)) : null },
+  missionScore: (seat: SeatId) => { const x = truth(); return x ? safe(() => query.missionScore(x.s, x.b, seat)) : null },
+  unitSupply: (u: UnitId) => { const x = truth(); return x ? safe(() => query.unitSupply(x.s, x.b, u)) : null },
+  poolTable: () => { const x = truth(); return x ? safe(() => query.poolTable(x.s, x.b)) : null },
+  detectedUnits: () => { const x = truth(); return x ? safe(() => query.detectedUnits(x.s, x.b)) : null },
+}
 
 // ---------- labels (our words; names from data) ----------
-export { conditionWord, dataName, modelName, narrate, rollLabel, seatLabel }
+export { conditionWord, dataName, modelName, narrate, phaseLabel, rollLabel, seatLabel, unitName }
 
 // =====================================================================================================
 // Boot
@@ -267,4 +467,6 @@ export function startLaunch(launch: Launch, params: Params): ClientRejection | n
   return newGame(launch.opts)
 }
 
-// Additive changes after the M3 freeze: (none yet)
+// Additive changes after the M3 freeze:
+//  - M3 integration: useUnitSupply, useUnitSupplies, usePoolTable, useDetectedUnits (+ queries.unitSupply/poolTable/
+//    detectedUnits), type PoolRow; engine/query.ts unitSupply, poolTable, detectedUnits (spec 00 s10).

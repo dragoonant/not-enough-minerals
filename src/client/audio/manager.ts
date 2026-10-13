@@ -4,6 +4,7 @@
 // (music.ts: title, battle loop, victory/defeat stingers) with 1.8 s crossfades; a missing file falls back to the synth mood.
 import { RECIPES, MoodPlayer } from './synth'
 import { MUSIC_TRACKS, MusicTrack, type MusicScene } from './music'
+import { SFX, SFX_BY_ID, sfxUrl } from './sfx'
 
 export type Mood = MusicScene
 
@@ -12,7 +13,7 @@ const dbToGain = (db: number): number => Math.pow(10, db / 20)
 const KEY = 'nem.audio.v1'
 const MAX_CONCURRENT = 4
 const MIN_RETRIGGER_MS = 35
-const GAP_MS: Record<string, number> = { death: 600, 'round-start': 800, victory: 2000, defeat: 2000 }
+const GAP_MS: Record<string, number> = { death: 600, 'death-terran': 500, 'death-zerg': 500, 'death-protoss': 500, 'arrive-warp': 400, 'arrive-drop': 400, 'arrive-burrow': 400, 'round-start': 800, victory: 2000, defeat: 2000 }
 const JITTER_CENTS = 35
 const CROSSFADE_S = 1.8
 
@@ -52,6 +53,8 @@ export class AudioManager {
   private players: MoodPlayer[] = []
   private track: MusicTrack | null = null
   private missingMusic = new Set<string>()
+  private buffers = new Map<string, AudioBuffer>()
+  private sfxLoading = false
   private timer: ReturnType<typeof setInterval> | null = null
   readonly stats = { played: {} as Record<string, number>, mood: '' as string, track: '' as string }
 
@@ -112,14 +115,34 @@ export class AudioManager {
       this.applyGains()
       if (ctx.state === 'suspended') await ctx.resume()
       this.unlocked = true
+      void this.loadSfx()
       if (this.wantMood) this.setMood(this.wantMood)
     } catch { /* audio unavailable: stay silent */ }
   }
 
-  play(id: string, opts: { volume?: number; delayMs?: number; detune?: number } = {}): void {
-    const recipe = RECIPES[id]
+  /** Fetches and decodes every generated SFX file once; a file that fails to load keeps its synth stand-in. */
+  async loadSfx(): Promise<void> {
     const ctx = this.ctx
-    if (!recipe || !ctx || !this.sfxBus || !this.unlocked || this.settings.muted) return
+    if (!ctx || this.sfxLoading) return
+    this.sfxLoading = true
+    await Promise.all(SFX.map(async (spec) => {
+      try {
+        const res = await fetch(sfxUrl(spec.id))
+        if (!res.ok) return
+        this.buffers.set(spec.id, await ctx.decodeAudioData(await res.arrayBuffer()))
+      } catch { /* missing or undecodable: synth stand-in */ }
+    }))
+  }
+
+  /** True once a generated file (not the synth stand-in) will play for this id. */
+  hasSfxFile(id: string): boolean { return this.buffers.has(id) }
+
+  play(id: string, opts: { volume?: number; delayMs?: number; detune?: number } = {}): void {
+    const spec = SFX_BY_ID[id]
+    const buffer = this.buffers.get(id)
+    const recipe = RECIPES[spec && !buffer ? spec.synth : id] ?? RECIPES[id]
+    const ctx = this.ctx
+    if ((!recipe && !buffer) || !ctx || !this.sfxBus || !this.unlocked || this.settings.muted) return
     const th = this.throttle.get(id) ?? { active: 0, last: -1e9 }
     const n = nowMs()
     if (n - th.last < (GAP_MS[id] ?? MIN_RETRIGGER_MS) || th.active >= MAX_CONCURRENT) return
@@ -127,7 +150,18 @@ export class AudioManager {
     this.throttle.set(id, th)
     const jitter = opts.detune ?? JITTER_CENTS
     const p = Math.pow(2, ((Math.random() * 2 - 1) * jitter) / 1200)
-    try { recipe({ ctx, out: this.sfxBus, t: ctx.currentTime + 0.01 + (opts.delayMs ?? 0) / 1000, p, v: opts.volume ?? 1 }) } catch { /* ignore */ }
+    const when = ctx.currentTime + 0.01 + (opts.delayMs ?? 0) / 1000
+    try {
+      if (buffer) {
+        const src = ctx.createBufferSource()
+        const g = ctx.createGain()
+        src.buffer = buffer
+        src.playbackRate.value = p
+        g.gain.value = (spec?.trim ?? 1) * (opts.volume ?? 1)
+        src.connect(g); g.connect(this.sfxBus)
+        src.start(when)
+      } else recipe!({ ctx, out: this.sfxBus, t: when, p, v: opts.volume ?? 1 })
+    } catch { /* ignore */ }
     this.stats.played[id] = (this.stats.played[id] ?? 0) + 1
     setTimeout(() => { th.active = Math.max(0, th.active - 1) }, 400 + (opts.delayMs ?? 0))
   }

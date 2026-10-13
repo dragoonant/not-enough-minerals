@@ -5,8 +5,8 @@ import { OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
 import type { OrbitControls as OrbitImpl } from 'three-stdlib'
 import { useStore } from '../store'
-import { CAMERA_TRANSITION_MS, cameraPose, easeInOut } from './layout'
-import { usePresented } from '../contract'
+import { CAMERA_TRANSITION_MS, cameraPose, easeInOut, viewDirOf } from './layout'
+import { useBoardGeometry, usePresented, useViewerSeat } from '../contract'
 
 const PAN_KEYS: Record<string, [number, number]> = { w: [0, -1], s: [0, 1], a: [-1, 0], d: [1, 0] }
 
@@ -15,18 +15,24 @@ export function CameraRig(): ReactElement {
   const { camera, invalidate, gl } = useThree()
   const preset = useStore((s) => s.preset)
   const tick = useStore((s) => s.presetTick)
-  const table = usePresented()?.scenario.table ?? { w: 36, d: 36 }
+  const presented = usePresented()
+  const table = presented?.scenario.table ?? { w: 36, d: 36 }
+  const viewer = useViewerSeat()
+  const geo = useBoardGeometry()
+  const flip = !!viewer && presented?.seatOrder.indexOf(viewer) === 1
+  const dir = viewDirOf(geo?.edges.find((e) => e.seat === viewer)?.segments, flip)
+  const dirKey = `${dir[0].toFixed(3)},${dir[1].toFixed(3)}`
   const tween = useRef<{ t0: number; fromP: THREE.Vector3; toP: THREE.Vector3; fromT: THREE.Vector3; toT: THREE.Vector3 } | null>(null)
   const keys = useRef(new Set<string>())
 
   useEffect(() => {
     const c = controls.current
     if (!c) return
-    const pose = cameraPose(preset, table)
+    const pose = cameraPose(preset, table, dir)
     tween.current = { t0: performance.now(), fromP: camera.position.clone(), toP: new THREE.Vector3(...pose.pos), fromT: c.target.clone(), toT: new THREE.Vector3(...pose.target) }
     invalidate()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [preset, tick])
+  }, [preset, tick, dirKey, table.w, table.d])
 
   // test hooks (?test=1): window.__screen(x, z, y?) -> page pixels; window.__camera(pos, target) jumps the camera
   useEffect(() => {
@@ -34,7 +40,7 @@ export function CameraRig(): ReactElement {
       __game?: unknown; __camera?: (p: [number, number, number], t: [number, number, number]) => void
       __screen?: (x: number, z: number, y?: number) => { x: number; y: number }
     }
-    if (!w.__game) return
+    if (!new URLSearchParams(location.search).has('test')) return
     w.__screen = (x, z, y = 0) => {
       camera.updateMatrixWorld()
       const v = new THREE.Vector3(x, y, z).project(camera)

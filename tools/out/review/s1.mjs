@@ -1,0 +1,15 @@
+import { chromium } from 'playwright'
+const b = await chromium.launch()
+const p = await b.newPage({ viewport: { width: 1280, height: 800 } })
+const errs = []
+p.on('console', m => { if (m.type() === 'error' || m.type()==='warning') errs.push(m.type()+': '+m.text()) })
+p.on('pageerror', e => errs.push('pageerror: ' + e.message))
+const t0 = Date.now()
+await p.goto('http://localhost:5201/')
+await p.waitForSelector('[data-testid=start-screen]', { timeout: 30000 })
+console.log('start screen ms', Date.now() - t0)
+await p.waitForTimeout(1500)
+await p.screenshot({ path: 'start.png' })
+console.log(await p.locator('[data-testid=start-screen]').innerText())
+console.log(errs.join('\n'))
+await b.close()

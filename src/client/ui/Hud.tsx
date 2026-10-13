@@ -1,55 +1,35 @@
-// HUD shell: top bar (round, turn, speed, skip, menu), narration ticker, banner, the prompt for the open human decision
-// (one button per option), rejection toast, "thinking" indicator and the game-over recap. M3 adds rails, the unit card,
-// the activation panel, odds, the briefing and the objective tracker on top of this shell.
-import {
-  SPEED_PRESETS, game, presentation, seatLabel, useBanner, useFatal, useGame, useGameResult, useNarration, usePending,
-  usePresented, usePresentedTurn, useRejection, useSettings, useWaitingFor, type ClientRejection,
-} from '../contract'
+// HUD shell. The table is the hero: a slim top bar (PhaseBar + tools), two translucent rails that collapse to icon tabs
+// (left: objectives, Supply, Reserves; right: unit card, weapons, odds, feed), a first-turn hint strip, the generic
+// banners (the decision panel itself is interaction/Prompt.tsx), the briefing, settings and the game-over screen.
+import { useState } from 'react'
 import type { PendingDecision } from '../../engine/types'
+import {
+  focus, game, presentation, useBanner, useEpoch, useFatal, useGameResult, useNarration, usePending, usePresentationIdle, usePresentedTurn, useRejection,
+  useSettings, useWaitingFor, type ClientRejection,
+} from '../contract'
+import { Rail } from './bits'
+import { Briefing } from './Briefing'
 import { GameOver } from './GameOver'
+import { ObjectiveTracker, ReservesTray, SupplyHud } from './LeftPanels'
+import { PhaseBar } from './PhaseBar'
+import { EventFeed, OddsPanel, UnitCard, WeaponPanel } from './RightPanels'
+import { SettingsPanel } from './SettingsPanel'
+import { Tip } from './Tooltip'
 import './hud.css'
 
-function TopBar() {
-  const turn = usePresentedTurn()
-  const state = usePresented()
-  const waiting = useWaitingFor()
-  const g = useGame()
-  const { speed } = useSettings()
+function TopBar({ onSettings }: { onSettings: () => void }) {
   return (
     <header className="topbar" data-testid="hud-topbar">
-      <div className="topbar-main">
-        <b data-testid="hud-round">Round {turn.round}{state?.maxRounds ? ` of ${state.maxRounds}` : ''}</b>
-        <span data-testid="hud-turn">{turn.seat ? `${seatLabel(turn.seat)} to act` : 'Setting up'}</span>
-        {waiting && <span className="dim" data-testid="hud-waiting">{waiting.controller !== 'human' ? `${waiting.label} is thinking` : waiting.hotSeat ? `${waiting.label}: your decision` : 'Your decision'}</span>}
-      </div>
-      <div className="topbar-seats">
-        {g.seatOrder.map((seat) => (
-          <span key={seat} className={`seatpill${turn.seat === seat ? ' on' : ''}`} data-testid={`seat-${seat}`}>
-            {seatLabel(seat)}: score {state?.seats[seat]?.score ?? 0}
-          </span>
-        ))}
-      </div>
+      <PhaseBar />
       <div className="topbar-tools">
-        <select aria-label="Animation speed" data-testid="hud-speed" value={String(speed)} onChange={(e) => presentation.setSpeed(Number(e.target.value))}>
-          {SPEED_PRESETS.map((p) => <option key={p.id} value={String(p.speed)}>{p.label}</option>)}
-        </select>
-        <button data-testid="hud-skip" onClick={() => presentation.skipAll()}>Skip</button>
+        <Tip title="Mission briefing" body="Read the scenario, how points are scored and the first-turn tips again.">
+          <button data-testid="briefing-open" onClick={() => focus.openBriefing(true)}>Briefing</button>
+        </Tip>
+        <Tip title="Settings" body="Volume, animation speed and narration."><button data-testid="settings-open" onClick={onSettings}>Settings</button></Tip>
+        <Tip title="Skip" body="Jump past the animation that is playing."><button data-testid="hud-skip" onClick={() => presentation.skipAll()}>Skip</button></Tip>
         <button data-testid="hud-menu-top" onClick={() => game.backToMenu()}>Menu</button>
       </div>
     </header>
-  )
-}
-
-/** Generic prompt: the decision kind's options as buttons (option labels come from the engine). */
-function Prompt({ pending }: { pending: PendingDecision }) {
-  return (
-    <div className="panel prompt" data-testid="hud-prompt" data-kind={pending.kind}>
-      <div className="options">
-        {pending.options.map((o) => (
-          <button key={o.id} data-testid={`option-${o.id}`} className={o.id === 'pass' ? 'quiet' : 'primary'} onClick={() => game.choose(o.id)}>{o.label}</button>
-        ))}
-      </div>
-    </div>
   )
 }
 
@@ -65,27 +45,41 @@ export function Hud() {
   const banner = useBanner()
   const pending = usePending()
   const waiting = useWaitingFor()
+  const idle = usePresentationIdle()
   const rejection = useRejection()
   const result = useGameResult()
   const fatal = useFatal()
   const narration = useNarration()
   const { narration: narrationOn } = useSettings()
+  const [settingsOpen, setSettingsOpen] = useState(false)
   const lastLine = narrationOn ? narration[narration.length - 1]?.text : null
   return (
     <div className="hud-root" data-testid="hud">
-      <TopBar />
+      <TopBar onSettings={() => setSettingsOpen(true)} />
+      <Rail id="left" side="left" testid="rail-left" sections={[
+        { id: 'objectives', label: 'Objectives', icon: 'objectives', node: <ObjectiveTracker /> },
+        { id: 'supply', label: 'Supply', icon: 'supply', node: <SupplyHud /> },
+        { id: 'reserves', label: 'Reserves', icon: 'reserves', node: <ReservesTray /> },
+      ]} />
+      <Rail id="right" side="right" testid="rail-right" sections={[
+        { id: 'odds', label: 'Odds', icon: 'odds', node: <OddsPanel /> },
+        { id: 'unit', label: 'Unit card', icon: 'unit', node: <UnitCard /> },
+        { id: 'weapons', label: 'Weapons', icon: 'weapons', node: <WeaponPanel /> },
+        { id: 'feed', label: 'What happened', icon: 'feed', node: <EventFeed /> },
+      ]} />
       {lastLine && <div className="ticker" data-testid="hud-narration">{lastLine}</div>}
       {banner && <div className={`banner banner-${banner.tone}`} data-testid="hud-banner">{banner.text}</div>}
       <div className="dock">
         {rejection && <Toast rejection={rejection} />}
         {fatal && <div className="toast" role="alert" data-testid="hud-fatal">The game hit a problem and stopped. Start a new game from the menu.</div>}
-        {!result && pending && <Prompt pending={pending} />}
         {!result && !pending && waiting && (
           <div className="panel waiting" data-testid="hud-thinking">
-            {waiting.controller !== 'human' ? `${waiting.label} is thinking...` : `Waiting for ${waiting.label}...`}
+            {!idle ? 'Resolving...' : waiting.controller !== 'human' ? `${waiting.label} is thinking...` : `Waiting for ${waiting.label}...`}
           </div>
         )}
       </div>
+      <Briefing />
+      {settingsOpen && <SettingsPanel onClose={() => setSettingsOpen(false)} />}
       <GameOver />
     </div>
   )

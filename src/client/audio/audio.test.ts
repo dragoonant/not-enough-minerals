@@ -4,21 +4,21 @@ import { weaponFlavour } from '../weaponFlavour'
 import { soundsForCue } from './cueSounds'
 import type { Cue } from '../presentation/cues'
 import { RECIPES, SOUND_IDS } from './synth'
+import { SFX_BY_ID } from './sfx'
 import { MUSIC_TRACKS, musicUrl } from './music'
 
 describe('audio', () => {
-  it('AUD-001 weaponFlavour picks the longest substring match', () => {
-    expect(weaponFlavour('gauss-rifle')).toBe('rifle')
-    expect(weaponFlavour('psi-blades')).toBe('blade')
-    expect(weaponFlavour('psi-emitter')).toBe('plasma')
+  it('AUD-001 weaponFlavour maps ids to flavours', () => {
+    expect(weaponFlavour('c-14-rifle')).toBe('gauss')
+    expect(weaponFlavour('psi-blades')).toBe('psi-blade')
     expect(weaponFlavour('claws')).toBe('claw')
-    expect(weaponFlavour('mystery', 'melee')).toBe('blunt')
+    expect(weaponFlavour('mystery', 'melee')).toBe('strike')
   })
   it('AUD-002 every recipe id used by cues exists', () => {
-    const cue = { kind: 'attack', attackerId: 'a', targetId: 'b', weaponId: 'plasma-gun', ns: 'shoot', success: true, result: null } as const
-    for (const c of soundsForCue(cue, 400)) expect(RECIPES[c.id]).toBeTypeOf('function')
+    const cue = { kind: 'attack', attackerId: 'a', targetId: 'b', weaponId: 'autocannon', ns: 'shoot', success: true, result: null } as const
+    for (const c of soundsForCue(cue, 400)) expect(SFX_BY_ID[c.id] ?? RECIPES[c.id]).toBeDefined()
     const dice: Cue = { kind: 'dice', purpose: 'test', dice: [{ sides: 6, face: 3, reroll: false, rollId: 'r:1' }], rolls: [] }
-    for (const c of soundsForCue(dice, 400)) expect(RECIPES[c.id]).toBeTypeOf('function')
+    for (const c of soundsForCue(dice, 400)) expect(SFX_BY_ID[c.id] ?? RECIPES[c.id]).toBeDefined()
     expect(SOUND_IDS.length).toBeGreaterThan(15)
   })
   it('AUD-003 move cue yields footsteps', () => {

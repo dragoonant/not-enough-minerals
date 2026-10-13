@@ -1,7 +1,16 @@
 {
-  "_comment": "Audio manifest. All prompts are original wording describing mood and instrumentation only; no existing game, film, composer or track is named or imitated. Music: `npx tsx tools/gen-music.ts` writes public/audio/music/<id>.mp3 (idempotent: existing files are skipped). SFX/voice items are added later.",
-  "voice": { "voiceId": "SOYHLrjzK2X1ezoPC6cr", "voiceName": "Harry - Fierce Warrior", "modelId": "eleven_flash_v2_5" },
-  "music": { "endpoint": "/v1/music", "modelId": "music_v1", "forceInstrumental": true, "outputFormat": "mp3_44100_128" },
+  "_comment": "Audio manifest. All prompts are original wording describing mood and instrumentation only; no existing game, film, composer or track is named or imitated. Music: `npx tsx tools/gen-music.ts` writes public/audio/music/<id>.mp3 (idempotent: existing files are skipped). SFX: `ELEVENLABS_API_KEY=... npx tsx tools/gen-audio.ts` writes public/audio/sfx/<id>.mp3 (idempotent; budget-capped). Prompts describe the mechanism, never a game or brand name.",
+  "voice": {
+    "voiceId": "SOYHLrjzK2X1ezoPC6cr",
+    "voiceName": "Harry - Fierce Warrior",
+    "modelId": "eleven_flash_v2_5"
+  },
+  "music": {
+    "endpoint": "/v1/music",
+    "modelId": "music_v1",
+    "forceInstrumental": true,
+    "outputFormat": "mp3_44100_128"
+  },
   "items": [
     {
       "id": "title",
@@ -32,6 +41,238 @@
       "group": "music",
       "prompt": "Original instrumental defeat stinger for a gritty industrial science-fiction war game. No vocals, no choir. Short somber falling phrase: a lonely detuned slide guitar descending in a minor key, a slow tolling metallic anvil, a low organic pulsing bass that slows down and dies away, cold dark synth drone fading to silence.",
       "durationSeconds": 10
+    },
+    {
+      "id": "wpn-gauss",
+      "kind": "sfx",
+      "group": "weapon",
+      "prompt": "Single sharp supersonic rifle shot from a magnetic coil rifle: a crisp electric crack, a short metallic whip, then a brief ringing tail. Dry and close, no echo, no reloading. No music, no voices, no speech.",
+      "durationSeconds": 1,
+      "promptInfluence": 0.7
+    },
+    {
+      "id": "wpn-revolver",
+      "kind": "sfx",
+      "group": "weapon",
+      "prompt": "One heavy revolver gunshot: deep booming crack, a short ringing metal tail, then a quiet cylinder click. Dry outdoor air, no reloading. No music, no voices, no speech.",
+      "durationSeconds": 1,
+      "promptInfluence": 0.7
+    },
+    {
+      "id": "wpn-autocannon",
+      "kind": "sfx",
+      "group": "weapon",
+      "prompt": "Short burst of five rapid automatic cannon rounds from a vehicle-mounted gun: deep thudding reports with a metallic rattle and a brief mechanical spin-down. No explosion. No music, no voices, no speech.",
+      "durationSeconds": 1.5,
+      "promptInfluence": 0.7
+    },
+    {
+      "id": "wpn-missiles",
+      "kind": "sfx",
+      "group": "weapon",
+      "prompt": "Salvo of four small rockets launched in quick succession: hissing ignition whoosh, rocket trails streaking away and fading into the distance. No impact explosion. No music, no voices, no speech.",
+      "durationSeconds": 1.5,
+      "promptInfluence": 0.7
+    },
+    {
+      "id": "wpn-siege-cannon",
+      "kind": "sfx",
+      "group": "weapon",
+      "prompt": "One massive artillery cannon firing: a huge low boom with ground-shaking sub bass, a heavy metallic recoil clunk, and a long rumbling tail. No music, no voices, no speech.",
+      "durationSeconds": 2,
+      "promptInfluence": 0.7
+    },
+    {
+      "id": "wpn-glaive",
+      "kind": "sfx",
+      "group": "weapon",
+      "prompt": "Alien energy weapon firing a bolt: a rising crystalline charge chirp, then a sharp bright energy zap with a shimmering ringing tail, like a crackling lance of light. No music, no voices, no speech.",
+      "durationSeconds": 1,
+      "promptInfluence": 0.65
+    },
+    {
+      "id": "wpn-disruptor",
+      "kind": "sfx",
+      "group": "weapon",
+      "prompt": "Rapid triple pulse from an alien particle blaster: three short bright humming energy bursts, each with a high crackle and quick decay, a faint electric buzz underneath. No music, no voices, no speech.",
+      "durationSeconds": 1.2,
+      "promptInfluence": 0.65
+    },
+    {
+      "id": "wpn-psi-blade",
+      "kind": "sfx",
+      "group": "weapon",
+      "prompt": "A glowing energy blade swung once: a hollow humming whoosh with a rising electric shimmer, ending in a bright crackling slash. No music, no voices, no speech.",
+      "durationSeconds": 1,
+      "promptInfluence": 0.65
+    },
+    {
+      "id": "wpn-warp-blade",
+      "kind": "sfx",
+      "group": "weapon",
+      "prompt": "A heavy crackling energy sword slash through the air: deep resonant hum, a sharp ringing cut, and a low pulse of warped space as it passes. No music, no voices, no speech.",
+      "durationSeconds": 1.2,
+      "promptInfluence": 0.65
+    },
+    {
+      "id": "wpn-strike",
+      "kind": "sfx",
+      "group": "weapon",
+      "prompt": "A hard armoured gauntlet punch: a quick whoosh, then a dull heavy thud of metal on a body with a short servo whine. No music, no voices, no speech.",
+      "durationSeconds": 0.8,
+      "promptInfluence": 0.7
+    },
+    {
+      "id": "wpn-stab",
+      "kind": "sfx",
+      "group": "weapon",
+      "prompt": "A knife-bayonet thrust: a quick whoosh, then a short dull stab into leather and padding with a faint metallic scrape. No music, no voices, no speech.",
+      "durationSeconds": 0.8,
+      "promptInfluence": 0.7
+    },
+    {
+      "id": "wpn-stomp",
+      "kind": "sfx",
+      "group": "weapon",
+      "prompt": "A giant armoured machine stomping down: a heavy hydraulic hiss, then a deep ground-shaking footfall with a crunch of gravel and metal. No music, no voices, no speech.",
+      "durationSeconds": 1.2,
+      "promptInfluence": 0.7
+    },
+    {
+      "id": "wpn-claw",
+      "kind": "sfx",
+      "group": "weapon",
+      "prompt": "Sharp bony claws raking quickly twice: dry scraping slashes, a quick rasping hiss, a short fleshy impact. No roar. No music, no voices, no speech.",
+      "durationSeconds": 0.9,
+      "promptInfluence": 0.7
+    },
+    {
+      "id": "wpn-slash",
+      "kind": "sfx",
+      "group": "weapon",
+      "prompt": "Two heavy curved bone blades cutting through the air in a fast cross slash: a whooshing swipe, then a sharp tearing cut. No roar. No music, no voices, no speech.",
+      "durationSeconds": 0.9,
+      "promptInfluence": 0.7
+    },
+    {
+      "id": "wpn-spines",
+      "kind": "sfx",
+      "group": "weapon",
+      "prompt": "A volley of needle-sharp spines flicked through the air: rapid fine whistling hisses and quick thwips as they strike. No music, no voices, no speech.",
+      "durationSeconds": 1,
+      "promptInfluence": 0.7
+    },
+    {
+      "id": "wpn-acid",
+      "kind": "sfx",
+      "group": "weapon",
+      "prompt": "A glob of caustic acid spat through the air: a wet gurgling spit, a hiss, then a sizzling fizz as it lands and corrodes metal. No music, no voices, no speech.",
+      "durationSeconds": 1.3,
+      "promptInfluence": 0.7
+    },
+    {
+      "id": "wpn-bio-blast",
+      "kind": "sfx",
+      "group": "weapon",
+      "prompt": "A pulse of living energy launched from an alien creature: a wet organic gulp and throb, a low warbling blast of crackling energy, and a squelching splash. No music, no voices, no speech.",
+      "durationSeconds": 1.2,
+      "promptInfluence": 0.65
+    },
+    {
+      "id": "death-terran",
+      "kind": "sfx",
+      "group": "death",
+      "prompt": "A human soldier in heavy armour is killed: a short strained gasp over band-limited radio static, then a metallic body collapsing with armour plates clattering on hard ground. No music, no voices, no speech.",
+      "durationSeconds": 2.2,
+      "promptInfluence": 0.6
+    },
+    {
+      "id": "death-zerg",
+      "kind": "sfx",
+      "group": "death",
+      "prompt": "A small insect-like alien creature dies: a wet shrieking hiss and chitter dropping in pitch, a squelchy collapse, and a few twitching clicks fading out. No music, no voices, no speech.",
+      "durationSeconds": 2,
+      "promptInfluence": 0.6
+    },
+    {
+      "id": "death-protoss",
+      "kind": "sfx",
+      "group": "death",
+      "prompt": "An armoured alien warrior with an energy shield dies: a falling tone of failing shield energy, a bright crackling burst, then a glassy shimmering dissipation and a metal clang. No music, no voices, no speech.",
+      "durationSeconds": 2.2,
+      "promptInfluence": 0.6
+    },
+    {
+      "id": "arrive-warp",
+      "kind": "sfx",
+      "group": "arrival",
+      "prompt": "Energy teleport arrival: a rising shimmering whine, a bright electric flash with a deep thump, and a ringing crystalline decay. No music, no voices, no speech.",
+      "durationSeconds": 1.5,
+      "promptInfluence": 0.6
+    },
+    {
+      "id": "arrive-drop",
+      "kind": "sfx",
+      "group": "arrival",
+      "prompt": "A dropship releasing a unit: jet thrusters roaring down, a hydraulic clamp release hiss, then a heavy landing thud with metal clatter. No music, no voices, no speech.",
+      "durationSeconds": 2,
+      "promptInfluence": 0.6
+    },
+    {
+      "id": "arrive-burrow",
+      "kind": "sfx",
+      "group": "arrival",
+      "prompt": "A big creature bursting up through the ground: low rumbling earth, crumbling dirt and gravel, a wet tearing eruption, then dirt raining down. No music, no voices, no speech.",
+      "durationSeconds": 1.8,
+      "promptInfluence": 0.6
+    },
+    {
+      "id": "ui-click",
+      "kind": "sfx",
+      "group": "ui",
+      "prompt": "A tiny crisp mechanical button click on a sci-fi console: a single dry tick with a faint electronic blip. Very short. No music, no voices, no speech.",
+      "durationSeconds": 0.5,
+      "promptInfluence": 0.7
+    },
+    {
+      "id": "ui-select",
+      "kind": "sfx",
+      "group": "ui",
+      "prompt": "A soft electronic confirmation chirp: two quick rising tones, clean and subtle, like selecting an item on a holographic panel. No music, no voices, no speech.",
+      "durationSeconds": 0.6,
+      "promptInfluence": 0.7
+    },
+    {
+      "id": "ui-turn",
+      "kind": "sfx",
+      "group": "ui",
+      "prompt": "A low calm two-note electronic alert tone with a soft metallic ping, signalling that it is your turn. No music, no voices, no speech.",
+      "durationSeconds": 1,
+      "promptInfluence": 0.7
+    },
+    {
+      "id": "dice-roll",
+      "kind": "sfx",
+      "group": "table",
+      "prompt": "Six wooden and plastic dice tumbling and rattling across a felt table and settling one by one. No music, no voices, no speech.",
+      "durationSeconds": 1.5,
+      "promptInfluence": 0.7
+    },
+    {
+      "id": "shield-hit",
+      "kind": "sfx",
+      "group": "table",
+      "prompt": "An energy shield absorbing a hit: a bright ringing zap with a glassy shimmer and crackle. Short. No music, no voices, no speech.",
+      "durationSeconds": 0.8,
+      "promptInfluence": 0.65
+    },
+    {
+      "id": "marker-claim",
+      "kind": "sfx",
+      "group": "table",
+      "prompt": "A heavy metal beacon planted on the ground: a solid clunk, a rising electronic activation hum, and a bright confirmation beep. No music, no voices, no speech.",
+      "durationSeconds": 1.2,
+      "promptInfluence": 0.65
     }
   ]
 }

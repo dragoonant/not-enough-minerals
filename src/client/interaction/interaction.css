@@ -1,0 +1,47 @@
+.ix-root { position: absolute; inset: 0; pointer-events: none; z-index: 4; color: var(--bone, #dfe6ee); font-size: 14px; }
+.ix-prompt { pointer-events: auto; position: absolute; left: 50%; bottom: 58px; transform: translateX(-50%); width: min(400px, calc(100% - 24px)); max-height: 46vh; overflow: auto;
+  background: rgba(15,20,27,.78); backdrop-filter: blur(6px); border: 1px solid rgba(111,124,136,.6); border-top: 2px solid var(--amber, #e0a03a); border-radius: 6px; padding: 8px 12px 10px; }
+.ix-prompt[data-dock="top"] { bottom: auto; top: 84px; }
+/* Docked beside the rails, on the side of the table away from what the player has to click. */
+.ix-prompt[data-side="left"] { left: 292px; transform: none; }
+.ix-prompt[data-side="right"] { left: auto; right: 324px; transform: none; }
+.ix-prompt.collapsed { width: auto; max-width: min(420px, calc(100% - 24px)); }
+.ix-sum { flex: 1; min-width: 0; font-size: 12px; opacity: .9; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ix-sum.bad { color: #ff8f7c; }
+/* Reserved for the odds line so hovering a target never changes the panel height (no hover feedback loop). */
+.ix-slot { height: 88px; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-start; }
+.ix-slot > .ix-note { padding: 4px 8px; }
+.ix-chip.off { opacity: .55; border-style: dashed; }
+.ix-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.ix-head h3 { margin: 0; font-family: "Bahnschrift", "Segoe UI Semibold", sans-serif; font-size: 15px; letter-spacing: .05em; text-transform: uppercase; color: var(--amber, #e0a03a); }
+.ix-head-tools { display: flex; gap: 4px; }
+.ix-icon { width: 24px; height: 24px; padding: 0; border-radius: 12px; background: transparent; color: inherit; border: 1px solid #46515c; cursor: pointer; font: inherit; font-size: 13px; line-height: 1; }
+.ix-icon[aria-pressed="true"] { border-color: var(--cyan, #59b8d6); color: var(--cyan, #59b8d6); }
+.ix-hint { margin: 4px 0 6px; font-size: 13px; opacity: .85; line-height: 1.35; }
+.ix-body { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
+.ix-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.ix-wrap { max-height: 28vh; overflow: auto; }
+.ix-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.ix-btn, .ix-chip { background: rgba(27,35,45,.92); color: inherit; border: 1px solid #46515c; border-radius: 4px; padding: 5px 10px; font: inherit; font-size: 13px; cursor: pointer; }
+.ix-btn:hover:not(:disabled), .ix-chip:hover { border-color: var(--amber, #e0a03a); }
+.ix-btn:disabled { opacity: .4; cursor: default; }
+.ix-btn.primary { background: var(--amber, #e0a03a); color: var(--ink, #0f141b); border-color: var(--amber, #e0a03a); font-weight: 600; }
+.ix-btn.quiet { background: transparent; }
+.ix-chip { border-radius: 12px; padding: 3px 10px; }
+.ix-chip.on { border-color: var(--cyan, #59b8d6); background: rgba(46,111,133,.45); }
+.ix-btn kbd, .ix-chip kbd { display: inline-block; margin-right: 6px; padding: 0 4px; border-radius: 3px; background: rgba(0,0,0,.35); font-size: 11px; font-family: inherit; opacity: .85; }
+.ix-btn.primary kbd { background: rgba(0,0,0,.2); }
+.ix-menu { border-top: 1px dashed #46515c; padding-top: 6px; }
+.ix-menu-title { font-weight: 600; margin-bottom: 4px; }
+.ix-tip, .ix-note { font-size: 12px; opacity: .8; min-height: 16px; }
+.ix-status { padding: 4px 8px; border-radius: 4px; border-left: 3px solid #59d68a; background: rgba(89,214,138,.1); font-size: 13px; }
+.ix-status.bad { border-left-color: #e0503a; background: rgba(224,80,58,.12); }
+.ix-status .bad, .ix-odds.bad, .ix-ruler.bad { color: #ff8f7c; }
+.ix-odds { display: flex; gap: 4px 12px; flex-wrap: wrap; font-size: 13px; padding: 4px 8px; border-radius: 4px; background: rgba(89,184,214,.1); border-left: 3px solid var(--cyan, #59b8d6); }
+.ix-odds.bad { border-left-color: #e0503a; background: rgba(224,80,58,.12); }
+.ix-ruler { padding: 1px 6px; border-radius: 3px; background: rgba(15,20,27,.85); border: 1px solid #59d68a; color: #bff3d2; font-size: 12px; white-space: nowrap; }
+.ix-ruler.bad { border-color: #e0503a; }
+.dim { opacity: .7; }
+@media (max-width: 900px) {
+  .ix-prompt, .ix-prompt[data-side="left"], .ix-prompt[data-side="right"] { left: 50%; right: auto; transform: translateX(-50%); bottom: 8px; max-height: 40vh; }
+}

@@ -1,11 +1,13 @@
-// window.__game for ?test=1 (spec 00 s8, KNOWLEDGE-BASE 1.5). Installed by bootClient; params parsed in params.ts.
+// window.__game for ?test=1 (spec 00 s8, spec 50 s7, KNOWLEDGE-BASE 1.5). Installed by bootClient; params in params.ts.
 import { view as engineView } from '../../engine/view'
 import type { Action, GameState, PendingDecision, PlayerView, SeatId } from '../../engine/types'
 import { getBotDriver } from '../bot/botDriver'
 import { skipAll } from '../presentation/director'
 import { usePresentedStore } from '../presentation/presentedStore'
-import type { Params } from '../params'
-import { dispatch, legalFor, ownerSeat, useGameStore, type ClientRejection } from './gameStore'
+import { parseSpeed, type Params } from '../params'
+import { dispatch, legalFor, ownerSeat, useGameStore, type ClientRejection, type ResolvedLaunch } from './gameStore'
+import { useSettingsStore } from './settingsStore'
+import { focus, isFiguresReady } from './uiStore'
 
 export interface GameTestApi {
   /** True engine state. */
@@ -22,6 +24,12 @@ export interface GameTestApi {
   idle(): boolean
   /** Show everything queued now. */
   skipAll(): void
+  /** Animation speed for this session: a number (0 = instant) or instant | fast | normal | slow. */
+  setSpeed(speed: number | string): void
+  /** Figures loaded (the bot waits for this); figuresReady(true) unblocks bots in a headless run. */
+  figuresReady(ready?: boolean): boolean
+  /** The resolved launch of the running game (matchup, armies, mission, deployment, tier). */
+  launch(): ResolvedLaunch | null
   params: Params
 }
 
@@ -40,6 +48,12 @@ export function installTestHooks(params: Params): void {
     pauseBots: (p = true) => getBotDriver().setPaused(p),
     idle: () => usePresentedStore.getState().idle,
     skipAll,
+    setSpeed(speed) {
+      const n = typeof speed === 'number' ? speed : parseSpeed(speed)
+      if (n !== null && Number.isFinite(n)) useSettingsStore.getState().set({ speed: n }, false)
+    },
+    figuresReady(ready) { if (ready !== undefined) focus.setFiguresReady(ready); return isFiguresReady() },
+    launch: () => useGameStore.getState().launch,
     params,
   }
   ;(window as unknown as { __game: GameTestApi }).__game = api

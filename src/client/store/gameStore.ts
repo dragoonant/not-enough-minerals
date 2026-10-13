@@ -1,20 +1,22 @@
 // Game runner (spec 50, 00 s3): the true engine state and THE ONLY CALLER OF engine apply() in the client.
 // Every answer (human click, bot, watchdog, test hook) goes through dispatch(); each accepted step is handed to the
-// presentation director as one batch. Saves are (seed, scenario, seats, action log) and load by replaying apply().
+// presentation director as one batch. Games are built from launch options (store/launch.ts resolveLaunch: matchup, mission,
+// deployment, seats, tier, seed). Saves are (resolved launch, seed, seats, action log) and load by replaying apply().
 import { create } from 'zustand'
 import { edition } from '../../data/index'
 import type { EditionBundle } from '../../data/types'
 import { apply } from '../../engine/apply'
 import { legalActions } from '../../engine/pending'
-import { createGame } from '../../engine/setup'
+import { createGame, type CreateGameOpts } from '../../engine/setup'
 import type { Action, GameState, PendingDecision, RejectionCode, SeatId } from '../../engine/types'
 import { enqueueBatch, resetPresentation } from '../presentation/director'
 import { setLabelContext } from '../presentation/labels'
 import type { SeqEvent } from '../presentation/cues'
-import { AUTOSAVE_KEY, SAVE_KIND, type NewGameOptions, type SeatController } from './launch'
+import { AUTOSAVE_KEY, SAVE_KIND, SAVE_VERSION, resolveLaunch, type NewGameOptions, type ResolvedLaunch, type SeatController } from './launch'
+import { resetFocus } from './uiStore'
 import { readJson, removeKey, writeJson } from './storage'
 
-export type { NewGameOptions, SeatController }
+export type { NewGameOptions, ResolvedLaunch, SeatController }
 export type DispatchSource = 'human' | 'bot' | 'watchdog' | 'test'
 
 export interface ClientRejection {
@@ -35,7 +37,8 @@ export interface GameStoreState {
   /** Seats in order with their controller (index 0 = near edge). */
   seatOrder: SeatId[]
   seed: string
-  scenarioId: string | null
+  /** Every choice the running game was built from (matchup, armies, mission, deployment, tier...). */
+  launch: ResolvedLaunch | null
   lastRejection: ClientRejection | null
   /** Set when the engine threw (an engine bug); answers stop until a new game or load. */
   fatal: string | null
@@ -46,7 +49,7 @@ export interface GameStoreState {
 }
 
 const INITIAL: GameStoreState = {
-  state: null, bundle: null, controllers: {}, seatOrder: [], seed: '', scenarioId: null, lastRejection: null, fatal: null, version: 0, epoch: 0,
+  state: null, bundle: null, controllers: {}, seatOrder: [], seed: '', launch: null, lastRejection: null, fatal: null, version: 0, epoch: 0,
 }
 export const useGameStore = create<GameStoreState>(() => ({ ...INITIAL }))
 
@@ -110,30 +113,44 @@ function newEvents(before: GameState, after: GameState): SeqEvent[] {
 /** Bumps on every new game or loaded save; per-game caches (AI memory) key on it. */
 export let gameEpoch = 0
 
-function begin(state: GameState, bundle: EditionBundle, controllers: Record<SeatId, SeatController>, seed: string, scenarioId: string | null): void {
+function begin(state: GameState, bundle: EditionBundle, controllers: Record<SeatId, SeatController>, seed: string, launch: ResolvedLaunch): void {
   gameEpoch++
   useGameStore.setState({
-    ...INITIAL, state, bundle, controllers, seatOrder: [...state.seatOrder], seed, scenarioId, version: useGameStore.getState().version + 1, epoch: gameEpoch,
+    ...INITIAL, state, bundle, controllers, seatOrder: [...state.seatOrder], seed, launch, version: useGameStore.getState().version + 1, epoch: gameEpoch,
   })
   setLabelContext({ bundle, controllers, seatOrder: state.seatOrder })
+  resetFocus()
   resetPresentation(state)
+}
+
+/** Engine set-up options for a resolved launch (the demo table when launch.demo). */
+export function createOptsFor(launch: ResolvedLaunch, seed: string, seats: SeatId[]): CreateGameOpts {
+  if (launch.demo || !launch.armies) return { seed, seats }
+  const [a, b] = seats
+  return {
+    seed, seats, armies: { [a!]: launch.armies[0], [b!]: launch.armies[1] },
+    ...(launch.missionId ? { missionId: launch.missionId } : {}),
+    ...(launch.deploymentId ? { deploymentId: launch.deploymentId } : {}),
+    ...(launch.preset ? { preset: launch.preset } : {}),
+    ...(launch.draft ? { draft: true } : {}),
+  }
 }
 
 // ---------- public ----------
 /** Start a new game from the data bundle. Returns a rejection (and keeps the old game) when setup fails. */
 export function newGame(opts: NewGameOptions = {}): ClientRejection | null {
-  const seats = opts.seats && opts.seats.length >= 2 ? opts.seats : (['human', 'bot'] as SeatController[])
+  const seats = (opts.seats && opts.seats.length >= 2 ? opts.seats : (['human', 'bot'] as SeatController[])).slice(0, 2)
   const seed = opts.seed || randomSeed()
+  const launch = resolveLaunch(opts, seed)
   let bundle: EditionBundle, state: GameState
   try {
-    bundle = edition(opts.edition)
-    const ids = seatIds(seats)
-    state = createGame(bundle, { seed, seats: ids, ...(opts.scenarioId ? { scenarioId: opts.scenarioId } : {}) })
+    bundle = edition(launch.edition)
+    state = createGame(bundle, createOptsFor(launch, seed, seatIds(seats)))
   } catch (e) {
     return reject('E_CLIENT', e instanceof Error ? e.message : String(e), null, 'The game could not be set up with those choices.')
   }
   const controllers = Object.fromEntries(state.seatOrder.map((id, i) => [id, seats[i] ?? 'bot'])) as Record<SeatId, SeatController>
-  begin(state, bundle, controllers, seed, opts.scenarioId ?? state.scenarioId ?? null)
+  begin(state, bundle, controllers, seed, launch)
   return null
 }
 
@@ -191,7 +208,7 @@ export function setController(seat: SeatId, c: SeatController): void {
 
 // ---------- save / continue ----------
 export interface ClientSave {
-  kind: typeof SAVE_KIND; v: 1; savedAt: string; edition: string; seed: string; scenarioId: string | null
+  kind: typeof SAVE_KIND; v: typeof SAVE_VERSION; savedAt: string; seed: string; launch: ResolvedLaunch
   /** Controllers in seat order. */
   seats: SeatController[]
   round: number
@@ -200,9 +217,9 @@ export interface ClientSave {
 
 export function exportSave(): ClientSave | null {
   const s = useGameStore.getState()
-  if (!s.state || !s.bundle) return null
+  if (!s.state || !s.bundle || !s.launch) return null
   return {
-    kind: SAVE_KIND, v: 1, savedAt: new Date().toISOString(), edition: s.bundle.edition, seed: s.seed, scenarioId: s.scenarioId,
+    kind: SAVE_KIND, v: SAVE_VERSION, savedAt: new Date().toISOString(), seed: s.seed, launch: s.launch,
     seats: s.seatOrder.map((id) => s.controllers[id] ?? 'bot'), round: s.state.round, log: s.state.log,
   }
 }
@@ -213,20 +230,21 @@ export function saveGame(key = AUTOSAVE_KEY): boolean {
 /** Rebuild a save by replaying its log through apply() (no animation). */
 export function importSave(data: unknown): ClientRejection | null {
   const d = data as Partial<ClientSave> | null
-  if (!d || d.kind !== SAVE_KIND || !Array.isArray(d.log) || typeof d.seed !== 'string') return reject('E_CLIENT', 'not a save', null, 'That save could not be read.')
+  if (!d || d.kind !== SAVE_KIND || d.v !== SAVE_VERSION || !d.launch || !Array.isArray(d.log) || typeof d.seed !== 'string') return reject('E_CLIENT', 'not a save', null, 'That save could not be read.')
+  const launch = d.launch
   let bundle: EditionBundle, state: GameState
   try {
-    bundle = edition(d.edition)
+    bundle = edition(launch.edition)
     const seats = d.seats && d.seats.length >= 2 ? d.seats : (['human', 'bot'] as SeatController[])
     const ids = seatIds(seats)
-    state = createGame(bundle, { seed: d.seed, seats: ids, ...(d.scenarioId ? { scenarioId: d.scenarioId } : {}) })
+    state = createGame(bundle, createOptsFor(launch, d.seed, ids))
     for (const a of d.log) {
       const r = apply(state, bundle, a)
       if (!r.ok) return reject(r.rejection.code, `replay stopped at ${a.decisionId}: ${r.rejection.message}`, a, 'That save no longer matches the rules; start a new game.')
       state = r.state
     }
     const controllers = Object.fromEntries(state.seatOrder.map((id, i) => [id, seats[i] ?? 'bot'])) as Record<SeatId, SeatController>
-    begin(state, bundle, controllers, d.seed, d.scenarioId ?? null)
+    begin(state, bundle, controllers, d.seed, launch)
   } catch (e) {
     return reject('E_CLIENT', e instanceof Error ? e.message : String(e), null, 'That save could not be loaded.')
   }
@@ -253,8 +271,21 @@ export function installAutosave(): () => void {
   })
 }
 
+/** Same launch, same seats, fresh seed (Rematch). */
+export function rematch(): ClientRejection | null {
+  const s = useGameStore.getState()
+  if (!s.launch) return newGame({})
+  const l = s.launch
+  return newGame({
+    seats: s.seatOrder.map((id) => s.controllers[id] ?? 'bot'), tier: l.tier, edition: l.edition,
+    ...(l.demo ? { demo: true } : {}), ...(l.matchup ? { matchup: l.matchup } : {}), ...(l.draft ? { draft: true } : {}),
+    ...(l.missionId ? { missionId: l.missionId } : {}), ...(l.deploymentId ? { deploymentId: l.deploymentId } : {}),
+  })
+}
+
 /** Tests: forget the current game. */
 export function resetGameStore(): void {
   useGameStore.setState({ ...INITIAL })
+  resetFocus()
   resetPresentation(null)
 }

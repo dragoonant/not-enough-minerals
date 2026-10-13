@@ -1,12 +1,18 @@
-// URL test hooks (spec 00 s8, KNOWLEDGE-BASE 1.5). Parsing only: this file stays in the start chunk (no engine imports).
+// URL test hooks (spec 00 s8, spec 50 s7, KNOWLEDGE-BASE 1.5). Parsing only: this file stays in the start chunk (no
+// engine imports).
 //   ?test=1              skip the start screen and expose window.__game (installed by store/testHooks.ts at boot):
-//                        { getState, view(seat), pending, legalActions, submit(action), pauseBots(bool), params }
+//                        { getState, view(seat), pending, legalActions, submit(action), pauseBots(bool), setSpeed(n), params }
 //   ?seats=human,bot     one controller per seat in seat order: human,bot | bot,bot | human,human (hot-seat)
 //   ?seed=<word>         repeatable games; put the seed in every bug report
-//   ?scenario=<id>       scenario id from data/<edition>/scenarios (default: the engine's demo table)
+//   ?matchup=<id>        founders (default) | tvz | tvp | zvp | tvt | zvz | pvp | first-battle | demo (M0 placeholder table)
+//   ?mission=<id|random> Mission Card id (e.g. frontlines-skirmish) or random;  ?deployment=<id|random> likewise
+//   ?draft=1             run the Mission / Deployment draft as decisions
 //   ?speed=fast          animation speed: instant | fast | normal | slow | <number> (0 = instant)
-//   ?tier=random|easy|normal  bot tier;  ?fps  frame-rate meter;  ?gallery  figure gallery (M5)
-// Any of seats/scenario/test also skips the start screen.
+//   ?tier=random|easy|normal  bot tier;  ?fps  frame-rate meter;  ?gallery  figure gallery
+//   ?menu=1              stay on the start screen even with ?test=1 (e2e drives the menu; the briefing then opens)
+// Any of test/seats/matchup/mission/deployment/draft/gallery also skips the start screen (unless ?menu=1).
+import type { NewGameOptions } from './store/launch'
+
 export type SeatController = 'human' | 'bot'
 
 export interface Params {
@@ -16,14 +22,20 @@ export interface Params {
   /** True when ?seats was given explicitly. */
   seatsGiven: boolean
   seed: string | null
-  scenario: string | null
+  /** ?matchup (a MatchupId or 'demo'), or null for the default. */
+  matchup: string | null
+  mission: string | null
+  deployment: string | null
+  draft: boolean
   /** Bot tier from ?tier (random | easy | normal), or null for the default. */
   tier: string | null
   /** Speed multiplier from ?speed, or null to keep the saved setting. */
   speed: number | null
   gallery: boolean
   fps: boolean
-  /** Start straight into a game (test=1, seats= or scenario= present). */
+  /** ?menu=1: keep the start screen (test hooks still install). */
+  menu: boolean
+  /** Start straight into a game. */
   autostart: boolean
 }
 
@@ -42,16 +54,34 @@ export function readParams(search = typeof location === 'undefined' ? '' : locat
   const seats = (seatsRaw ?? 'human,bot').split(',').map((s) => s.trim().toLowerCase())
     .filter(Boolean).map((s): SeatController => (s === 'bot' || s === 'ai' ? 'bot' : 'human'))
   const test = q.get('test') === '1'
+  const draft = q.get('draft') === '1'
   return {
     test,
     seats: seats.length >= 2 ? seats : ['human', 'bot'],
     seatsGiven: seatsRaw !== null,
     seed: q.get('seed'),
-    scenario: q.get('scenario'),
+    matchup: q.get('matchup'),
+    mission: q.get('mission'),
+    deployment: q.get('deployment'),
+    draft,
     tier: q.get('tier'),
     speed: parseSpeed(q.get('speed')),
     gallery: q.has('gallery'),
     fps: q.has('fps'),
-    autostart: test || seatsRaw !== null || q.has('scenario'),
+    menu: q.get('menu') === '1',
+    autostart: q.get('menu') !== '1' && (test || seatsRaw !== null || q.has('matchup') || q.has('mission') || q.has('deployment') || draft || q.has('gallery')),
+  }
+}
+
+/** The new-game options the URL asks for (used when ?test / ?seats / ?matchup... skip the start screen). */
+export function paramsLaunch(p: Params = readParams()): NewGameOptions {
+  return {
+    seats: p.seats,
+    ...(p.seed ? { seed: p.seed } : {}),
+    ...(p.matchup === 'demo' ? { demo: true } : p.matchup ? { matchup: p.matchup as NewGameOptions['matchup'] } : {}),
+    ...(p.mission ? { missionId: p.mission } : {}),
+    ...(p.deployment ? { deploymentId: p.deployment } : {}),
+    ...(p.draft ? { draft: true } : {}),
+    ...(p.tier ? { tier: p.tier } : {}),
   }
 }

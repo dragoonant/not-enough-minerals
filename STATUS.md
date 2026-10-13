@@ -1,7 +1,8 @@
 # Status: what exists
 
-Milestone reached: **M2 rules engine** (generated snapshot, 2026-10-13; this file lists only what is real; plans live
-in PLAN.md). Gate reports: `tools/out/m1-data-report.md` (M1), `tools/out/m2-followups.md` (M2 open items). The specs
+Milestone reached: **M3 playable slice** (generated snapshot, 2026-10-13; this file lists only what is real; plans live
+in PLAN.md). Gate reports: `tools/out/m1-data-report.md` (M1), `tools/out/m2-followups.md` (M2 open items),
+`tools/out/m3-followups.md` (M3 open items). The specs
 under `docs/spec/` (00 architecture, 10-19 rules, 20-21 data, 30 AI, 50 client, 60 testing) are not listed here.
 
 ## Repo and tooling
@@ -41,18 +42,36 @@ under `docs/spec/` (00 architecture, 10-19 rules, 20-21 data, 30 AI, 50 client, 
 ## AI (`src/ai/`)
 - Tier decider with an empty POLICIES table; every tier plays random (M4).
 
-## Client (`src/client/`)
-- Start screen with the fan notice -> game screen: placeholder mat and terrain, procedural figures, HUD with the
-  generic option prompt, dice tray, Web Audio. `store/gameStore.ts` is the only apply caller. Test hooks `?test=1`,
-  `?seats=`, `?seed=`, `?tier=`, `?speed=`, `?fps`. No rules-specific UI yet (M3).
+## Client (`src/client/`; spec `docs/spec/50-client.md`)
+- `contract.ts` is the only door to the engine: hooks over presented state, `query.ts` previews, `focus` UI state.
+  `store/gameStore.ts` is the only apply caller; `store/launch.ts` resolves menu or URL launches (seeded random
+  mission and deployment).
+- Start screen (`ui/StartScreen.tsx`, `ui/start/`): matchups including Founders Edition and a First Battle learning
+  game, mission and deployment pickers with a briefing preview, players (vs bot, hot-seat, watch bots), side, bot
+  tier, speed, seed; our own geometric faction emblems; fan notice.
+- Game screen: briefing modal (mission, Phases, Supply pool table, scoring, mini-map with Entry Edges, first-turn
+  tips) through `ui/ModalLayer.tsx`; collapsible rails with objective tracker, score, Supply table, Reserves, unit
+  card with weapon panel and statuses, odds panel, "What happened" feed (`ui/feedView.ts`); PhaseBar, hint strip,
+  settings, game-over screen with a per-Round VP table and rosters.
+- Board (`board/`): mat, placeholder terrain, deployment zones and edges, objective rings with control labels,
+  threat/detection overlay, camera presets facing the viewer's Entry Edge. Figures (`figures/`): GLB models where
+  present, procedural MGSD-ish proxies otherwise, status icons, `?gallery`.
+- Interaction (`interaction/`): one prompt per decision kind (deploy entry band, move/charge paths with ruler and
+  ghost formation, weapon and target picks with odds, abilities, Roll-Offs), docked beside the rails.
+- Presentation (`presentation/`): director and beats pace engine events into cues; dice tray (`dice/`, Working and
+  Quick modes, dice log); Web Audio SFX and music (`audio/`).
+- Test hooks `?test=1` (`window.__game`), `?seats=`, `?seed=`, `?tier=`, `?speed=`, `?matchup=`, `?mission=`,
+  `?menu=1`, `?gallery`, `?fps`.
 
-## Verification (2026-10-13)
-- `npm run typecheck`: clean. `npm test`: 330 tests in 31 files, all pass; each `it()` is named by a checklist ID
-  from `docs/spec/12-rules-test-checklist.md` (largest groups SUP, ATK, VIS, MOVE, DEP, DICE, ABL, MSN, GOLD, DMG)
-  plus HOOK-000..100 (every hook point fires in real games). `npm run e2e`: 3.
-- `npm run build`: ok. `npm run sim -- --games 60`: 60 finished, 0 errors, avg 4.72 rounds, 16597 decisions, max
-  step 137 ms (winners B 27, A 17, draws 16).
+## Verification (2026-10-13, M3 gate)
+- `npm run typecheck`: clean. `npm test`: 397 tests in 40 files, all pass (engine checklist IDs plus client UI-,
+  INT-, DICE-, board and start-screen tests).
+- `npm run validate:data`: ok, 15 warnings. `npm run build`: ok. `npm run sim -- --games 30`: 30 finished, 0 errors,
+  avg 4.63 rounds, 8219 decisions, max step 134 ms (winners B 14, A 8, draws 8).
+- `npm run e2e`: 11 pass (boot, human answer, a full Founders game vs bot from the menu, bot-vs-bot per matchup,
+  screenshots). Screenshots: `screenshots/m3-{start,briefing,board,dice,gallery,gameover,rings}.png` at 1280x800.
 
 ## Not yet
-The playable slice with rules UI (M3), the AI policies (M4), art, audio files, real terrain. Open M2 items:
-`tools/out/m2-followups.md`.
+The AI policies (M4; every bot tier plays random), most figure art, real terrain, query additions the client is
+waiting on (shoot options, contest radii, coherency links, placement-aware visibility). Open items:
+`tools/out/m2-followups.md`, `tools/out/m3-followups.md`.

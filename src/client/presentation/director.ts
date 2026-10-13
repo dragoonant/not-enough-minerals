@@ -5,7 +5,7 @@
 import type { Action, GameState } from '../../engine/types'
 import { getSettings, scaled } from '../store/settingsStore'
 import { addNarration, clearBanner, resetAnnouncements, showBanner, type NarrationLine } from './announceStore'
-import { buildBeats, type Beat } from './beats'
+import { anchorModel, buildBeats, type Beat } from './beats'
 import type { Cue, SeqEvent } from './cues'
 import { narrate } from './labels'
 import {
@@ -70,12 +70,23 @@ function applyPatch(beat: Beat): void {
   draft.patch.cursor = Math.max(peek('cursor'), lastSeqOf(beat))
 }
 
-function popsFor(cue: Cue): Omit<DamagePop, 'id' | 'startedAt' | 'durationMs'>[] {
+function popsFor(cue: Cue, state: GameState): Omit<DamagePop, 'id' | 'startedAt' | 'durationMs'>[] {
   switch (cue.kind) {
-    case 'damage': return [{ modelId: cue.targetId, text: cue.applied > 0 ? `-${cue.applied}` : 'No damage', tone: cue.applied > 0 ? 'damage' : 'miss' }]
-    case 'attack': return cue.success ? [] : [{ modelId: cue.targetId, text: 'Miss', tone: 'miss' }]
-    case 'removed': return [{ modelId: cue.modelId, text: 'Out', tone: 'removed' }]
-    case 'condition': return cue.added ? [{ modelId: cue.modelId, text: cue.condition, tone: 'condition' }] : []
+    case 'attackStage': {
+      const at = anchorModel(state, cue.targetUnitId)
+      if (!at) return []
+      if (cue.data.step === 'hit' && cue.data.hits + cue.data.precision === 0) return [{ modelId: at, text: 'Miss', tone: 'miss' }]
+      if (cue.data.step === 'damage') return [{ modelId: at, text: cue.data.total > 0 ? `-${cue.data.newDamage ?? cue.data.total}` : 'No damage', tone: cue.data.total > 0 ? 'damage' : 'miss' }]
+      return []
+    }
+    case 'casualties': return cue.modelIds.map((modelId) => ({ modelId, text: 'Out', tone: 'removed' as const }))
+    case 'charge': {
+      const at = anchorModel(state, cue.unitId)
+      if (!at) return []
+      if (cue.stage === 'failed') return [{ modelId: at, text: 'Charge failed', tone: 'miss' }]
+      if (cue.stage === 'rolled' && cue.distance !== undefined) return [{ modelId: at, text: `${cue.distance}"`, tone: 'condition' }]
+      return []
+    }
     default: return []
   }
 }
@@ -89,7 +100,7 @@ function startBeat(beat: Beat, dur: number): void {
   draft.feed.push({ id, seq: active.lastSeq, cue: beat.cue, text })
   if (text && getSettings().narration) draft.lines.push({ seq: active.lastSeq, text })
   if (beat.applyAt === 'start') applyPatch(beat)
-  if (beat.cue.kind === 'dice') {
+  if (beat.cue.kind === 'dice' || (beat.cue.kind === 'attackStage' && beat.cue.dice.length > 0)) {
     const shown: ShownRoll = { id, cue: beat.cue, startedAt: now, durationMs: dur }
     draft.patch.roll = shown
     draft.dice.push(shown)
@@ -99,7 +110,7 @@ function startBeat(beat: Beat, dur: number): void {
       const t: MoveTween = { modelId: beat.cue.modelId, points: beat.cue.points, startedAt: now, durationMs: dur }
       draft.patch.tweens = { ...peek('tweens'), [t.modelId]: t }
     }
-    const pops = popsFor(beat.cue)
+    const pops = popsFor(beat.cue, cur.state)
     if (pops.length) {
       const live = peek('pops').filter((p) => now < p.startedAt + p.durationMs)
       draft.patch.pops = [...live, ...pops.map((p) => ({ ...p, id: ++seq, startedAt: now, durationMs: Math.max(dur, 900) }))]

@@ -8,7 +8,7 @@ import { chargeNeeded, chargeTargets } from './charge'
 import { contest } from './control'
 import { atLeastP, binomial, convolve, exprDistribution, finalTN, mean, pAtLeast, pSuccess } from './dice'
 import { keywordOf, rollModOf, statOf, weaponProfile, type StatCtx } from './effects'
-import { bracketSupply, unitDef } from './edition'
+import { allWeapons, bracketSupply, rule, unitDef } from './edition'
 import { engagedWith, isEngaged } from './engage'
 import { runHook } from './hooks'
 import { highGroundCover, losBetween } from './los'
@@ -17,8 +17,12 @@ import { moveReach } from './movement'
 import { isRejection } from './errors'
 import { meleeTargets } from './melee'
 import { previewBatch } from './shooting'
-import { coherencyState, tableModels, unitModels } from './squads'
-import { available, canArrive, onTableSupply, poolFor } from './supply'
+import { coherencyDistance, coherencyState, linkValid, squadCtx, tableModels, unitModels } from './squads'
+import { planBatches } from './shooting'
+import { modelDistance } from './measure'
+import { baseRadius, edgeDistance } from './geometry'
+import { available, canArrive, onTableSupply, poolFor, supplyFor } from './supply'
+import { detectorAreas, hasStatus, inDetection } from './effects'
 import { updateControl } from './control'
 import { canTarget, type SeeVerdict } from './visibility'
 import type { AttackBatch, GameState, ModelId, ModelState, SeatId, UnitId, Vec2 } from './types'
@@ -247,6 +251,11 @@ export interface ObjectiveStatus {
   active: boolean
   /** VP each seat would get from this marker if Scoring ran now. */
   vpNow: Record<SeatId, number>
+  /** Marker disc radius and the control-zone ring radius (marker radius + rules.json contestRange), inches. */
+  markerRadius: number
+  contestRadius: number
+  /** Two or more seats have a Unit that can contest this marker (control.contest; Supply 0 still counts as present). */
+  contested: boolean
 }
 /** Per marker on the table: contest totals and the controller Scoring step 1 would store now (control.contest), and the
  *  marker VP of the Mission's per-marker rules for that controller. */
@@ -262,7 +271,9 @@ export function objectiveStatus(state: GameState, bundle: EditionBundle): Object
         if (r.kind === 'activatedMarkerCash' && state.round >= r.fromRound && m.active) vpNow[c.controller]! += m.activatedRound ?? 0
       }
     }
-    return { n: m.n, totals: c.totals, controller: c.controller, active: m.active, vpNow }
+    const markerRadius = baseRadius(rule(bundle, 'markerDiameterMm'))
+    const contested = state.seatOrder.filter((x) => c.contesters[x]!.length > 0).length > 1
+    return { n: m.n, totals: c.totals, controller: c.controller, active: m.active, vpNow, markerRadius, contestRadius: markerRadius + rule(bundle, 'contestRange'), contested }
   })
 }
 
@@ -277,11 +288,22 @@ export function missionScore(state: GameState, bundle: EditionBundle, seat: Seat
 }
 
 // ---------------------------------------------------------------- movement previews
-export interface CoherencyPreview { inCoherency: boolean; outOfCoherency: ModelId[]; distance: number }
+export interface CoherencyPreview {
+  inCoherency: boolean; outOfCoherency: ModelId[]; distance: number
+  /** Model pairs a coherency line can be drawn between: base edges within `distance` and a valid link (squads.linkValid). */
+  links: [ModelId, ModelId][]
+}
 /** Coherency of a proposed placement (squads.coherencyState). */
 export function coherencyPreview(state: GameState, bundle: EditionBundle, unitId: UnitId, placement: Record<ModelId, Vec2>): CoherencyPreview {
   const r = coherencyState(state, bundle, unitId, placement)
-  return { inCoherency: r.inCoherency, outOfCoherency: r.outOfCoherency, distance: r.distance }
+  const nodes = unitModels(state, unitId).filter((m) => placement?.[m.id] || !m.offTable).map((m) => ({ m, pos: placement?.[m.id] ?? m.pos }))
+  const ctx = squadCtx(state, bundle, unitId)
+  const links: [ModelId, ModelId][] = []
+  for (let i = 0; i < nodes.length; i++) for (let j = i + 1; j < nodes.length; j++) {
+    const a = nodes[i]!, b = nodes[j]!
+    if (edgeDistance(a.pos, a.m.base, b.pos, b.m.base) <= r.distance + 1e-6 && linkValid(ctx, a.pos, baseRadius(a.m.base), b.pos, baseRadius(b.m.base))) links.push([a.m.id, b.m.id])
+  }
+  return { inCoherency: r.inCoherency, outOfCoherency: r.outOfCoherency, distance: r.distance, links }
 }
 
 export interface Reach { move: number | null; run: number | null; chargeMin: number | null; chargeMax: number | null }
@@ -295,5 +317,120 @@ export function reachOf(state: GameState, bundle: EditionBundle, unitId: UnitId)
     move: r?.move ?? null, run: r?.run ?? null,
     chargeMin: canCharge && speed !== null ? speed + 1 + mod : null, chargeMax: canCharge && speed !== null ? speed + 6 + mod : null,
   }
+}
+
+// ---------------------------------------------------------------- M3 client additions (spec 00 s10)
+/** Current Supply Value of one unit (supply.supplyFor, purpose 'pool'): the Reserves tray and the unit card. */
+export function unitSupply(state: GameState, bundle: EditionBundle, unitId: UnitId): number {
+  return supplyFor(state, bundle, unitId, 'pool')
+}
+
+export interface PoolRow { round: number; pool: number | null }
+/** The Supply Pool for every Round of the game (null = unlimited, the final Round), for the briefing's Pool table. */
+export function poolTable(state: GameState, bundle: EditionBundle): PoolRow[] {
+  const last = state.maxRounds ?? 0
+  const rows: PoolRow[] = []
+  for (let r = 1; r <= last; r++) {
+    const p = poolFor(state, bundle, r)
+    rows.push({ round: r, pool: Number.isFinite(p) ? p : null })
+  }
+  return rows
+}
+
+/** Units on the table inside an enemy detector area (effects.inDetection): the 'detected' status icon. */
+export function detectedUnits(state: GameState, bundle: EditionBundle): UnitId[] {
+  if (detectorAreas(state, bundle).length === 0) return []
+  return Object.values(state.units).filter((u) => u.location === 'table' && inDetection(state, bundle, u.id)).map((u) => u.id).sort()
+}
+// ---------------------------------------------------------------- shooting options with reasons (M3 fix)
+export type ShotReason = 'wrongPhase' | 'notOnTable' | 'disengaged' | 'burrowed' | 'wrongStatus' | 'bulkyEngaged' | 'spent'
+  | 'targetTag' | 'engagedShooter' | 'engagedTarget' | 'noLos' | 'outOfRange' | 'hidden' | 'other'
+export interface ShotTarget {
+  targetUnitId: UnitId
+  eligible: boolean
+  reason?: ShotReason
+  /** Plain-words reason for the panel (our own wording, with numbers where there are some). */
+  text?: string
+  /** Nearest base-edge distance and the weapon's range (inches), set for outOfRange and noLos. */
+  distance?: number
+  range?: number
+  /** Eligible only: printed hit TN, best TN actually rolled, and why they differ. */
+  printedHit?: number | null
+  hitTN?: number | null
+  hitNotes?: ('indirectFire' | 'longRange' | 'cover' | 'highGround' | 'modifier')[]
+}
+export interface ShotWeapon { weaponId: Id; name: string; eligible: boolean; reason?: ShotReason; text?: string; targets: ShotTarget[] }
+export interface ShootOptions { unitId: UnitId; canShoot: boolean; reason?: ShotReason; text?: string; weapons: ShotWeapon[] }
+
+const SHOT_TEXT: Record<ShotReason, string> = {
+  wrongPhase: 'Ranged Attacks happen in the Assault Phase.', notOnTable: 'This unit is not on the table.',
+  disengaged: 'It disengaged this Round, so it may not shoot.', burrowed: 'A burrowed unit cannot shoot.',
+  wrongStatus: 'This weapon needs a status the unit does not have.', bulkyEngaged: 'Bulky weapons cannot fire while Engaged.',
+  spent: 'Already fired this Round.', targetTag: 'This weapon cannot target that kind of unit.',
+  engagedShooter: 'Engaged units may only shoot what they are Engaged with.', engagedTarget: 'The target is Engaged with friendly models.',
+  noLos: 'No line of sight.', outOfRange: 'Out of range.', hidden: 'The target is hidden.', other: 'Not a legal target.',
+}
+
+/** Per weapon and enemy unit: eligible, or the reason with numbers. Eligibility is shooting.planBatches itself; reasons are
+ *  diagnosed from the same visibility, engagement and distance services. For the weapon panel and the action menu. */
+export function shootOptions(state: GameState, bundle: EditionBundle, unitId: UnitId): ShootOptions {
+  const unit = state.units[unitId]
+  const out = (canShoot: boolean, reason: ShotReason | undefined, weapons: ShotWeapon[]): ShootOptions => ({ unitId, canShoot, ...(reason ? { reason, text: SHOT_TEXT[reason] } : {}), weapons })
+  if (!unit || unit.location !== 'table') return out(false, 'notOnTable', [])
+  if (state.roundPhase !== 'assault') return out(false, 'wrongPhase', [])
+  if (unit.noShootChargeRound === state.round) return out(false, 'disengaged', [])
+  if (hasStatus(state, unitId, 'BURROWED')) return out(false, 'burrowed', [])
+  const plan = planBatches(state, bundle, unitId)
+  const models = unitModels(state, unitId)
+  const engagedNow = engagedWith(state, bundle, unitId)
+  const enemies = Object.values(state.units).filter((u) => u.owner !== unit.owner && u.location === 'table' && tableModels(state, u.id).length > 0).map((u) => u.id).sort()
+  const def = unitDef(bundle, unit.profileId)
+  const ids = [...new Set(models.flatMap((m) => m.weapons))]
+  const weapons: ShotWeapon[] = []
+  for (const wid of ids) {
+    const base = weaponProfile(state, bundle, unitId, wid, { attack: 'ranged' })
+    if (!base || base.phase !== 'assault') continue
+    const name = (def ? allWeapons(def).find((w) => w.id === wid)?.name : undefined) ?? base.name
+    const cand = plan.find((c) => c.weaponId === wid)
+    const wFail = (reason: ShotReason): ShotWeapon => ({ weaponId: wid, name, eligible: false, reason, text: SHOT_TEXT[reason], targets: enemies.map((t) => ({ targetUnitId: t, eligible: false, reason, text: SHOT_TEXT[reason] })) })
+    if (base.requiresStatus && !hasStatus(state, unitId, base.requiresStatus)) { weapons.push(wFail('wrongStatus')); continue }
+    if (engagedNow.length && hasKw(base.keywords, 'BULKY')) { weapons.push(wFail('bulkyEngaged')); continue }
+    const carriers = models.filter((m) => m.weapons.includes(wid) && !Object.keys(unit.usage).some((k) => k.startsWith('shoot.fired:'+state.round+':'+m.id)))
+    if (!carriers.length) { weapons.push(wFail('spent')); continue }
+    const range = typeof base.range === 'number' ? base.range : 0
+    const printed = finalTN(bundle, base.hit)
+    const targets: ShotTarget[] = enemies.map((t) => {
+      if (cand?.targets.includes(t)) {
+        const tns = attackPreview(state, bundle, unitId, wid, t).perModel.map((m) => m.hitTN).filter((x): x is number => x !== null)
+        const best = tns.length ? Math.min(...tns) : null
+        const notes: NonNullable<ShotTarget['hitNotes']> = []
+        if (best !== null && (best !== printed || new Set(tns).size > 1)) {
+          if (hasKw(base.keywords, 'INDIRECT_FIRE')) notes.push('indirectFire')
+          if (new Set(tns).size > 1) notes.push('longRange')
+          const cov = coverFor(state, bundle, unitId, t)
+          if (cov === 'highGround') notes.push('highGround'); else if (cov !== 'none') notes.push('cover')
+          if (!notes.length) notes.push('modifier')
+        }
+        return { targetUnitId: t, eligible: true, printedHit: printed, hitTN: best, ...(notes.length ? { hitNotes: notes } : {}) }
+      }
+      const tags = unitDef(bundle, state.units[t]!.profileId)?.combatTags ?? []
+      const tagOk = base.target === 'all' ? tags.includes('ground') || tags.includes('flying') : tags.includes(base.target)
+      const near = Math.min(...carriers.flatMap((c) => tableModels(state, t).map((m) => modelDistance(c, m))))
+      const fail = (reason: ShotReason, extra: Partial<ShotTarget> = {}): ShotTarget => ({ targetUnitId: t, eligible: false, reason, text: SHOT_TEXT[reason], ...extra })
+      if (!tagOk) return fail('targetTag')
+      if (engagedNow.length && !engagedNow.includes(t)) return fail('engagedShooter')
+      if (isEngaged(state, bundle, t) && !engagedNow.includes(t) && !hasKw(base.keywords, 'PINPOINT')) return fail('engagedTarget')
+      const v = canTarget(state, bundle, unitId, t, { ranged: true, needsLos: !hasKw(base.keywords, 'INDIRECT_FIRE'), actorModelIds: carriers.map((m) => m.id) })
+      const dTxt = `${near.toFixed(1)}" away, range ${range}"`
+      if (!v.ok) {
+        if (v.reasons.some((r) => String(r).toLowerCase().includes('hidden'))) return fail('hidden')
+        return fail('noLos', { distance: near, range, text: `No line of sight (${dTxt}).` })
+      }
+      return fail('outOfRange', { distance: near, range, text: `Out of range: ${dTxt}.` })
+    })
+    weapons.push({ weaponId: wid, name, eligible: !!cand?.targets.length, ...(cand?.targets.length ? {} : { reason: 'other' as ShotReason, text: 'No legal target.' }), targets })
+  }
+  if (!weapons.some((w) => w.eligible)) return out(false, weapons.length && weapons.every((w) => w.reason === 'spent') ? 'spent' : 'other', weapons)
+  return out(true, undefined, weapons)
 }
 void hasKw

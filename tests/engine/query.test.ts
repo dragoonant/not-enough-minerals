@@ -2,7 +2,7 @@
 // over the dice; PREV-001 checks it against the real pipeline (Monte Carlo over seeds, within a few standard errors).
 import { describe, expect, it } from 'vitest'
 import { mean } from '../../src/engine/dice'
-import { attackPreview, chargeOdds, coverFor, engaged, objectiveStatus, reachOf, supplyStatus } from '../../src/engine/query'
+import { attackPreview, chargeOdds, coherencyPreview, coverFor, engaged, objectiveStatus, reachOf, shootOptions, supplyStatus } from '../../src/engine/query'
 import { isRejection } from '../../src/engine/registry'
 import { seedRng } from '../../src/engine/rng'
 import { declareBatch } from '../../src/engine/shooting'
@@ -66,5 +66,33 @@ describe('query', () => {
     const walled = { ...s0, terrain: [ter('wall', 'obstacle', 0, 0, 30, 1, 4, { size: 3 })] }
     expect(coverFor(walled, b, 'A-marines', 'B-zerglings')).toBe('full')
     expect(engaged(s0, b, 'A-marines')).toEqual([])
+  })
+})
+
+describe('query M3 fix additions', () => {
+  it('PREV-005 shootOptions explains ineligible weapons and targets with numbers', () => {
+    const s0 = duelState(b, { gap: 40, roundPhase: 'assault' })
+    const o = shootOptions(s0, b, 'A-marines')
+    expect(o.weapons.length).toBeGreaterThan(0)
+    const t = o.weapons[0]!.targets.find((x) => x.targetUnitId === 'B-zerglings')!
+    expect(t.eligible).toBe(false)
+    expect(t.reason).toBe('outOfRange')
+    expect(t.distance!).toBeGreaterThan(t.range!)
+    const near = shootOptions(duelState(b, { gap: 10, roundPhase: 'assault' }), b, 'A-marines')
+    expect(near.canShoot).toBe(true)
+    const ok = near.weapons.flatMap((w) => w.targets).find((x) => x.eligible)!
+    expect(ok.printedHit).toBeTypeOf('number')
+    expect(shootOptions(duelState(b, { gap: 10, roundPhase: 'movement' }), b, 'A-marines').reason).toBe('wrongPhase')
+  })
+
+  it('PREV-006 coherencyPreview returns link pairs; objectiveStatus carries ring radius and contested', () => {
+    const s0 = duelState(b)
+    const c = coherencyPreview(s0, b, 'A-marines', {})
+    expect(c.links.length).toBeGreaterThan(0)
+    for (const [x, y] of c.links) expect(x).not.toBe(y)
+    for (const o of objectiveStatus(s0, b)) {
+      expect(o.contestRadius).toBeGreaterThan(o.markerRadius)
+      expect(typeof o.contested).toBe('boolean')
+    }
   })
 })

@@ -14,8 +14,10 @@ export default defineConfig(({ mode }) => ({
       input: { main: fileURLToPath(new URL('./index.html', import.meta.url)) },
       output: {
         codeSplitting: {
+          includeDependenciesRecursively: false,
           groups: [
             { name: 'react', test: /node_modules[\/](react|react-dom|scheduler|zustand|use-sync-external-store)[\/]/, priority: 40 },
+            { name: 'three-extras', test: /node_modules[\/]three[\/]examples[\/]/, priority: 35 },
             { name: 'three', test: /node_modules[\/]three[\/]/, priority: 30 },
             { name: 'r3f', test: /node_modules[\/](@react-three|three-stdlib|three-mesh-bvh|camera-controls|maath|troika|@monogrid|meshline|stats|suspend-react|its-fine)/, priority: 20 },
             { name: 'engine', test: /src[\/]engine[\/]/, priority: 10 },

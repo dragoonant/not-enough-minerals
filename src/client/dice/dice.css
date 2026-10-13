@@ -1,10 +1,25 @@
-.dt { position: absolute; right: 8px; bottom: 56px; z-index: 2; width: 220px; max-width: calc(100% - 24px); color: var(--bone); background: linear-gradient(180deg, rgba(27,35,45,.9), rgba(15,20,27,.92)); border: 1px solid #59b8d655; border-right: 3px solid var(--amber); border-radius: 4px; padding: 6px 8px; font-size: 12px; }
-@media (max-width: 600px) { .dt { width: 150px; right: 4px; opacity: .92; } }
+.dt { position: absolute; right: 8px; bottom: 56px; z-index: 2; width: 230px; max-width: calc(100% - 24px); max-height: min(270px, 60%); overflow: hidden; display: flex; flex-direction: column; color: var(--bone); background: linear-gradient(180deg, rgba(27,35,45,.78), rgba(15,20,27,.82)); border: 1px solid #59b8d655; border-right: 3px solid var(--amber); border-radius: 4px; padding: 6px 8px; font-size: 12px; backdrop-filter: blur(2px); }
+.dt[data-mode="full"] { width: 290px; }
+@media (max-width: 600px) { .dt, .dt[data-mode="full"] { width: 190px; right: 4px; opacity: .94; } }
 .dt-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
-.dt-label { font-weight: 700; }
+.dt-label { font-weight: 700; min-width: 0; }
+.dt-btns { display: flex; gap: 4px; flex: none; }
+.dt-mini { background: #1b232d; color: var(--bone); border: 1px solid #46515c; border-radius: 3px; padding: 0 6px; font: inherit; font-size: 11px; line-height: 18px; cursor: pointer; }
+.dt-mini:hover { border-color: var(--amber); }
+.dt-mini[aria-pressed="true"] { border-color: var(--cyan); }
+.dt-chip { position: absolute; right: 8px; bottom: 56px; z-index: 2; min-width: 34px; height: 30px; padding: 0 8px; background: rgba(15,20,27,.8); color: var(--bone); border: 1px solid #59b8d655; border-radius: 4px; font: inherit; font-size: 12px; cursor: pointer; }
 .dt-dice { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 4px; }
 .die { min-width: 36px; height: 36px; display: grid; place-items: center; border-radius: 7px; border: 2px solid #8fa3b5; background: #e8eef3; color: #0f141b; }
 .die b { font-size: 18px; }
+.die-sm { min-width: 24px; height: 24px; border-radius: 5px; border-width: 1px; }
+.die-sm b { font-size: 13px; }
+.die-surge { background: #f1c05a; border-color: var(--amber); }
+.die-armour { background: #cfe3ee; border-color: #6aa6c0; }
+.die-evade { background: #d5ecd0; border-color: #78b36c; }
+.die-pass { box-shadow: 0 0 0 2px #5fd08a; background-image: linear-gradient(rgba(95,208,138,.35), rgba(95,208,138,.35)); }
+.die-pass b::after { content: ' ¹3'; font-size: 10px; }
+.die-fail { opacity: .6; box-shadow: 0 0 0 2px #d0655f; }
+.die-fail b::after { content: ' ¹7'; font-size: 10px; }
 .die-reroll { outline: 2px dashed var(--cyan); outline-offset: 1px; }
 .die-old { opacity: .4; text-decoration: line-through; }
 .die-rolling { animation: dt-spin .5s linear infinite; }
@@ -13,7 +28,23 @@
 @media (prefers-reduced-motion: reduce) { .die-rolling { animation: none; opacity: .6; } }
 .dt-meta { font-size: 12px; opacity: .85; display: flex; flex-wrap: wrap; gap: 4px 10px; }
 .dt-tag { color: var(--cyan); }
+.dt-work { display: grid; gap: 6px; margin: 6px 0 2px; }
+.dt-row { border-top: 1px solid #2c3a48; padding-top: 4px; }
+.dt-rt { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--cyan); }
+.dt-rb { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px; }
+.dt-rb .dt-dice { margin: 2px 0; gap: 4px; }
+.dt-grp { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 6px; }
+.dt-tn { opacity: .85; font-size: 11px; }
+.dt-sum { opacity: .9; }
+.dt-dmg { font-weight: 700; color: var(--amber); }
+.dt-totals { display: flex; justify-content: space-between; gap: 4px; margin-top: 6px; padding-top: 4px; border-top: 1px solid #2c3a48; }
+.dt-tot { display: flex; flex-direction: column; align-items: center; min-width: 40px; }
+.dt-tot small { font-size: 9px; letter-spacing: .1em; text-transform: uppercase; opacity: .7; }
+.dt-tot b { font-size: 15px; }
+.dt-tot-off { opacity: .35; }
 .dt-toggle { margin-top: 6px; background: none; border: 0; padding: 0; color: var(--amber); cursor: pointer; font: inherit; font-size: 12px; text-decoration: underline; }
-.dtl { margin: 6px 0 0; padding: 0; list-style: none; max-height: 180px; overflow: auto; border-top: 1px solid #2c3a48; }
+.dtl { margin: 6px 0 0; padding: 0; list-style: none; flex: 1 1 auto; min-height: 60px; overflow: auto; border-top: 1px solid #2c3a48; }
 .dtl li { display: flex; gap: 6px; align-items: center; justify-content: space-between; padding: 3px 0; border-bottom: 1px solid #1b232d; font-size: 12px; }
 .dtl-faces { opacity: .85; }
+
+.dt-work { overflow: auto; min-height: 0; }

@@ -1,11 +1,13 @@
 // Bot driver (KNOWLEDGE-BASE 1.4): answers bot-owned decisions through gameStore.dispatch, only while the presentation
-// is idle, so a bot never acts over an animation the player has not seen. A watchdog force-answers when a bot decision
-// has made no progress for WATCHDOG_MS, whatever the presentation is doing. Per-decision AI time budget: VITE_AI_MS.
+// is idle AND the figures of the game have loaded (uiStore.figuresReady), so a bot never acts over an animation the
+// player has not seen or before the table is drawn. A watchdog force-answers when a bot decision has made no progress
+// for WATCHDOG_MS (5 s), whatever the presentation or the figures are doing. Per-decision AI time budget: VITE_AI_MS.
+// M3: every tier plays the seeded random bot. M4 installs the tier brains with setTierBrains(createAiBrain).
 import type { Action } from '../../engine/types'
 import { aiBudgetMs, TIER_IDS, type Tier } from '../../ai/types'
 import { view as aiViewOf } from '../../engine/view'
-import { useLaunchStore } from '../store/launch'
 import { readParams } from '../params'
+import { isFiguresReady, useFocusStore } from '../store/uiStore'
 import { skipAll } from '../presentation/director'
 import { isPresentationIdle, usePresentedStore } from '../presentation/presentedStore'
 import { dispatch, isBotDecision, legalFor, ownerSeat, preview, useGameStore } from '../store/gameStore'
@@ -26,28 +28,28 @@ let override: BotBrain | null = null
 export function setBotBrain(b: BotBrain | null): void { override = b }
 
 export const DEFAULT_TIER: Tier = 'normal'
-/** The opponent tier of the running game: the launch options' `tier`, else ?tier, else normal. */
+/** The opponent tier of the running game: its launch tier, else ?tier, else normal. */
 export function launchTier(): Tier {
-  const l = useLaunchStore.getState().launch
-  const t = (l && l.mode === 'new' ? l.opts.tier : undefined) ?? readParams().tier ?? undefined
+  const t = useGameStore.getState().launch?.tier ?? readParams().tier ?? undefined
   return typeof t === 'string' && (TIER_IDS as readonly string[]).includes(t) ? (t as Tier) : DEFAULT_TIER
 }
 
-let tiered: { tier: Tier; key: string; brain: BotBrain; dispose?: () => void } | null = null
-/** The brain for a tier: random uses the placeholder bot; easy and normal use the AI worker (loaded on demand). */
+/** M4 seam: a factory that builds the brain for a tier (e.g. aiWorkerClient.createAiBrain). Null = random for every tier. */
+export type TierBrainFactory = (tier: Tier) => BotBrain & { dispose?(): void }
+let tierFactory: TierBrainFactory | null = null
+export function setTierBrains(f: TierBrainFactory | null): void { tierFactory = f; tiered?.dispose?.(); tiered = null }
+
+let tiered: { key: string; brain: BotBrain; dispose?: () => void } | null = null
+/** The brain for a tier: the random bot until M4 installs tier brains. */
 function brainFor(tier: Tier): BotBrain {
   if (override) return override
-  const key = `${tier}:${useGameStore.getState().seed}`
+  if (!tierFactory || tier === 'random') return randomBrain
+  const key = `${tier}:${useGameStore.getState().epoch}`
   if (tiered && tiered.key === key) return tiered.brain
   tiered?.dispose?.()
-  if (tier === 'random') { tiered = { tier, key, brain: randomBrain }; return randomBrain }
-  let inner: Promise<BotBrain & { dispose(): void }> | null = null
-  const lazy: BotBrain = async (v, p, l, c) => {
-    inner ??= import('./aiWorkerClient').then((m) => m.createAiBrain(tier))
-    return (await inner)(v, p, l, c)
-  }
-  tiered = { tier, key, brain: lazy, dispose: () => { void inner?.then((b) => b.dispose()) } }
-  return lazy
+  const brain = tierFactory(tier)
+  tiered = { key, brain, ...(brain.dispose ? { dispose: () => brain.dispose!() } : {}) }
+  return brain
 }
 
 /** Brain for a bot seat: the tier brain (every bot seat plays the launch tier). */
@@ -62,9 +64,16 @@ export interface BotDriverOptions {
   watchdogMs?: number
   thinkMs?: number
   budgetMs?: number
+  /** Wait for uiStore.figuresReady before answering (default true; headless tests pass false). */
+  requireFigures?: boolean
 }
 
 export type TickResult = 'answered' | 'thinking' | 'forced' | 'waiting' | 'notBot' | 'paused'
+
+/** Bots act only when the presentation is idle and (by default) the figures have loaded. */
+export function botMayAct(requireFigures = true): boolean {
+  return isPresentationIdle() && (!requireFigures || isFiguresReady())
+}
 
 export interface BotDriver {
   /** Try to answer the open bot decision now. */
@@ -103,6 +112,7 @@ export function createBotDriver(opts: BotDriverOptions = {}): BotDriver {
   const watchdogMs = opts.watchdogMs ?? WATCHDOG_MS
   const thinkMs = opts.thinkMs ?? BOT_THINK_MS
   const budgetMs = opts.budgetMs ?? AI_MS
+  const requireFigures = opts.requireFigures ?? true
 
   let seen: string | null = null
   let since = now()
@@ -159,14 +169,14 @@ export function createBotDriver(opts: BotDriverOptions = {}): BotDriver {
     const key = decisionKey()
     if (now() - since >= watchdogMs) { inflight = null; return force() ? 'forced' : 'waiting' }
     if (inflight === key) return 'thinking'
-    if (!isPresentationIdle()) return 'waiting'
+    if (!botMayAct(requireFigures)) return 'waiting'
     think()
     return inflight === key ? 'thinking' : 'answered'
   }
 
   function schedule(): void {
     if (!running || paused || tickTimer !== null) return
-    if (!isBotDecision() || !isPresentationIdle() || inflight === decisionKey()) return
+    if (!isBotDecision() || !botMayAct(requireFigures) || inflight === decisionKey()) return
     const ms = scaled(thinkMs)
     tickTimer = setT(() => { tickTimer = null; if (running) { tick(); schedule() } }, ms)
   }
@@ -190,6 +200,7 @@ export function createBotDriver(opts: BotDriverOptions = {}): BotDriver {
       unsubs = [
         useGameStore.subscribe((s, prev) => { if (s.state !== prev.state || s.controllers !== prev.controllers) { schedule(); armWatchdog() } }),
         usePresentedStore.subscribe((s, prev) => { if (s.idle && !prev.idle) schedule() }),
+        useFocusStore.subscribe((s, prev) => { if (s.figuresReady && !prev.figuresReady) schedule() }),
       ]
       schedule()
       armWatchdog()

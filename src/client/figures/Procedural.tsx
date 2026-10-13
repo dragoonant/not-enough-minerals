@@ -11,7 +11,7 @@ export interface FigureProps {
 }
 
 /** Figure height in inches by base size (cosmetic): grows with the base. */
-export const figureHeight = (baseMm: number): number => 1.2 + (baseMm - 25) * 0.04
+export const figureHeight = (baseMm: number): number => 1.2 + (baseMm - 25) * 0.022
 
 export function ProceduralFigure({ id, x, z, baseMm, color, accent, heightIn, bare }: FigureProps) {
   const r = baseMm / MM / 2

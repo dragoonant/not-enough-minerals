@@ -1,0 +1,23 @@
+import { chromium } from 'playwright'
+const b = await chromium.launch()
+const p = await b.newPage({ viewport: { width: 1280, height: 800 } })
+const errs = []
+p.on('console', m => { if (m.type() === 'error' || m.type()==='warning') errs.push(m.type()+': '+m.text()) })
+p.on('pageerror', e => errs.push('pageerror: ' + e.message))
+await p.goto('http://localhost:5201/?seed=rev1')
+await p.waitForSelector('[data-testid=start-screen]')
+// scroll check
+const sh = await p.evaluate(() => { const e = document.querySelector('[data-testid=start-screen]'); return [e.scrollHeight, e.clientHeight, document.documentElement.scrollHeight] })
+console.log('start scroll', sh)
+await p.mouse.wheel(0, 800); await p.waitForTimeout(400)
+await p.screenshot({ path: 'start-scrolled.png' })
+const t0 = Date.now()
+await p.click('[data-testid=start-button]')
+await p.waitForSelector('[data-testid=game-screen]', { timeout: 30000 })
+console.log('game screen ms', Date.now() - t0)
+await p.waitForTimeout(3000)
+await p.screenshot({ path: 'g01-briefing.png' })
+const br = p.locator('[data-testid=briefing]')
+if (await br.count()) console.log('BRIEFING:\n' + await br.innerText())
+console.log('ERRS\n' + errs.join('\n'))
+await b.close()
