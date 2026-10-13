@@ -1,0 +1,264 @@
+{
+ "id": "ravager",
+ "name": "Ravager",
+ "race": "zerg",
+ "factionTags": [
+  "zerg"
+ ],
+ "unique": false,
+ "role": "Tactician",
+ "slot": "core",
+ "summoned": false,
+ "combatTags": [
+  "armoured",
+  "biological",
+  "ground"
+ ],
+ "stats": {
+  "shield": null,
+  "speed": [
+   4,
+   8
+  ],
+  "armour": 5,
+  "evade": 5,
+  "hp": 9,
+  "size": 3
+ },
+ "baseMm": 80,
+ "supplyProfile": [
+  {
+   "min": 1,
+   "max": 1,
+   "supply": 1
+  },
+  {
+   "min": 2,
+   "max": 2,
+   "supply": 2
+  }
+ ],
+ "weapons": [
+  {
+   "id": "plasma-discharge",
+   "name": "Plasma Discharge",
+   "phase": "assault",
+   "range": 12,
+   "target": "ground",
+   "roa": 4,
+   "hit": 3,
+   "surgeTypes": [
+    "light"
+   ],
+   "sDice": "D3+1",
+   "dmg": 1,
+   "keywords": []
+  },
+  {
+   "id": "claws",
+   "name": "Claws",
+   "phase": "combat",
+   "range": "E",
+   "target": "ground",
+   "roa": 2,
+   "hit": 4,
+   "surgeTypes": [],
+   "sDice": null,
+   "dmg": 1,
+   "keywords": []
+  }
+ ],
+ "abilities": [
+  {
+   "id": "squadron",
+   "name": "Squadron",
+   "type": "passive",
+   "phase": "any",
+   "effects": [
+    {
+     "op": "coherency",
+     "d": 4
+    }
+   ],
+   "text": "Models stay in coherency at up to 4 inches apart."
+  },
+  {
+   "id": "deep-tunnel",
+   "name": "Deep Tunnel",
+   "type": "active",
+   "phase": "movement",
+   "cost": {
+    "res": "BM",
+    "n": 1
+   },
+   "effects": [
+    {
+     "op": "setToken",
+     "token": "ravager-burrow",
+     "range": 12,
+     "wholly": true
+    },
+    {
+     "op": "place",
+     "x": 0,
+     "from": "token",
+     "token": "ravager-burrow",
+     "optional": true,
+     "at": {
+      "event": "endOfRound"
+     }
+    }
+   ],
+   "text": "Dig a tunnel exit up to 12 inches away and resurface there at round end."
+  },
+  {
+   "id": "corrosive-bile",
+   "name": "Corrosive Bile",
+   "type": "active",
+   "phase": "movement",
+   "cost": {
+    "res": "BM",
+    "n": 1
+   },
+   "effects": [
+    {
+     "op": "setToken",
+     "token": "corrosive-bile",
+     "range": 14,
+     "perModel": true
+    },
+    {
+     "op": "hits",
+     "x": 5,
+     "y": 1,
+     "to": "tokenArea",
+     "token": "corrosive-bile",
+     "radius": 1,
+     "perToken": true,
+     "at": {
+      "event": "endOfPhase",
+      "phase": "assault"
+     }
+    },
+    {
+     "op": "removeToken",
+     "token": "corrosive-bile",
+     "at": {
+      "event": "endOfPhase",
+      "phase": "assault"
+     }
+    }
+   ],
+   "text": "Each Ravager lobs bile up to 14 inches; anything near it at the end of the Assault Phase takes HITS 5 (1)."
+  },
+  {
+   "id": "devastating-charge",
+   "name": "Devastating Charge",
+   "type": "passive",
+   "phase": "assault",
+   "trigger": {
+    "event": "chargeSucceeded"
+   },
+   "effects": [
+    {
+     "op": "impact",
+     "x": 2,
+     "y": 4
+    }
+   ],
+   "text": "After a successful Charge, IMPACT (2) 4+."
+  }
+ ],
+ "upgrades": [
+  {
+   "id": "bloated-bile-ducts",
+   "name": "Bloated Bile Ducts",
+   "phase": "any",
+   "ability": {
+    "id": "bloated-bile-ducts",
+    "name": "Bloated Bile Ducts",
+    "type": "passive",
+    "phase": "any",
+    "effects": [
+     {
+      "op": "abilityMod",
+      "ability": "corrosive-bile",
+      "field": "radius",
+      "value": 2
+     }
+    ],
+    "text": "Bile splashes 2 inches."
+   }
+  },
+  {
+   "id": "burrow-ambush",
+   "name": "Burrow Ambush",
+   "phase": "movement",
+   "ability": {
+    "id": "burrow-ambush",
+    "name": "Burrow Ambush",
+    "type": "passive",
+    "phase": "movement",
+    "trigger": {
+     "event": "nominatedToDeploy"
+    },
+    "endsActivation": true,
+    "effects": [
+     {
+      "op": "place",
+      "x": 18,
+      "from": "entryEdge",
+      "minEnemyDist": 10
+     }
+    ],
+    "text": "Arrives from Reserves up to 18 inches in from its edge, 10 inches clear of enemies."
+   }
+  },
+  {
+   "id": "potent-bile",
+   "name": "Potent Bile",
+   "phase": "assault",
+   "ability": {
+    "id": "potent-bile",
+    "name": "Potent Bile",
+    "type": "passive",
+    "phase": "assault",
+    "trigger": {
+     "event": "beforeArmourRoll",
+     "subject": "enemy",
+     "filter": {
+      "fromAbility": "corrosive-bile"
+     }
+    },
+    "effects": [
+     {
+      "op": "debuff",
+      "char": "armour",
+      "x": 1,
+      "to": "triggerUnit"
+     }
+    ],
+    "text": "Bile victims lose 1 Armour before they save."
+   }
+  }
+ ],
+ "cardVersion": "1.06.26",
+ "source": "CS2-Z p.1",
+ "tokens": [
+  {
+   "id": "ravager-burrow",
+   "name": "Ravager Burrow",
+   "baseMm": null,
+   "size": null,
+   "displacement": true,
+   "text": "Tunnel exit the Ravagers resurface from."
+  },
+  {
+   "id": "corrosive-bile",
+   "name": "Corrosive Bile",
+   "baseMm": null,
+   "size": null,
+   "text": "Where the bile lands."
+  }
+ ]
+}

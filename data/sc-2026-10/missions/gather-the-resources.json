@@ -1,0 +1,104 @@
+[
+ {
+  "id": "gather-the-resources-standard",
+  "name": "Gather the Resources",
+  "scale": "standard",
+  "startSupply": 6,
+  "escalation": 2,
+  "gameLength": 5,
+  "specialWinLead": 10,
+  "markerStart": "activated",
+  "startOfRound": [],
+  "scoring": [
+   {
+    "kind": "supplyDestroyed"
+   },
+   {
+    "kind": "perControlledMarker",
+    "fromRound": 2,
+    "vp": {
+     "own": 0,
+     "neutral": 0,
+     "opponent": 2
+    }
+   }
+  ],
+  "actions": [
+   {
+    "id": "gather",
+    "name": "Gather",
+    "phase": "assault",
+    "requires": {
+     "engaged": false,
+     "markerWithin": 3,
+     "markerSides": [
+      "neutral",
+      "opponent"
+     ],
+     "controlled": true
+    },
+    "effects": [
+     {
+      "op": "gainVP",
+      "n": 1
+     }
+    ],
+    "text": "An Unengaged Unit near a held neutral or enemy-colour marker may trade its action for 1 VP."
+   }
+  ],
+  "text": "From round 2 only held enemy-colour markers score (2 VP each); a Unit may also Gather at a held marker for 1 VP.",
+  "cardVersion": "1.04.26",
+  "source": "CS1-T p.12"
+ },
+ {
+  "id": "gather-the-resources-skirmish",
+  "name": "Gather the Resources",
+  "scale": "skirmish",
+  "startSupply": 3,
+  "escalation": 1,
+  "gameLength": 5,
+  "specialWinLead": 8,
+  "markerStart": "activated",
+  "startOfRound": [],
+  "scoring": [
+   {
+    "kind": "supplyDestroyed"
+   },
+   {
+    "kind": "perControlledMarker",
+    "fromRound": 2,
+    "vp": {
+     "own": 0,
+     "neutral": 0,
+     "opponent": 2
+    }
+   }
+  ],
+  "actions": [
+   {
+    "id": "gather",
+    "name": "Gather",
+    "phase": "assault",
+    "requires": {
+     "engaged": false,
+     "markerWithin": 3,
+     "markerSides": [
+      "neutral",
+      "opponent"
+     ],
+     "controlled": true
+    },
+    "effects": [
+     {
+      "op": "gainVP",
+      "n": 1
+     }
+    ],
+    "text": "An Unengaged Unit near a held neutral or enemy-colour marker may trade its action for 1 VP."
+   }
+  ],
+  "text": "From round 2 only held enemy-colour markers score (2 VP each); a Unit may also Gather at a held marker for 1 VP.",
+  "cardVersion": "1.04.26",
+  "source": "CS1-T p.12"
+ }
+]

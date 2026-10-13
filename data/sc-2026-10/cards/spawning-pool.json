@@ -1,0 +1,45 @@
+{
+  "id": "spawning-pool",
+  "name": "Spawning Pool",
+  "kind": "tactical",
+  "race": "zerg",
+  "factionTags": [
+    "zerg"
+  ],
+  "unique": false,
+  "slots": {
+    "core": 1
+  },
+  "resource": {
+    "res": "BM",
+    "n": 1
+  },
+  "abilities": [
+    {
+      "id": "feral-rage",
+      "name": "Feral Rage",
+      "type": "active",
+      "phase": "combat",
+      "target": {
+        "kind": "activeUnit"
+      },
+      "effects": [
+        {
+          "op": "grantKeyword",
+          "kw": {
+            "kw": "PRECISION",
+            "x": 2
+          },
+          "to": {
+            "phase": "combat",
+            "first": true
+          },
+          "duration": "endOfActivation"
+        }
+      ],
+      "text": "Melee: the first weapon used this activation gets PRECISION 2."
+    }
+  ],
+  "cardVersion": "1.04.26",
+  "source": "CS1-Z p.16"
+}

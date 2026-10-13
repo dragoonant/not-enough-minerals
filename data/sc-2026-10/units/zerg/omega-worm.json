@@ -1,0 +1,115 @@
+{
+ "id": "omega-worm",
+ "name": "Omega Worm",
+ "race": "zerg",
+ "factionTags": [
+  "zerg",
+  "kerrigans-swarm"
+ ],
+ "unique": false,
+ "role": "Tactician",
+ "slot": null,
+ "summoned": true,
+ "combatTags": [
+  "armoured",
+  "biological",
+  "ground"
+ ],
+ "stats": {
+  "shield": null,
+  "speed": null,
+  "armour": 5,
+  "evade": null,
+  "hp": 10,
+  "size": 3
+ },
+ "baseMm": 80,
+ "supplyProfile": [
+  {
+   "min": 1,
+   "max": 1,
+   "supply": 0
+  }
+ ],
+ "weapons": [],
+ "abilities": [
+  {
+   "id": "detection",
+   "name": "Detection",
+   "type": "passive",
+   "phase": "any",
+   "effects": [
+    {
+     "op": "detection",
+     "radius": 6,
+     "centre": "self"
+    }
+   ],
+   "text": "Enemies within 6 inches lose Hidden."
+  },
+  {
+   "id": "source-of-creep",
+   "name": "Source of Creep",
+   "type": "passive",
+   "phase": "any",
+   "effects": [
+    {
+     "op": "aura",
+     "radius": 6,
+     "centre": "self",
+     "affects": {
+      "side": "any",
+      "race": "zerg",
+      "tags": [
+       "ground"
+      ]
+     },
+     "effects": [
+      {
+       "op": "status",
+       "status": "ON_CREEP",
+       "mode": "gain"
+      }
+     ]
+    }
+   ],
+   "text": "Ground Zerg within 6 inches are on Creep."
+  },
+  {
+   "id": "structure",
+   "name": "Structure",
+   "type": "passive",
+   "phase": "any",
+   "effects": [
+    {
+     "op": "grantKeyword",
+     "kw": {
+      "kw": "STRUCTURE"
+     }
+    }
+   ],
+   "text": "A building: never activates and never counts for Supply or markers."
+  },
+  {
+   "id": "omega-network",
+   "name": "Omega Network",
+   "type": "passive",
+   "phase": "any",
+   "effects": [
+    {
+     "op": "altEntry",
+     "kind": "unitBase",
+     "supplyCapPerRound": 2
+    },
+    {
+     "op": "code",
+     "code": "omega-network-recall"
+    }
+   ],
+   "text": "Its base is an entry point for up to 2 Supply a Round, and touching it can send a Unit back to Reserves."
+  }
+ ],
+ "upgrades": [],
+ "cardVersion": "1.04.26",
+ "source": "CS1-Z p.3"
+}

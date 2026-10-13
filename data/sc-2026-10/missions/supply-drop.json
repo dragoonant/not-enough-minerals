@@ -1,0 +1,89 @@
+[
+ {
+  "id": "supply-drop-standard",
+  "name": "Supply Drop",
+  "scale": "standard",
+  "startSupply": 6,
+  "escalation": 2,
+  "gameLength": 5,
+  "specialWinLead": 12,
+  "markerStart": "deactivated",
+  "startOfRound": [
+   {
+    "rounds": [
+     1,
+     2,
+     3,
+     4
+    ],
+    "action": "activateRandom",
+    "markers": [
+     1,
+     2,
+     3,
+     4
+    ]
+   },
+   {
+    "rounds": [
+     5
+    ],
+    "action": "activate",
+    "markers": [
+     5
+    ]
+   }
+  ],
+  "scoring": [
+   {
+    "kind": "supplyDestroyed"
+   },
+   {
+    "kind": "activatedMarkerCash",
+    "fromRound": 1
+   }
+  ],
+  "actions": [],
+  "text": "Markers come alive one per round; cash a live marker you hold for the round number it woke in, then it leaves the table.",
+  "cardVersion": "1.04.26",
+  "source": "CS1-T p.11"
+ },
+ {
+  "id": "supply-drop-skirmish",
+  "name": "Supply Drop",
+  "scale": "skirmish",
+  "startSupply": 4,
+  "escalation": 1,
+  "gameLength": 4,
+  "specialWinLead": 8,
+  "markerStart": "deactivated",
+  "startOfRound": [
+   {
+    "rounds": [
+     2,
+     3,
+     4
+    ],
+    "action": "activateRandom",
+    "markers": [
+     1,
+     2,
+     5
+    ]
+   }
+  ],
+  "scoring": [
+   {
+    "kind": "supplyDestroyed"
+   },
+   {
+    "kind": "activatedMarkerCash",
+    "fromRound": 2
+   }
+  ],
+  "actions": [],
+  "text": "One marker wakes at random each round from round 2; cash a live marker you hold for its wake-up round, then it is removed.",
+  "cardVersion": "1.04.26",
+  "source": "CS1-T p.11"
+ }
+]

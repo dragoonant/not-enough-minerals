@@ -1,0 +1,86 @@
+{
+  "id": "malignant-creep",
+  "name": "Malignant Creep",
+  "kind": "creep",
+  "race": "zerg",
+  "factionTags": [
+    "zerg",
+    "kerrigans-swarm"
+  ],
+  "unique": true,
+  "slots": {},
+  "resource": null,
+  "abilities": [
+    {
+      "id": "creep-removal",
+      "name": "Creep Removal",
+      "type": "passive",
+      "phase": "any",
+      "effects": [
+        {
+          "op": "code",
+          "code": "creep-tumor-removal",
+          "args": {
+            "actions": [
+              "move",
+              "deploy",
+              "run",
+              "charge",
+              "disengage"
+            ]
+          }
+        }
+      ],
+      "text": "An enemy finishing a move, deploy, run, charge or disengage within 1 inch of a friendly Creep Tumor destroys that tumor."
+    },
+    {
+      "id": "living-glob-of-tissue",
+      "name": "Living Glob of Tissue",
+      "type": "passive",
+      "phase": "any",
+      "effects": [
+        {
+          "op": "grantKeyword",
+          "kw": {
+            "kw": "STAY_IN_PLAY"
+          },
+          "to": "tokenArea"
+        },
+        {
+          "op": "grantKeyword",
+          "kw": {
+            "kw": "DISPLACEMENT"
+          },
+          "to": "tokenArea"
+        }
+      ],
+      "text": "Creep Tumors stay in play and can be displaced."
+    },
+    {
+      "id": "malevolent-matriarch",
+      "name": "Malevolent Matriarch",
+      "type": "passive",
+      "phase": "assault",
+      "trigger": {
+        "event": "declareCharge",
+        "who": "friendly"
+      },
+      "effects": [
+        {
+          "op": "rollMod",
+          "roll": "impactHit",
+          "delta": 1,
+          "to": "triggerUnit",
+          "when": {
+            "race": "zerg",
+            "onCreep": true
+          },
+          "duration": "endOfActivation"
+        }
+      ],
+      "text": "A friendly Zerg Unit charging from Creep gets +1 on IMPACT hit rolls."
+    }
+  ],
+  "cardVersion": "1.04.26",
+  "source": "CS1-Z p.14"
+}

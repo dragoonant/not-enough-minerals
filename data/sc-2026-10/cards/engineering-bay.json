@@ -1,0 +1,77 @@
+{
+  "id": "engineering-bay",
+  "name": "Engineering Bay",
+  "kind": "tactical",
+  "race": "terran",
+  "factionTags": [
+    "terran"
+  ],
+  "unique": false,
+  "slots": {
+    "core": 1
+  },
+  "resource": {
+    "res": "CP",
+    "n": 1
+  },
+  "abilities": [
+    {
+      "id": "infantry-weapons",
+      "name": "Infantry Weapons",
+      "type": "active",
+      "phase": "assault",
+      "target": {
+        "kind": "activeUnit",
+        "filter": {
+          "tags": [
+            "biological"
+          ]
+        }
+      },
+      "effects": [
+        {
+          "op": "grantKeyword",
+          "kw": {
+            "kw": "CRITICAL_HIT",
+            "x": 1
+          },
+          "to": {
+            "phase": "assault",
+            "first": true
+          },
+          "duration": "endOfActivation"
+        }
+      ],
+      "text": "A biological Unit adds CRITICAL HIT 1 to its first ranged weapon used."
+    },
+    {
+      "id": "infantry-armor",
+      "name": "Infantry Armor",
+      "type": "reaction",
+      "phase": "any",
+      "trigger": {
+        "event": "beforeArmourRoll",
+        "subject": "friendly",
+        "filter": {
+          "tags": [
+            "biological"
+          ]
+        }
+      },
+      "effects": [
+        {
+          "op": "grantKeyword",
+          "kw": {
+            "kw": "TOUGH",
+            "x": 1
+          },
+          "to": "triggerUnit",
+          "duration": "thisRoll"
+        }
+      ],
+      "text": "A biological friend gets TOUGH 1 on one armour roll."
+    }
+  ],
+  "cardVersion": "1.04.26",
+  "source": "CS1-T p.8"
+}

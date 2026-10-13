@@ -1,0 +1,244 @@
+{
+ "id": "hydralisk",
+ "name": "Hydralisk",
+ "race": "zerg",
+ "factionTags": [
+  "zerg"
+ ],
+ "unique": false,
+ "role": "Damage Dealer",
+ "slot": "elite",
+ "summoned": false,
+ "combatTags": [
+  "biological",
+  "light",
+  "ground"
+ ],
+ "stats": {
+  "shield": null,
+  "speed": [
+   4,
+   8
+  ],
+  "armour": 5,
+  "evade": 5,
+  "hp": 4,
+  "size": 2
+ },
+ "baseMm": [
+  40,
+  100
+ ],
+ "supplyProfile": [
+  {
+   "min": 1,
+   "max": 1,
+   "supply": 1
+  },
+  {
+   "min": 2,
+   "max": 2,
+   "supply": 2
+  },
+  {
+   "min": 3,
+   "max": 4,
+   "supply": 3
+  }
+ ],
+ "weapons": [
+  {
+   "id": "needle-spines",
+   "name": "Needle Spines",
+   "phase": "assault",
+   "range": 12,
+   "target": "all",
+   "roa": 3,
+   "hit": 3,
+   "surgeTypes": [
+    "light",
+    "armoured"
+   ],
+   "sDice": "D3+1",
+   "dmg": 2,
+   "keywords": []
+  },
+  {
+   "id": "scythe",
+   "name": "Scythe",
+   "phase": "combat",
+   "range": "E",
+   "target": "ground",
+   "roa": 2,
+   "hit": 4,
+   "surgeTypes": [],
+   "sDice": null,
+   "dmg": 1,
+   "keywords": []
+  }
+ ],
+ "abilities": [
+  {
+   "id": "squadron",
+   "name": "Squadron",
+   "type": "passive",
+   "phase": "any",
+   "effects": [
+    {
+     "op": "coherency",
+     "d": 4
+    }
+   ],
+   "text": "Models stay in coherency at up to 4 inches apart."
+  },
+  {
+   "id": "lunge",
+   "name": "Lunge",
+   "type": "reaction",
+   "phase": "assault",
+   "cost": {
+    "res": "BM",
+    "n": 1
+   },
+   "trigger": {
+    "event": "attackResolved",
+    "who": "enemy",
+    "attack": "ranged",
+    "subject": "otherFriendly",
+    "within": 10
+   },
+   "requires": {
+    "engaged": false
+   },
+   "effects": [
+    {
+     "op": "move",
+     "kind": "move",
+     "towards": "attacker"
+    }
+   ],
+   "text": "After a friend nearby is shot, surge toward the shooter."
+  }
+ ],
+ "upgrades": [
+  {
+   "id": "ancillary-carapace",
+   "name": "Ancillary Carapace",
+   "phase": "any",
+   "ability": {
+    "id": "ancillary-carapace",
+    "name": "Ancillary Carapace",
+    "type": "passive",
+    "phase": "any",
+    "trigger": {
+     "event": "beforeArmourRoll",
+     "subject": "self"
+    },
+    "effects": [
+     {
+      "op": "grantKeyword",
+      "kw": {
+       "kw": "TOUGH",
+       "x": 1
+      },
+      "when": {
+       "first": "activation"
+      },
+      "duration": "thisRoll"
+     }
+    ],
+    "text": "TOUGH 1 on its first Armour Roll each activation."
+   }
+  },
+  {
+   "id": "lurking",
+   "name": "Lurking",
+   "phase": "any",
+   "ability": {
+    "id": "lurking",
+    "name": "Lurking",
+    "type": "passive",
+    "phase": "any",
+    "effects": [
+     {
+      "op": "canEvade",
+      "vs": [
+       "ranged"
+      ],
+      "when": {
+       "status": [
+        "STATIONARY"
+       ],
+       "first": "round"
+      }
+     },
+     {
+      "op": "rollMod",
+      "roll": "evade",
+      "delta": 1,
+      "when": {
+       "status": [
+        "STATIONARY"
+       ],
+       "first": "round",
+       "onCreep": true
+      }
+     }
+    ],
+    "text": "Standing still, it may Evade the first shot each Round, better on Creep."
+   }
+  },
+  {
+   "id": "burrow-ambush",
+   "name": "Burrow Ambush",
+   "phase": "movement",
+   "ability": {
+    "id": "burrow-ambush",
+    "name": "Burrow Ambush",
+    "type": "passive",
+    "phase": "movement",
+    "trigger": {
+     "event": "nominatedToDeploy"
+    },
+    "endsActivation": true,
+    "effects": [
+     {
+      "op": "place",
+      "x": 18,
+      "from": "entryEdge",
+      "minEnemyDist": 10
+     }
+    ],
+    "text": "Arrives from Reserves up to 18 inches in from its edge, 10 inches clear of enemies."
+   }
+  },
+  {
+   "id": "grooved-spines",
+   "name": "Grooved Spines",
+   "phase": "assault",
+   "ability": {
+    "id": "grooved-spines",
+    "name": "Grooved Spines",
+    "type": "passive",
+    "phase": "assault",
+    "effects": [
+     {
+      "op": "grantKeyword",
+      "kw": {
+       "kw": "LONG_RANGE",
+       "x": 16
+      },
+      "to": {
+       "ids": [
+        "needle-spines"
+       ]
+      }
+     }
+    ],
+    "text": "Needle Spines reach 16 inches."
+   }
+  }
+ ],
+ "cardVersion": "1.03.26",
+ "source": "CS1-Z p.1"
+}

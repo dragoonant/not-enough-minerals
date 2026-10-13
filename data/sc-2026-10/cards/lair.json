@@ -1,0 +1,67 @@
+{
+  "id": "lair",
+  "name": "Lair",
+  "kind": "tactical",
+  "race": "zerg",
+  "factionTags": [
+    "zerg"
+  ],
+  "unique": true,
+  "slots": {
+    "core": 1,
+    "elite": 1
+  },
+  "resource": {
+    "res": "BM",
+    "n": 1
+  },
+  "abilities": [
+    {
+      "id": "creep-spread",
+      "name": "Creep Spread",
+      "type": "active",
+      "phase": "movement",
+      "effects": [
+        {
+          "op": "code",
+          "code": "creep-tumor-spawn"
+        }
+      ],
+      "text": "Drop a Creep Tumor within 6 inches of a friendly entry edge or tumor, no sight needed."
+    },
+    {
+      "id": "predation",
+      "name": "Predation",
+      "type": "active",
+      "phase": "any",
+      "target": {
+        "kind": "activeUnit"
+      },
+      "effects": [
+        {
+          "op": "grantKeyword",
+          "kw": {
+            "kw": "INSTANT"
+          },
+          "to": {
+            "phase": "combat",
+            "all": true
+          },
+          "duration": "endOfActivation"
+        }
+      ],
+      "text": "All melee weapons of the active Unit gain INSTANT."
+    }
+  ],
+  "tokens": [
+    {
+      "id": "creep-tumor",
+      "name": "Creep Tumor",
+      "baseMm": null,
+      "size": null,
+      "text": "A marker that spreads Creep; further tumors can be dropped near it."
+    }
+  ],
+  "cardVersion": "1.04.26",
+  "source": "CS1-Z p.15"
+}

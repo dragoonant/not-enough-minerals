@@ -1,0 +1,246 @@
+{
+  "id": "medic",
+  "name": "Medic",
+  "race": "terran",
+  "factionTags": [
+    "terran"
+  ],
+  "unique": false,
+  "role": "Lifesaver",
+  "slot": "support",
+  "summoned": false,
+  "combatTags": [
+    "biological",
+    "light",
+    "ground"
+  ],
+  "stats": {
+    "shield": null,
+    "speed": [
+      4,
+      7
+    ],
+    "armour": 5,
+    "evade": 5,
+    "hp": 2,
+    "size": 2
+  },
+  "baseMm": 32,
+  "supplyProfile": [
+    {
+      "min": 1,
+      "max": 1,
+      "supply": 0
+    },
+    {
+      "min": 2,
+      "max": 3,
+      "supply": 1
+    }
+  ],
+  "weapons": [
+    {
+      "id": "strike",
+      "name": "Strike",
+      "phase": "combat",
+      "range": "E",
+      "target": "ground",
+      "roa": 1,
+      "hit": 5,
+      "surgeTypes": [],
+      "sDice": null,
+      "dmg": 1,
+      "keywords": []
+    }
+  ],
+  "abilities": [
+    {
+      "id": "life-support",
+      "name": "Life Support",
+      "type": "reaction",
+      "phase": "any",
+      "cost": {
+        "res": "CP",
+        "n": 1
+      },
+      "trigger": {
+        "event": "damageSuffered",
+        "subject": "otherFriendly",
+        "within": 4,
+        "filter": {
+          "tags": [
+            "biological"
+          ]
+        }
+      },
+      "effects": [
+        {
+          "op": "damageReduce",
+          "n": {
+            "count": "ownModelsWithinTarget",
+            "d": 4
+          },
+          "to": "triggerUnit"
+        }
+      ],
+      "text": "Soak 1 damage per medic near a wounded biological friend."
+    },
+    {
+      "id": "restoration",
+      "name": "Restoration",
+      "type": "reaction",
+      "phase": "any",
+      "cost": {
+        "res": "CP",
+        "n": 1
+      },
+      "trigger": {
+        "event": "debuffReceived",
+        "subject": "friendly",
+        "within": 4
+      },
+      "effects": [
+        {
+          "op": "cleanse",
+          "what": "debuffs",
+          "to": "triggerUnit"
+        }
+      ],
+      "text": "Strip every debuff from a nearby friend the moment it gets one."
+    },
+    {
+      "id": "medpack",
+      "name": "Medpack",
+      "type": "active",
+      "phase": "movement",
+      "cost": {
+        "res": "CP",
+        "n": 1
+      },
+      "target": {
+        "kind": "otherFriendlyUnit",
+        "range": 4,
+        "filter": {
+          "tags": [
+            "biological"
+          ]
+        }
+      },
+      "effects": [
+        {
+          "op": "heal",
+          "x": {
+            "count": "ownModelsWithinTarget",
+            "d": 4
+          }
+        }
+      ],
+      "text": "Heal a nearby biological friend by 1 per medic close to it."
+    },
+    {
+      "id": "optical-flare",
+      "name": "Optical Flare",
+      "type": "active",
+      "phase": "movement",
+      "cost": {
+        "res": "CP",
+        "n": 2
+      },
+      "target": {
+        "kind": "enemyUnit",
+        "range": 12
+      },
+      "effects": [
+        {
+          "op": "debuff",
+          "char": "range",
+          "x": 4,
+          "weapons": {
+            "phase": "assault"
+          }
+        },
+        {
+          "op": "denyKeyword",
+          "kw": "LONG_RANGE",
+          "duration": "endOfRound"
+        }
+      ],
+      "text": "Blind an enemy within 12 inches: -4 range on its guns and no LONG RANGE this Round."
+    }
+  ],
+  "upgrades": [
+    {
+      "id": "advanced-medic-facilities",
+      "name": "Advanced Medic Facilities",
+      "phase": "any",
+      "ability": {
+        "id": "advanced-medic-facilities",
+        "name": "Advanced Medic Facilities",
+        "type": "passive",
+        "phase": "any",
+        "effects": [
+          {
+            "op": "supplyOverride",
+            "purposes": [
+              "pool"
+            ],
+            "value": 0
+          }
+        ],
+        "text": "Medics take no room in the Supply Pool."
+      }
+    },
+    {
+      "id": "a-13-flash-grenade-launcher",
+      "name": "A-13 Flash Grenade Launcher",
+      "phase": "any",
+      "ability": {
+        "id": "a-13-flash-grenade-launcher",
+        "name": "A-13 Flash Grenade Launcher",
+        "type": "passive",
+        "phase": "any",
+        "effects": [
+          {
+            "op": "abilityMod",
+            "ability": "optical-flare",
+            "field": "target.range",
+            "value": 16
+          }
+        ],
+        "text": "Optical Flare reaches 16 inches."
+      }
+    },
+    {
+      "id": "stabilizer-medpacks",
+      "name": "Stabilizer Medpacks",
+      "phase": "any",
+      "ability": {
+        "id": "stabilizer-medpacks",
+        "name": "Stabilizer Medpacks",
+        "type": "passive",
+        "phase": "any",
+        "effects": [
+          {
+            "op": "abilityMod",
+            "ability": "life-support",
+            "field": "count.plus",
+            "delta": 1
+          },
+          {
+            "op": "abilityMod",
+            "ability": "medpack",
+            "field": "count.plus",
+            "delta": 1
+          }
+        ],
+        "text": "Life Support and Medpack count one extra medic."
+      }
+    }
+  ],
+  "cardVersion": "1.04.26",
+  "source": [
+    "CS1-T p.3",
+    "CT p.2",
+    "CL p.2"
+  ]
+}

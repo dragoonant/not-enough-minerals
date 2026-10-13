@@ -1,0 +1,61 @@
+{
+  "id": "robotics-facility",
+  "name": "Robotics Facility",
+  "kind": "tactical",
+  "race": "protoss",
+  "factionTags": [
+    "protoss"
+  ],
+  "unique": false,
+  "slots": {
+    "elite": 2
+  },
+  "resource": {
+    "res": "PE",
+    "n": 1
+  },
+  "abilities": [
+    {
+      "id": "plasma-shields",
+      "name": "Plasma Shields",
+      "type": "reaction",
+      "phase": "any",
+      "trigger": {
+        "event": "beforeArmourRoll",
+        "subject": "friendly",
+        "filter": {
+          "tags": [
+            "mechanical",
+            "ground"
+          ],
+          "status": [
+            "SHIELDED"
+          ]
+        }
+      },
+      "effects": [
+        {
+          "op": "grantKeyword",
+          "kw": {
+            "kw": "TOUGH",
+            "x": 1
+          },
+          "to": "triggerUnit",
+          "duration": "thisRoll"
+        },
+        {
+          "op": "grantKeyword",
+          "kw": {
+            "kw": "DODGE",
+            "x": 1
+          },
+          "to": "triggerUnit",
+          "duration": "thisRoll"
+        }
+      ],
+      "text": "A shielded mechanical ground friend gets TOUGH 1 and DODGE 1 on one armour roll."
+    }
+  ],
+  "cardVersion": "1.06.26",
+  "source": "CS2-P p.4"
+}

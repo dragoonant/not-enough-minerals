@@ -1,0 +1,182 @@
+{
+  "id": "praetor-guard",
+  "name": "Praetor Guard (Zealot)",
+  "race": "protoss",
+  "factionTags": [
+    "protoss",
+    "khalai"
+  ],
+  "unique": true,
+  "role": "Damage Dealer",
+  "slot": "elite",
+  "summoned": false,
+  "combatTags": [
+    "biological",
+    "light",
+    "ground"
+  ],
+  "stats": {
+    "shield": 3,
+    "speed": [
+      4,
+      7
+    ],
+    "armour": 5,
+    "evade": 5,
+    "hp": 4,
+    "size": 2
+  },
+  "baseMm": 40,
+  "supplyProfile": [
+    {
+      "min": 1,
+      "max": 1,
+      "supply": 1
+    },
+    {
+      "min": 2,
+      "max": 3,
+      "supply": 2
+    }
+  ],
+  "weapons": [
+    {
+      "id": "psi-blades",
+      "name": "Psi Blades",
+      "phase": "combat",
+      "range": "E",
+      "target": "ground",
+      "roa": 4,
+      "hit": 3,
+      "surgeTypes": [
+        "light"
+      ],
+      "sDice": "D3",
+      "dmg": 1,
+      "keywords": []
+    }
+  ],
+  "abilities": [
+    {
+      "id": "shield-overcharge",
+      "name": "Shield Overcharge",
+      "type": "passive",
+      "phase": "any",
+      "trigger": {
+        "event": "beforeArmourRoll",
+        "subject": "self"
+      },
+      "effects": [
+        {
+          "op": "grantKeyword",
+          "kw": {
+            "kw": "TOUGH",
+            "x": 2
+          },
+          "when": {
+            "first": "round"
+          },
+          "duration": "thisRoll"
+        }
+      ],
+      "text": "TOUGH 2 on its first Armour Roll each Round."
+    },
+    {
+      "id": "leg-enhancements",
+      "name": "Leg Enhancements",
+      "type": "active",
+      "phase": "movement",
+      "cost": {
+        "res": "PE",
+        "n": 1
+      },
+      "effects": [
+        {
+          "op": "move",
+          "kind": "move",
+          "x": 2,
+          "freeAction": true
+        }
+      ],
+      "text": "A free 2 inch Move outside the action limit."
+    },
+    {
+      "id": "charge",
+      "name": "Charge",
+      "type": "active",
+      "phase": "assault",
+      "cost": {
+        "res": "PE",
+        "n": 1
+      },
+      "effects": [
+        {
+          "op": "charge",
+          "dice": "best2D6"
+        }
+      ],
+      "text": "Charge distance uses the best of two dice."
+    },
+    {
+      "id": "devastating-charge",
+      "name": "Devastating Charge",
+      "type": "passive",
+      "phase": "assault",
+      "trigger": {
+        "event": "chargeSucceeded"
+      },
+      "effects": [
+        {
+          "op": "impact",
+          "x": 3,
+          "y": 4
+        }
+      ],
+      "text": "After a successful Charge, IMPACT (3) 4+."
+    },
+    {
+      "id": "titan-killers",
+      "name": "Titan Killers",
+      "type": "passive",
+      "phase": "combat",
+      "effects": [
+        {
+          "op": "setChar",
+          "char": "dmg",
+          "value": 2,
+          "when": {
+            "attack": "closeCombat",
+            "targetSize": {
+              "min": 3
+            }
+          },
+          "duration": "thisAttack"
+        }
+      ],
+      "text": "Melee damage 2 against Size 3 or bigger."
+    },
+    {
+      "id": "precognition",
+      "name": "Precognition",
+      "type": "passive",
+      "phase": "combat",
+      "effects": [
+        {
+          "op": "canEvade",
+          "vs": [
+            "all"
+          ]
+        }
+      ],
+      "text": "May Evade any attack."
+    }
+  ],
+  "upgrades": [],
+  "cardVersion": "1.04.26",
+  "source": [
+    "CS1-P p.3",
+    "CT p.7",
+    "CL p.2"
+  ],
+  "variantOf": "zealot"
+}

@@ -1,0 +1,77 @@
+{
+  "id": "forge",
+  "name": "Forge",
+  "kind": "tactical",
+  "race": "protoss",
+  "factionTags": [
+    "protoss"
+  ],
+  "unique": false,
+  "slots": {
+    "elite": 1
+  },
+  "resource": {
+    "res": "PE",
+    "n": 1
+  },
+  "abilities": [
+    {
+      "id": "ground-weapons",
+      "name": "Ground Weapons",
+      "type": "active",
+      "phase": "assault",
+      "target": {
+        "kind": "activeUnit",
+        "filter": {
+          "tags": [
+            "ground"
+          ]
+        }
+      },
+      "effects": [
+        {
+          "op": "grantKeyword",
+          "kw": {
+            "kw": "CRITICAL_HIT",
+            "x": 1
+          },
+          "to": {
+            "phase": "assault",
+            "first": true
+          },
+          "duration": "endOfActivation"
+        }
+      ],
+      "text": "A ground Unit adds CRITICAL HIT 1 to its first ranged weapon used."
+    },
+    {
+      "id": "ground-armor",
+      "name": "Ground Armor",
+      "type": "reaction",
+      "phase": "any",
+      "trigger": {
+        "event": "beforeArmourRoll",
+        "subject": "friendly",
+        "filter": {
+          "tags": [
+            "ground"
+          ]
+        }
+      },
+      "effects": [
+        {
+          "op": "grantKeyword",
+          "kw": {
+            "kw": "TOUGH",
+            "x": 1
+          },
+          "to": "triggerUnit",
+          "duration": "thisRoll"
+        }
+      ],
+      "text": "A ground friend gets TOUGH 1 on one armour roll."
+    }
+  ],
+  "cardVersion": "1.04.26",
+  "source": "CS1-P p.10"
+}

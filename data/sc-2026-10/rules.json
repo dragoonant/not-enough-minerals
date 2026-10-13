@@ -1,0 +1,39 @@
+{
+  "id": "rules",
+  "source": ["R", "CL p.1-2", "F"],
+  "engagementRange": { "value": 1, "source": "R p.55 7.2" },
+  "coherency": { "value": 3, "source": "R p.37 4.4" },
+  "contestRange": { "value": 3, "source": ["R p.71 8.9.1", "F p.2"] },
+  "hiddenRange": { "value": 4, "source": "R p.93 VISIBLE" },
+  "zoiDepth": { "value": 6, "source": ["R p.45 5.6", "R p.93 ZONE OF INFLUENCE"] },
+  "gapClearance": { "value": { "small": 1, "large": 3, "largeFromSize": 3 }, "source": ["R p.39 4.6", "F p.2"] },
+  "tnClamp": { "value": [2, 6], "source": ["R p.33 3.4", "F p.3"] },
+  "maxRerollsPerDie": { "value": 1, "source": "QS p.3" },
+  "closeRanksMax": { "value": 3, "source": "R p.69 8.8.1" },
+  "eliminationVP": { "value": 10, "source": "R p.74 8.9.3" },
+  "markerDiameterMm": { "value": 32, "source": ["R p.55 7.3.2", "R p.71 8.9.1"] },
+  "baseSizesMm": { "value": [25, 32, 40, 50, 80, 100, 150], "source": ["CS1-T", "CS1-Z", "CS1-P", "CS2-T p.1", "CS2-P p.1"] },
+  "scales": {
+    "value": {
+      "skirmish": { "minerals": 1000, "gasPct": 10, "table": { "w": 36, "h": 36 } },
+      "standard": { "minerals": 2000, "gasPct": 10, "table": { "w": 54, "h": 36 } },
+      "grand-offensive": { "minerals": null, "gasPct": 10, "table": { "w": 72, "h": 36 } }
+    },
+    "source": ["R p.75 9.1.1", "CS1-T p.13-14"]
+  },
+  "factionTags": {
+    "value": {
+      "terran": "Terran", "zerg": "Zerg", "protoss": "Protoss",
+      "raynors-raiders": "Raynor's Raiders", "kerrigans-swarm": "Kerrigan's Swarm",
+      "khalai": "Khalai", "nerazim": "Nerazim"
+    },
+    "source": ["CS1-T p.5-6", "CS1-T p.9", "CS1-Z p.3-4", "CS1-P p.3-4", "CS2-P p.3-4"]
+  },
+  "claimTiming": {
+    "value": { "phase": "scoring", "markerMustBeControlled": true, "order": "after control, before VP" },
+    "source": ["CS2-P p.5"]
+  },
+  "tokens": [
+    { "id": "faction-indicator", "name": "Faction Indicator", "baseMm": null, "size": null, "text": "A marker some abilities drop on the table to anchor an area or an arrival point." }
+  ]
+}

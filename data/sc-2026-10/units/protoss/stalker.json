@@ -1,0 +1,165 @@
+{
+  "id": "stalker",
+  "name": "Stalker",
+  "race": "protoss",
+  "factionTags": [
+    "protoss"
+  ],
+  "unique": false,
+  "role": "Damage Dealer",
+  "slot": "elite",
+  "summoned": false,
+  "combatTags": [
+    "armoured",
+    "mechanical",
+    "ground"
+  ],
+  "stats": {
+    "shield": 3,
+    "speed": [
+      4,
+      8
+    ],
+    "armour": 4,
+    "evade": 6,
+    "hp": 6,
+    "size": 3
+  },
+  "baseMm": 80,
+  "supplyProfile": [
+    {
+      "min": 1,
+      "max": 1,
+      "supply": 1
+    },
+    {
+      "min": 2,
+      "max": 2,
+      "supply": 2
+    }
+  ],
+  "weapons": [
+    {
+      "id": "particle-disruptors",
+      "name": "Particle Disruptors",
+      "phase": "assault",
+      "range": 12,
+      "target": "all",
+      "roa": 4,
+      "hit": 3,
+      "surgeTypes": [
+        "armoured"
+      ],
+      "sDice": "D3",
+      "dmg": 2,
+      "keywords": []
+    },
+    {
+      "id": "stomp",
+      "name": "Stomp",
+      "phase": "combat",
+      "range": "E",
+      "target": "ground",
+      "roa": 2,
+      "hit": 5,
+      "surgeTypes": [],
+      "sDice": null,
+      "dmg": 1,
+      "keywords": []
+    }
+  ],
+  "abilities": [
+    {
+      "id": "squadron",
+      "name": "Squadron",
+      "type": "passive",
+      "phase": "any",
+      "effects": [
+        {
+          "op": "coherency",
+          "d": 4
+        }
+      ],
+      "text": "Horizontal Coherency between models is 4 inches (vertical stays normal)."
+    },
+    {
+      "id": "blink",
+      "name": "Blink",
+      "type": "active",
+      "phase": "movement",
+      "cost": {
+        "res": "PE",
+        "n": 1
+      },
+      "effects": [
+        {
+          "op": "place",
+          "x": 6,
+          "notInEngagement": true
+        }
+      ],
+      "text": "Teleport up to 6 inches, never into melee."
+    }
+  ],
+  "upgrades": [
+    {
+      "id": "path-of-shadows",
+      "name": "Path of Shadows",
+      "phase": "any",
+      "ability": {
+        "id": "path-of-shadows",
+        "name": "Path of Shadows",
+        "type": "active",
+        "phase": "any",
+        "cost": {
+          "res": "PE",
+          "n": 1
+        },
+        "effects": [
+          {
+            "op": "status",
+            "status": "HIDDEN",
+            "mode": "gain",
+            "duration": "untilNextAction"
+          }
+        ],
+        "text": "Turns Hidden until its next action."
+      }
+    },
+    {
+      "id": "fury-of-the-nerazim",
+      "name": "Fury of the Nerazim",
+      "phase": "assault",
+      "ability": {
+        "id": "fury-of-the-nerazim",
+        "name": "Fury of the Nerazim",
+        "type": "passive",
+        "phase": "assault",
+        "effects": [
+          {
+            "op": "grantKeyword",
+            "kw": {
+              "kw": "INSTANT"
+            },
+            "to": {
+              "ids": [
+                "particle-disruptors"
+              ]
+            },
+            "when": {
+              "targetActivated": true
+            },
+            "duration": "thisAttack"
+          }
+        ],
+        "text": "INSTANT against enemies that already acted this Phase."
+      }
+    }
+  ],
+  "cardVersion": "1.03.26",
+  "source": [
+    "CS1-P p.6",
+    "CT p.7",
+    "CL p.2"
+  ]
+}

@@ -1,0 +1,102 @@
+[
+ {
+  "id": "artefact-hunt-standard",
+  "name": "Artefact Hunt",
+  "scale": "standard",
+  "startSupply": 6,
+  "escalation": 2,
+  "gameLength": 5,
+  "specialWinLead": null,
+  "markerStart": "activated",
+  "startOfRound": [],
+  "scoring": [
+   {
+    "kind": "supplyDestroyed"
+   },
+   {
+    "kind": "claimCarriedInZone",
+    "rounds": [
+     5
+    ],
+    "vp": 4
+   },
+   {
+    "kind": "ownMarkersNotClaimed",
+    "rounds": [
+     5
+    ],
+    "vp": 2
+   }
+  ],
+  "actions": [],
+  "claim": {
+   "fromRound": 2,
+   "within": 3,
+   "markerSides": [
+    "neutral",
+    "opponent"
+   ],
+   "maxPerUnit": 1,
+   "dropOn": [
+    "supplyDrop",
+    "beforePlace",
+    "outmassedEngaged",
+    "leftTable"
+   ],
+   "dropWithin": 2
+  },
+  "text": "From round 2 Units can lift held markers and carry them; in round 5 carriers inside their own zone score 4 VP and your uncarried colour markers score 2 VP each.",
+  "cardVersion": "1.06.26",
+  "source": "CS2-P p.5"
+ },
+ {
+  "id": "artefact-hunt-skirmish",
+  "name": "Artefact Hunt",
+  "scale": "skirmish",
+  "startSupply": 3,
+  "escalation": 1,
+  "gameLength": 5,
+  "specialWinLead": null,
+  "markerStart": "activated",
+  "startOfRound": [],
+  "scoring": [
+   {
+    "kind": "supplyDestroyed"
+   },
+   {
+    "kind": "claimCarriedInZone",
+    "rounds": [
+     5
+    ],
+    "vp": 3
+   },
+   {
+    "kind": "ownMarkersNotClaimed",
+    "rounds": [
+     5
+    ],
+    "vp": 1
+   }
+  ],
+  "actions": [],
+  "claim": {
+   "fromRound": 2,
+   "within": 3,
+   "markerSides": [
+    "neutral",
+    "opponent"
+   ],
+   "maxPerUnit": 1,
+   "dropOn": [
+    "supplyDrop",
+    "beforePlace",
+    "outmassedEngaged",
+    "leftTable"
+   ],
+   "dropWithin": 2
+  },
+  "text": "From round 2 Units can lift held markers and carry them; in round 5 carriers inside their own zone score 3 VP and your uncarried colour markers score 1 VP each.",
+  "cardVersion": "1.06.26",
+  "source": "CS2-P p.5"
+ }
+]

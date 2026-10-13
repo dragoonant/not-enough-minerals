@@ -1,0 +1,188 @@
+{
+  "id": "artanis",
+  "name": "Artanis",
+  "race": "protoss",
+  "factionTags": [
+    "protoss"
+  ],
+  "unique": true,
+  "role": "Tank",
+  "slot": "hero",
+  "summoned": false,
+  "combatTags": [
+    "biological",
+    "psionic",
+    "ground"
+  ],
+  "stats": {
+    "shield": 4,
+    "speed": 7,
+    "armour": 4,
+    "evade": 5,
+    "hp": 8,
+    "size": 2
+  },
+  "baseMm": 40,
+  "supplyProfile": [
+    {
+      "min": 1,
+      "max": 1,
+      "supply": 1
+    }
+  ],
+  "weapons": [
+    {
+      "id": "twilight-blades-strike",
+      "name": "Twilight Blades Strike",
+      "phase": "combat",
+      "range": "E",
+      "target": "ground",
+      "roa": 2,
+      "hit": 2,
+      "surgeTypes": [
+        "armoured"
+      ],
+      "sDice": "D3",
+      "dmg": 3,
+      "keywords": []
+    },
+    {
+      "id": "twilight-blades-sweep",
+      "name": "Twilight Blades Sweep",
+      "phase": "combat",
+      "range": "E",
+      "target": "ground",
+      "roa": 6,
+      "hit": 2,
+      "surgeTypes": [
+        "light"
+      ],
+      "sDice": "D3+1",
+      "dmg": 1,
+      "keywords": []
+    }
+  ],
+  "abilities": [
+    {
+      "id": "commander",
+      "name": "Commander",
+      "type": "passive",
+      "phase": "any",
+      "effects": [
+        {
+          "op": "supplyOverride",
+          "purposes": [
+            "control",
+            "contest",
+            "objectives",
+            "disengage"
+          ],
+          "delta": 1
+        }
+      ],
+      "text": "Counts one extra Supply for markers, objectives and Disengage checks."
+    },
+    {
+      "id": "phase-prism",
+      "name": "Phase Prism",
+      "type": "passive",
+      "phase": "movement",
+      "trigger": {
+        "event": "nominatedToDeploy"
+      },
+      "endsActivation": true,
+      "target": {
+        "kind": "otherFriendlyUnit"
+      },
+      "effects": [
+        {
+          "op": "place",
+          "x": 0,
+          "from": "friendlyUnit",
+          "optional": true
+        },
+        {
+          "op": "returnToReserves",
+          "to": "target"
+        }
+      ],
+      "text": "Arrive beside a friendly Unit, which is sent back to Reserves, if you choose to."
+    },
+    {
+      "id": "lightning-dash",
+      "name": "Lightning Dash",
+      "type": "reaction",
+      "phase": "assault",
+      "cost": {
+        "res": "PE",
+        "n": 1
+      },
+      "trigger": {
+        "event": "chargeSucceeded"
+      },
+      "effects": [
+        {
+          "op": "chargeAgain",
+          "differentTarget": true,
+          "ignoreEngaged": true,
+          "noImpact": true
+        }
+      ],
+      "text": "After a good Charge, charge a second enemy without a second impact."
+    },
+    {
+      "id": "hierarchs-stand",
+      "name": "Hierarch's Stand",
+      "type": "reaction",
+      "phase": "assault",
+      "cost": {
+        "res": "PE",
+        "n": 1
+      },
+      "trigger": {
+        "event": "targeted",
+        "attack": "ranged",
+        "subject": "otherFriendly",
+        "within": 8
+      },
+      "effects": [
+        {
+          "op": "code",
+          "code": "redirect-attack"
+        },
+        {
+          "op": "canEvade",
+          "vs": [
+            "all"
+          ],
+          "duration": "endOfActivation"
+        }
+      ],
+      "text": "If Artanis is a legal target for the shot, he takes it in place of a nearby friend and may Evade it."
+    },
+    {
+      "id": "devastating-charge",
+      "name": "Devastating Charge",
+      "type": "passive",
+      "phase": "assault",
+      "trigger": {
+        "event": "chargeSucceeded"
+      },
+      "effects": [
+        {
+          "op": "impact",
+          "x": 6,
+          "y": 4
+        }
+      ],
+      "text": "After a successful Charge, IMPACT (6) 4+."
+    }
+  ],
+  "upgrades": [],
+  "cardVersion": "1.04.26",
+  "source": [
+    "CS1-P p.2",
+    "CT p.7",
+    "CL p.2"
+  ]
+}

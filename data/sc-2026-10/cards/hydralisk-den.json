@@ -1,0 +1,45 @@
+{
+  "id": "hydralisk-den",
+  "name": "Hydralisk Den",
+  "kind": "tactical",
+  "race": "zerg",
+  "factionTags": [
+    "zerg"
+  ],
+  "unique": false,
+  "slots": {
+    "elite": 2
+  },
+  "resource": {
+    "res": "BM",
+    "n": 1
+  },
+  "abilities": [
+    {
+      "id": "missile-attacks",
+      "name": "Missile Attacks",
+      "type": "active",
+      "phase": "assault",
+      "target": {
+        "kind": "activeUnit"
+      },
+      "effects": [
+        {
+          "op": "grantKeyword",
+          "kw": {
+            "kw": "PRECISION",
+            "x": 1
+          },
+          "to": {
+            "phase": "assault",
+            "first": true
+          },
+          "duration": "endOfActivation"
+        }
+      ],
+      "text": "The active Unit adds PRECISION 1 to its first ranged weapon used."
+    }
+  ],
+  "cardVersion": "1.03.26",
+  "source": "CS1-Z p.14"
+}

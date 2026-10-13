@@ -5,13 +5,14 @@ import type { EditionBundle, EditionsFile, Kind, KindMap, SingletonMap, Singleto
 
 export * from './types'
 export { buildBundles } from './bundle'
-export { validateBundle, validateEditions, formatError, type ValidationError } from './validate'
+export { validateBundle, validateEditions, formatError, isWarning, type ValidationError } from './validate'
+export { mergedCostTable } from './query'
 
 const modules = import.meta.glob('../../data/**/*.json', { eager: true, import: 'default' }) as Record<string, unknown>
 
 const PREFIX = '../../data/'
 const raw: RawFile[] = Object.entries(modules).map(([p, json]) => ({ path: p.slice(PREFIX.length), json }))
-const editionsFile = (modules[`${PREFIX}editions.json`] as EditionsFile | undefined) ?? { default: 'core', editions: ['core'] }
+const editionsFile = (modules[`${PREFIX}editions.json`] as EditionsFile | undefined) ?? { default: 'sc-2026-10', editions: ['sc-2026-10'] }
 const { bundles } = buildBundles(raw)
 for (const e of editionsFile.editions) bundles[e] ??= emptyBundle(e)
 

@@ -1,0 +1,80 @@
+{
+ "id": "protoss-starter",
+ "name": "Protoss Starter",
+ "scale": "skirmish",
+ "faction": "daelaam",
+ "units": [
+  {
+   "unit": "zealot",
+   "models": 3,
+   "upgrades": [
+    {
+     "id": "my-life-for-aiur"
+    },
+    {
+     "id": "leg-enhancements"
+    },
+    {
+     "id": "we-stand-as-one"
+    }
+   ]
+  },
+  {
+   "unit": "adept",
+   "models": 4,
+   "upgrades": [
+    {
+     "id": "resonating-glaives"
+    },
+    {
+     "id": "glaive-strike"
+    }
+   ]
+  },
+  {
+   "unit": "sentry",
+   "models": 2,
+   "upgrades": [
+    {
+     "id": "solid-field-projectors"
+    },
+    {
+     "id": "hallucination"
+    }
+   ]
+  },
+  {
+   "unit": "stalker",
+   "models": 1,
+   "upgrades": [
+    {
+     "id": "path-of-shadows"
+    },
+    {
+     "id": "fury-of-the-nerazim"
+    }
+   ]
+  },
+  {
+   "unit": "stalker",
+   "models": 1,
+   "upgrades": [
+    {
+     "id": "path-of-shadows"
+    },
+    {
+     "id": "fury-of-the-nerazim"
+    }
+   ]
+  }
+ ],
+ "cards": [
+  "forge",
+  "twilight-council",
+  "observer"
+ ],
+ "source": [
+  "R p.112",
+  "CT p.7-8"
+ ]
+}

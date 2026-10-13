@@ -1,0 +1,286 @@
+{
+  "id": "goliath",
+  "name": "Goliath",
+  "race": "terran",
+  "factionTags": [
+    "terran"
+  ],
+  "unique": false,
+  "role": "Damage Dealer",
+  "slot": "elite",
+  "summoned": false,
+  "combatTags": [
+    "armoured",
+    "mechanical",
+    "ground"
+  ],
+  "stats": {
+    "shield": null,
+    "speed": 7,
+    "armour": 4,
+    "evade": null,
+    "hp": 10,
+    "size": 3
+  },
+  "baseMm": 80,
+  "supplyProfile": [
+    {
+      "min": 1,
+      "max": 1,
+      "supply": 2
+    }
+  ],
+  "weapons": [
+    {
+      "id": "autocannon",
+      "name": "Autocannon",
+      "phase": "assault",
+      "range": 12,
+      "target": "ground",
+      "roa": 9,
+      "hit": 4,
+      "surgeTypes": [],
+      "sDice": null,
+      "dmg": 1,
+      "keywords": [
+        {
+          "kw": "LONG_RANGE",
+          "x": 18
+        }
+      ]
+    },
+    {
+      "id": "underbelly-machine-gun",
+      "name": "Underbelly Machine Gun",
+      "phase": "assault",
+      "range": 8,
+      "target": "ground",
+      "roa": 6,
+      "hit": 3,
+      "surgeTypes": [
+        "light"
+      ],
+      "sDice": "D3",
+      "dmg": 1,
+      "keywords": [
+        {
+          "kw": "PINPOINT"
+        },
+        {
+          "kw": "SIDEARM"
+        }
+      ]
+    },
+    {
+      "id": "hellfire-missiles",
+      "name": "Hellfire Missiles",
+      "phase": "assault",
+      "range": 16,
+      "target": "flying",
+      "roa": 6,
+      "hit": 3,
+      "surgeTypes": [
+        "light"
+      ],
+      "sDice": "D3",
+      "dmg": 1,
+      "keywords": [
+        {
+          "kw": "ANTI_EVADE",
+          "x": 1
+        },
+        {
+          "kw": "SIDEARM"
+        }
+      ]
+    },
+    {
+      "id": "stomp",
+      "name": "Stomp",
+      "phase": "combat",
+      "range": "E",
+      "target": "ground",
+      "roa": 4,
+      "hit": 5,
+      "surgeTypes": [],
+      "sDice": null,
+      "dmg": 1,
+      "keywords": []
+    }
+  ],
+  "abilities": [
+    {
+      "id": "target-lock",
+      "name": "Target Lock",
+      "type": "active",
+      "phase": "movement",
+      "cost": {
+        "res": "CP",
+        "n": 1
+      },
+      "target": {
+        "kind": "enemyUnit",
+        "range": 12
+      },
+      "effects": [
+        {
+          "op": "weaponMod",
+          "addSurgeTypes": [
+            "light",
+            "armoured"
+          ],
+          "sDice": "D3+1",
+          "to": "allFriendly",
+          "unitFilter": {
+            "units": [
+              "goliath"
+            ]
+          },
+          "weapons": {
+            "ids": [
+              "autocannon"
+            ]
+          },
+          "when": {
+            "targetSelectedBy": "target-lock"
+          },
+          "duration": "endOfRound"
+        }
+      ],
+      "text": "Mark an enemy within 12 inches; Goliath autocannons hitting it gain Light and Armoured Surge at D3+1."
+    },
+    {
+      "id": "indomitable",
+      "name": "Indomitable",
+      "type": "passive",
+      "phase": "assault",
+      "effects": [
+        {
+          "op": "grantKeyword",
+          "kw": {
+            "kw": "INDOMITABLE"
+          }
+        }
+      ],
+      "text": "Trades shots with Unengaged Units even while Engaged."
+    },
+    {
+      "id": "devastating-charge",
+      "name": "Devastating Charge",
+      "type": "passive",
+      "phase": "assault",
+      "trigger": {
+        "event": "chargeSucceeded"
+      },
+      "effects": [
+        {
+          "op": "impact",
+          "x": 4,
+          "y": 3
+        }
+      ],
+      "text": "After a successful Charge, IMPACT (4) 3+."
+    }
+  ],
+  "upgrades": [
+    {
+      "id": "ares-class-targeting-system",
+      "name": "Ares-Class Targeting System",
+      "phase": "any",
+      "ability": {
+        "id": "ares-class-targeting-system",
+        "name": "Ares-Class Targeting System",
+        "type": "passive",
+        "phase": "any",
+        "effects": [
+          {
+            "op": "grantKeyword",
+            "kw": {
+              "kw": "PRECISION",
+              "x": 1
+            },
+            "to": {
+              "ids": [
+                "autocannon",
+                "underbelly-machine-gun"
+              ]
+            }
+          }
+        ],
+        "text": "Autocannon and machine gun get PRECISION 1."
+      }
+    },
+    {
+      "id": "scatter-missiles",
+      "name": "Scatter Missiles",
+      "phase": "assault",
+      "replaces": "hellfire-missiles",
+      "weapon": {
+        "id": "scatter-missiles",
+        "name": "Scatter Missiles",
+        "phase": "assault",
+        "range": 18,
+        "target": "ground",
+        "roa": 6,
+        "hit": 5,
+        "surgeTypes": [
+          "light"
+        ],
+        "sDice": "D3",
+        "dmg": 1,
+        "keywords": [
+          {
+            "kw": "INDIRECT_FIRE"
+          },
+          {
+            "kw": "LOCKED_IN",
+            "x": 6
+          },
+          {
+            "kw": "LONG_RANGE",
+            "x": 24
+          },
+          {
+            "kw": "SIDEARM"
+          }
+        ]
+      }
+    },
+    {
+      "id": "haywire-missiles",
+      "name": "Haywire Missiles",
+      "phase": "assault",
+      "replaces": "hellfire-missiles",
+      "weapon": {
+        "id": "haywire-missiles",
+        "name": "Haywire Missiles",
+        "phase": "assault",
+        "range": 12,
+        "target": "ground",
+        "roa": 3,
+        "hit": 3,
+        "surgeTypes": [
+          "armoured"
+        ],
+        "sDice": "D3",
+        "dmg": 1,
+        "keywords": [
+          {
+            "kw": "PIERCE",
+            "tag": "armoured",
+            "x": 3
+          },
+          {
+            "kw": "SIDEARM"
+          }
+        ]
+      }
+    }
+  ],
+  "cardVersion": "1.03.26",
+  "source": [
+    "CS1-T p.7",
+    "CT p.2",
+    "CL p.2"
+  ]
+}

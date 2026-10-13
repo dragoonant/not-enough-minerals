@@ -1,0 +1,99 @@
+{
+  "id": "point-defense-drone",
+  "name": "Point Defense Drone",
+  "race": "terran",
+  "factionTags": [
+    "terran",
+    "raynors-raiders"
+  ],
+  "unique": false,
+  "role": "Lifesaver",
+  "slot": null,
+  "summoned": true,
+  "combatTags": [
+    "armoured",
+    "flying",
+    "mechanical"
+  ],
+  "stats": {
+    "shield": null,
+    "speed": null,
+    "armour": 6,
+    "evade": 6,
+    "hp": 3,
+    "size": null
+  },
+  "baseMm": 32,
+  "supplyProfile": [
+    {
+      "min": 1,
+      "max": 1,
+      "supply": 0
+    }
+  ],
+  "weapons": [],
+  "abilities": [
+    {
+      "id": "point-defense-laser",
+      "name": "Point Defense Laser",
+      "type": "passive",
+      "phase": "any",
+      "trigger": {
+        "event": "targeted",
+        "attack": "ranged",
+        "subject": "otherFriendly",
+        "within": 4,
+        "filter": {
+          "attackInstant": false
+        }
+      },
+      "effects": [
+        {
+          "op": "removeDice",
+          "n": 2,
+          "upTo": true,
+          "pool": "attack"
+        },
+        {
+          "op": "removeSelf"
+        }
+      ],
+      "text": "Shoots down up to 2 attack dice aimed at a friend nearby, then burns out."
+    },
+    {
+      "id": "gliding",
+      "name": "Gliding",
+      "type": "passive",
+      "phase": "any",
+      "effects": [
+        {
+          "op": "grantKeyword",
+          "kw": {
+            "kw": "DISPLACEMENT"
+          }
+        }
+      ],
+      "text": "Can be nudged aside."
+    },
+    {
+      "id": "structure",
+      "name": "Structure",
+      "type": "passive",
+      "phase": "any",
+      "effects": [
+        {
+          "op": "grantKeyword",
+          "kw": {
+            "kw": "STRUCTURE"
+          }
+        }
+      ],
+      "text": "A building: never activates and never counts for Supply or markers."
+    }
+  ],
+  "upgrades": [],
+  "cardVersion": "1.04.26",
+  "source": [
+    "CS1-T p.5"
+  ]
+}

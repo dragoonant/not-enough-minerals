@@ -1,0 +1,227 @@
+{
+  "id": "zeratul",
+  "name": "Zeratul",
+  "race": "protoss",
+  "factionTags": [
+    "protoss"
+  ],
+  "unique": true,
+  "role": "Damage Dealer",
+  "slot": "hero",
+  "summoned": false,
+  "combatTags": [
+    "biological",
+    "psionic",
+    "ground"
+  ],
+  "stats": {
+    "shield": 3,
+    "speed": 7,
+    "armour": 5,
+    "evade": 5,
+    "hp": 5,
+    "size": 2
+  },
+  "baseMm": 40,
+  "supplyProfile": [
+    {
+      "min": 1,
+      "max": 1,
+      "supply": 1
+    }
+  ],
+  "weapons": [
+    {
+      "id": "master-warp-blade",
+      "name": "Master Warp Blade",
+      "phase": "combat",
+      "range": "E",
+      "target": "ground",
+      "roa": 4,
+      "hit": 3,
+      "surgeTypes": [
+        "light",
+        "armoured"
+      ],
+      "sDice": "D3",
+      "dmg": 2,
+      "keywords": [
+        {
+          "kw": "INSTANT"
+        }
+      ]
+    }
+  ],
+  "abilities": [
+    {
+      "id": "one-with-the-shadows",
+      "name": "One with the Shadows",
+      "type": "passive",
+      "phase": "any",
+      "trigger": {
+        "event": "actionResolved"
+      },
+      "effects": [
+        {
+          "op": "status",
+          "status": "HIDDEN",
+          "mode": "gain"
+        }
+      ],
+      "text": "Turns Hidden after every action."
+    },
+    {
+      "id": "prophetic-vision",
+      "name": "Prophetic Vision",
+      "type": "reaction",
+      "phase": "any",
+      "cost": {
+        "res": "PE",
+        "n": 1
+      },
+      "repeatable": true,
+      "trigger": {
+        "event": "targeted",
+        "subject": "self"
+      },
+      "effects": [
+        {
+          "op": "setChar",
+          "char": "evade",
+          "value": 4,
+          "unmodifiable": true,
+          "duration": "thisAttack"
+        }
+      ],
+      "text": "When attacked, his Evade is a flat 4+."
+    },
+    {
+      "id": "sentenced-to-death",
+      "name": "Sentenced to Death",
+      "type": "active",
+      "phase": "movement",
+      "cost": {
+        "res": "PE",
+        "n": 1
+      },
+      "target": {
+        "kind": "enemyUnit",
+        "los": false
+      },
+      "effects": [
+        {
+          "op": "grantKeyword",
+          "kw": {
+            "kw": "CRITICAL_HIT",
+            "x": 2
+          },
+          "to": {
+            "phase": "combat"
+          },
+          "when": {
+            "attack": "closeCombat",
+            "targetSelectedBy": "sentenced-to-death"
+          },
+          "duration": "endOfRound"
+        }
+      ],
+      "text": "Mark any enemy; his blade gets CRITICAL HIT 2 against it."
+    },
+    {
+      "id": "void-prison",
+      "name": "Void Prison",
+      "type": "active",
+      "phase": "movement",
+      "cost": {
+        "res": "PE",
+        "n": 1
+      },
+      "effects": [
+        {
+          "op": "setToken",
+          "token": "faction-indicator",
+          "range": 8
+        },
+        {
+          "op": "aura",
+          "radius": 2,
+          "centre": "indicator",
+          "affects": {
+            "side": "enemy"
+          },
+          "effects": [
+            {
+              "op": "debuff",
+              "char": "speed",
+              "x": 2
+            }
+          ],
+          "duration": "endOfRound"
+        }
+      ],
+      "text": "Mark a spot within 8 inches; enemies within 2 inches of it are slowed."
+    },
+    {
+      "id": "void-blink",
+      "name": "Void Blink",
+      "type": "active",
+      "phase": "assault",
+      "cost": {
+        "res": "PE",
+        "n": 1
+      },
+      "requires": {
+        "engaged": false
+      },
+      "effects": [
+        {
+          "op": "place",
+          "x": 6
+        }
+      ],
+      "text": "Blink up to 6 inches when not in melee."
+    },
+    {
+      "id": "devastating-charge",
+      "name": "Devastating Charge",
+      "type": "passive",
+      "phase": "assault",
+      "trigger": {
+        "event": "chargeSucceeded"
+      },
+      "effects": [
+        {
+          "op": "impact",
+          "x": 4,
+          "y": 4
+        }
+      ],
+      "text": "After a successful Charge, IMPACT (4) 4+."
+    },
+    {
+      "id": "shadow-strike",
+      "name": "Shadow Strike",
+      "type": "active",
+      "phase": "combat",
+      "cost": {
+        "res": "PE",
+        "n": 1
+      },
+      "effects": [
+        {
+          "op": "hits",
+          "x": 4,
+          "y": 1,
+          "to": "engagedEnemies"
+        }
+      ],
+      "text": "Every enemy in melee with him takes HITS 4 (1)."
+    }
+  ],
+  "upgrades": [],
+  "cardVersion": "1.06.26",
+  "source": [
+    "CS2-P p.2",
+    "CT p.7"
+  ]
+}

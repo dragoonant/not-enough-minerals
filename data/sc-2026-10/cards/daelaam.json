@@ -1,0 +1,65 @@
+{
+  "id": "daelaam",
+  "name": "Daelaam",
+  "kind": "faction",
+  "race": "protoss",
+  "factionTags": [
+    "protoss"
+  ],
+  "unique": true,
+  "slots": {
+    "core": 3,
+    "elite": 1,
+    "support": 1,
+    "air": 1
+  },
+  "resource": {
+    "res": "PE",
+    "n": 1
+  },
+  "abilities": [
+    {
+      "id": "mass-recall",
+      "name": "Mass Recall",
+      "type": "active",
+      "phase": "movement",
+      "limit": "oncePerGame",
+      "effects": [
+        {
+          "op": "setToken",
+          "token": "faction-indicator",
+          "range": null
+        },
+        {
+          "op": "code",
+          "code": "mass-recall"
+        }
+      ],
+      "text": "Once a game, mark a spot; friendly Protoss within 6 inches return to Reserves."
+    },
+    {
+      "id": "daeuhl",
+      "name": "Dae'uhl",
+      "type": "reaction",
+      "phase": "any",
+      "trigger": {
+        "event": "damageSuffered",
+        "subject": "friendly"
+      },
+      "effects": [
+        {
+          "op": "code",
+          "code": "damage-reduce-min-one",
+          "args": {
+            "n": 2,
+            "min": 1
+          },
+          "to": "triggerUnit"
+        }
+      ],
+      "text": "Friendly damage taken drops by 2 but cannot fall under 1."
+    }
+  ],
+  "cardVersion": "1.04.26",
+  "source": "CS1-P p.9"
+}

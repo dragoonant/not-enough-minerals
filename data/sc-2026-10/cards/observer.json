@@ -1,0 +1,60 @@
+{
+  "id": "observer",
+  "name": "Observer",
+  "kind": "tactical",
+  "race": "protoss",
+  "factionTags": [
+    "protoss"
+  ],
+  "unique": true,
+  "slots": {
+    "support": 1
+  },
+  "resource": {
+    "res": "PE",
+    "n": 1
+  },
+  "abilities": [
+    {
+      "id": "gravitic-boosters",
+      "name": "Gravitic Boosters",
+      "type": "reaction",
+      "phase": "assault",
+      "trigger": {
+        "event": "chargeDistance",
+        "who": "friendly"
+      },
+      "effects": [
+        {
+          "op": "charge",
+          "plus": 1,
+          "to": "triggerUnit",
+          "duration": "thisRoll"
+        }
+      ],
+      "text": "A friend adds 1 inch to its Charge distance."
+    },
+    {
+      "id": "surveillance",
+      "name": "Surveillance",
+      "type": "active",
+      "phase": "movement",
+      "effects": [
+        {
+          "op": "setToken",
+          "token": "faction-indicator",
+          "range": null
+        },
+        {
+          "op": "detection",
+          "radius": 6,
+          "centre": "indicator",
+          "duration": "endOfRound"
+        }
+      ],
+      "text": "Place a scan spot: enemies within 6 inches of it lose Hidden."
+    }
+  ],
+  "cardVersion": "1.04.26",
+  "source": "CS1-P p.10"
+}

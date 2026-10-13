@@ -1,7 +1,8 @@
-// Game setup. M0: a demo table only (procedural placeholder models and terrain on a 36 x 36 in skirmish table) with the
-// placeholder turn flow. No StarCraft unit, scenario or deployment rule lives here yet.
+// Game setup. M0/M1: a demo table only (placeholder models and terrain on a 36 x 36 in skirmish table) with the
+// placeholder turn flow. When the bundle holds the Marine record (data exemplar, spec 20/21), seat 0's squad is a
+// 6-model Marine Unit read from data; everything else stays placeholder. No StarCraft rule lives here yet.
 // TODO(M2): createGame(bundle, opts) builds forces, deployment and missions from the data bundle (spec 10/11/20).
-import type { EditionBundle } from '../data/types'
+import type { EditionBundle, UnitDef } from '../data/types'
 import { seedRng } from './rng'
 import { beginPlay, PLACEHOLDER_ROUNDS } from './turnflow'
 import type { GameState, ModelState, SeatId, SeatState, TerrainInstance } from './types'
@@ -49,13 +50,28 @@ function demoTerrain(): TerrainInstance[] {
   ]
 }
 
+/** The data bundle shape setup reads: the edition id and, optionally, its records. */
+export type SetupBundle = Pick<EditionBundle, 'edition'> & { records?: Pick<EditionBundle['records'], 'units'> }
+
+/** Seat 0's demo squad: 6 Marines from data when the bundle has the record, else 3 placeholder models. */
+function demoSquad(owner: SeatId, marine: UnitDef | undefined): ModelState[] {
+  if (marine && typeof marine.baseMm === 'number') {
+    const base = marine.baseMm as ModelState['base']
+    return [0, 1, 2, 3, 4, 5].map((i) => modelDefaults({
+      id: `am${i + 1}`, profileId: marine.id, owner, unitId: 'a-marines', pos: { x: -11 + (i % 3) * 1.6, z: 13.4 + Math.floor(i / 3) * 1.6 }, base,
+    }))
+  }
+  const m = (id: string, x: number, z: number) => modelDefaults({ id, profileId: 'placeholder-25', owner, unitId: 'a-squad', pos: { x, z }, base: 25 })
+  return [m('a1', -10, 14), m('a2', -8.5, 14.6), m('a3', -7, 14)]
+}
+
 /** Placeholder squads: seat 0 near (+z), seat 1 far (-z), on a spread of round bases. Profile ids are placeholders. */
-function demoModels(seats: SeatId[]): ModelState[] {
+function demoModels(seats: SeatId[], bundle: SetupBundle | null): ModelState[] {
   const [a = 'A', b = 'B'] = seats
   const m = (id: string, owner: SeatId, unitId: string, x: number, z: number, base: number) =>
     modelDefaults({ id, profileId: `placeholder-${base}`, owner, unitId, pos: { x, z }, base })
   return [
-    m('a1', a, 'a-squad', -10, 14, 25), m('a2', a, 'a-squad', -8.5, 14.6, 25), m('a3', a, 'a-squad', -7, 14, 25),
+    ...demoSquad(a, bundle?.records?.units.find((u) => u.id === 'marine')),
     m('a4', a, 'a-hero', -2, 14, 32), m('a5', a, 'a-big', 5, 13.5, 50),
     m('b1', b, 'b-swarm', 6, -14, 25), m('b2', b, 'b-swarm', 7.5, -14.5, 25), m('b3', b, 'b-swarm', 9, -14, 25),
     m('b4', b, 'b-hero', 2, -14, 32), m('b5', b, 'b-big', -6, -13, 40),
@@ -63,7 +79,7 @@ function demoModels(seats: SeatId[]): ModelState[] {
 }
 
 /** A playable placeholder game (any bundle): the demo table plus the placeholder turn flow. */
-export function createGame(bundle: Pick<EditionBundle, 'edition'> | null, opts: CreateGameOpts = {}): GameState {
+export function createGame(bundle: SetupBundle | null, opts: CreateGameOpts = {}): GameState {
   const seed = opts.seed ?? 'demo'
   const seats = opts.seats && opts.seats.length >= 2 ? opts.seats : ['A', 'B']
   const base = gameDefaults(seed, seats, bundle?.edition ?? 'none')
@@ -71,13 +87,13 @@ export function createGame(bundle: Pick<EditionBundle, 'edition'> | null, opts: 
     ...base,
     scenarioId: opts.scenarioId ?? null,
     scenario: { table: { ...TABLES[opts.table ?? 'skirmish'] } },
-    models: Object.fromEntries(demoModels(seats).map((x) => [x.id, x])),
+    models: Object.fromEntries(demoModels(seats, bundle).map((x) => [x.id, x])),
     terrain: demoTerrain(),
   }
   return beginPlay(state)
 }
 
-/** The M0 demo table with no data bundle. */
-export function createDemoGame(seed = 'demo'): GameState {
-  return createGame(null, { seed })
+/** The demo table; with a bundle that holds the Marine, seat 0 fields a Marine squad from data. */
+export function createDemoGame(seed = 'demo', bundle: SetupBundle | null = null): GameState {
+  return createGame(bundle, { seed })
 }

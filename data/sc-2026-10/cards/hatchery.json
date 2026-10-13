@@ -1,0 +1,66 @@
+{
+  "id": "hatchery",
+  "name": "Hatchery",
+  "kind": "tactical",
+  "race": "zerg",
+  "factionTags": [
+    "zerg"
+  ],
+  "unique": false,
+  "slots": {
+    "support": 1
+  },
+  "resource": {
+    "res": "BM",
+    "n": 1
+  },
+  "abilities": [
+    {
+      "id": "lie-in-wait",
+      "name": "Lie in Wait",
+      "type": "active",
+      "phase": "movement",
+      "target": {
+        "kind": "activeUnit",
+        "filter": {
+          "tags": [
+            "ground"
+          ],
+          "engaged": false
+        }
+      },
+      "effects": [
+        {
+          "op": "status",
+          "status": "BURROWED",
+          "mode": "gain"
+        }
+      ],
+      "text": "An unengaged ground Unit gains Burrowed."
+    },
+    {
+      "id": "creep-spread",
+      "name": "Creep Spread",
+      "type": "active",
+      "phase": "movement",
+      "effects": [
+        {
+          "op": "code",
+          "code": "creep-tumor-spawn"
+        }
+      ],
+      "text": "Drop a Creep Tumor within 6 inches of a friendly entry edge or tumor, no sight needed."
+    }
+  ],
+  "tokens": [
+    {
+      "id": "creep-tumor",
+      "name": "Creep Tumor",
+      "baseMm": null,
+      "size": null,
+      "text": "A marker that spreads Creep; further tumors can be dropped near it."
+    }
+  ],
+  "cardVersion": "1.04.26",
+  "source": "CS1-Z p.13"
+}

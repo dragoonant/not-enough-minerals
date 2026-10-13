@@ -1,0 +1,43 @@
+{
+  "id": "roach-warren",
+  "name": "Roach Warren",
+  "kind": "tactical",
+  "race": "zerg",
+  "factionTags": [
+    "zerg"
+  ],
+  "unique": false,
+  "slots": {
+    "core": 1
+  },
+  "resource": {
+    "res": "BM",
+    "n": 1
+  },
+  "abilities": [
+    {
+      "id": "nasty-surprise",
+      "name": "Nasty Surprise",
+      "type": "active",
+      "phase": "assault",
+      "target": {
+        "kind": "activeUnit",
+        "filter": {
+          "tags": [
+            "ground"
+          ]
+        }
+      },
+      "effects": [
+        {
+          "op": "status",
+          "status": "BURROWED",
+          "mode": "lose"
+        }
+      ],
+      "text": "Unburrow the active ground Unit right now."
+    }
+  ],
+  "cardVersion": "1.04.26",
+  "source": "CS1-Z p.15"
+}

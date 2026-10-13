@@ -1,0 +1,66 @@
+{
+  "id": "overcharged-nexus",
+  "name": "Overcharged Nexus",
+  "kind": "tactical",
+  "race": "protoss",
+  "factionTags": [
+    "protoss"
+  ],
+  "unique": true,
+  "slots": {
+    "core": 1,
+    "elite": 1
+  },
+  "resource": {
+    "res": "PE",
+    "n": 1
+  },
+  "abilities": [
+    {
+      "id": "strategic-recall",
+      "name": "Strategic Recall",
+      "type": "active",
+      "phase": "movement",
+      "insteadOfAction": true,
+      "target": {
+        "kind": "activeUnit",
+        "filter": {
+          "tags": [
+            "ground"
+          ],
+          "engaged": false
+        }
+      },
+      "effects": [
+        {
+          "op": "returnToReserves"
+        }
+      ],
+      "text": "An unengaged ground Unit returns to Reserves in place of its action."
+    },
+    {
+      "id": "photon-overcharge",
+      "name": "Photon Overcharge",
+      "type": "reaction",
+      "phase": "any",
+      "trigger": {
+        "event": "nominatedToDeploy",
+        "who": "enemy",
+        "filter": {
+          "code": "arrival-off-entry-edge"
+        }
+      },
+      "effects": [
+        {
+          "op": "hits",
+          "x": 3,
+          "y": 1,
+          "to": "triggerUnit"
+        }
+      ],
+      "text": "An enemy arriving away from its own edge takes HITS 3 (1)."
+    }
+  ],
+  "cardVersion": "1.04.26",
+  "source": "CS1-P p.9"
+}

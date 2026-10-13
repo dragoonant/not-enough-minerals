@@ -1,0 +1,69 @@
+{
+  "id": "twilight-council",
+  "name": "Twilight Council",
+  "kind": "tactical",
+  "race": "protoss",
+  "factionTags": [
+    "protoss"
+  ],
+  "unique": true,
+  "slots": {
+    "support": 1,
+    "elite": 1
+  },
+  "resource": {
+    "res": "PE",
+    "n": 1
+  },
+  "abilities": [
+    {
+      "id": "weapons-of-the-firstborn",
+      "name": "Weapons of the Firstborn",
+      "type": "active",
+      "phase": "assault",
+      "target": {
+        "kind": "activeUnit",
+        "filter": {
+          "tags": [
+            "ground"
+          ]
+        }
+      },
+      "effects": [
+        {
+          "op": "buff",
+          "char": "range",
+          "x": 4,
+          "to": {
+            "phase": "assault",
+            "first": true
+          }
+        }
+      ],
+      "text": "A ground Unit gets BUFF Range 4 on its first ranged weapon used."
+    },
+    {
+      "id": "veil-of-shadows",
+      "name": "Veil of Shadows",
+      "type": "reaction",
+      "phase": "any",
+      "trigger": {
+        "event": "actionResolved",
+        "who": "friendly",
+        "filter": {
+          "code": "resolved-place-effect"
+        }
+      },
+      "effects": [
+        {
+          "op": "heal",
+          "x": 2,
+          "to": "triggerUnit"
+        }
+      ],
+      "text": "A friend that was just PLACEd heals 2 damage."
+    }
+  ],
+  "cardVersion": "1.03.26",
+  "source": "CS1-P p.9"
+}

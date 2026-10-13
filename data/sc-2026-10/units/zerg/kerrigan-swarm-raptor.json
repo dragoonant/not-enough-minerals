@@ -1,0 +1,151 @@
+{
+ "id": "kerrigan-swarm-raptor",
+ "name": "Kerrigan Swarm Raptor (Zergling)",
+ "race": "zerg",
+ "factionTags": [
+  "zerg",
+  "kerrigans-swarm"
+ ],
+ "unique": true,
+ "role": "Damage Dealer",
+ "slot": "elite",
+ "summoned": false,
+ "combatTags": [
+  "biological",
+  "light",
+  "ground"
+ ],
+ "stats": {
+  "shield": null,
+  "speed": [
+   5,
+   9
+  ],
+  "armour": 5,
+  "evade": 4,
+  "hp": 2,
+  "size": 1
+ },
+ "baseMm": 32,
+ "supplyProfile": [
+  {
+   "min": 1,
+   "max": 3,
+   "supply": 0
+  },
+  {
+   "min": 4,
+   "max": 6,
+   "supply": 1
+  }
+ ],
+ "weapons": [
+  {
+   "id": "claws",
+   "name": "Claws",
+   "phase": "combat",
+   "range": "E",
+   "target": "ground",
+   "roa": 2,
+   "hit": 3,
+   "surgeTypes": [
+    "light",
+    "armoured"
+   ],
+   "sDice": "D6",
+   "dmg": 1,
+   "keywords": [
+    {
+     "kw": "INSTANT"
+    }
+   ]
+  }
+ ],
+ "abilities": [
+  {
+   "id": "squadron",
+   "name": "Squadron",
+   "type": "passive",
+   "phase": "any",
+   "effects": [
+    {
+     "op": "coherency",
+     "d": 4
+    }
+   ],
+   "text": "Models stay in coherency at up to 4 inches apart."
+  },
+  {
+   "id": "raptor-strain",
+   "name": "Raptor Strain",
+   "type": "passive",
+   "phase": "any",
+   "effects": [
+    {
+     "op": "moveThrough",
+     "what": "impassable",
+     "maxSize": 4,
+     "noAccessPoints": true
+    }
+   ],
+   "text": "Climbs over impassable pieces up to Size 4 and changes level freely."
+  },
+  {
+   "id": "leap",
+   "name": "Leap",
+   "type": "active",
+   "phase": "assault",
+   "cost": {
+    "res": "BM",
+    "n": 1
+   },
+   "effects": [
+    {
+     "op": "charge",
+     "plus": 2
+    }
+   ],
+   "text": "+2 inches of charge distance."
+  },
+  {
+   "id": "adrenal-overload",
+   "name": "Adrenal Overload",
+   "type": "active",
+   "phase": "assault",
+   "cost": {
+    "res": "BM",
+    "n": 1
+   },
+   "effects": [
+    {
+     "op": "rollMod",
+     "roll": "impactHit",
+     "delta": 1,
+     "duration": "endOfRound"
+    }
+   ],
+   "text": "+1 to its IMPACT hit rolls."
+  },
+  {
+   "id": "devastating-charge",
+   "name": "Devastating Charge",
+   "type": "passive",
+   "phase": "assault",
+   "trigger": {
+    "event": "chargeSucceeded"
+   },
+   "effects": [
+    {
+     "op": "impact",
+     "x": 2,
+     "y": 5
+    }
+   ],
+   "text": "After a successful Charge, IMPACT (2) 5+."
+  }
+ ],
+ "upgrades": [],
+ "cardVersion": "1.04.26",
+ "source": "CS1-Z p.4",
+ "variantOf": "zergling"
+}

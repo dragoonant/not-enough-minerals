@@ -1,0 +1,82 @@
+{
+  "id": "zerg-swarm",
+  "name": "Zerg Swarm",
+  "kind": "faction",
+  "race": "zerg",
+  "factionTags": [
+    "zerg"
+  ],
+  "unique": true,
+  "slots": {
+    "core": 3,
+    "elite": 1,
+    "support": 1,
+    "air": 1
+  },
+  "resource": {
+    "res": "BM",
+    "n": 1
+  },
+  "requiresCreepCard": true,
+  "abilities": [
+    {
+      "id": "rapid-burrowing",
+      "name": "Rapid Burrowing",
+      "type": "active",
+      "phase": "movement",
+      "target": {
+        "kind": "friendlyUnit",
+        "filter": {
+          "race": "zerg",
+          "tags": [
+            "ground"
+          ],
+          "engaged": false
+        }
+      },
+      "effects": [
+        {
+          "op": "status",
+          "status": "BURROWED",
+          "mode": "gain"
+        }
+      ],
+      "text": "An unengaged friendly Zerg ground Unit burrows, even after activating."
+    },
+    {
+      "id": "brood-instinct",
+      "name": "Brood Instinct",
+      "type": "reaction",
+      "phase": "any",
+      "trigger": {
+        "event": "beforeEvadeRoll",
+        "subject": "friendly"
+      },
+      "effects": [
+        {
+          "op": "rollMod",
+          "roll": "evade",
+          "delta": 1,
+          "to": "triggerUnit",
+          "duration": "thisRoll"
+        }
+      ],
+      "text": "A friend gets +1 on one Evade roll."
+    },
+    {
+      "id": "zerg-creep",
+      "name": "Zerg Creep",
+      "type": "passive",
+      "phase": "any",
+      "effects": [
+        {
+          "op": "code",
+          "code": "zerg-creep-army-building"
+        }
+      ],
+      "text": "Army building needs one Creep Card from this army."
+    }
+  ],
+  "cardVersion": "1.04.26",
+  "source": "CS1-Z p.13"
+}

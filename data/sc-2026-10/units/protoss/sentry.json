@@ -1,0 +1,230 @@
+{
+  "id": "sentry",
+  "name": "Sentry",
+  "race": "protoss",
+  "factionTags": [
+    "protoss"
+  ],
+  "unique": false,
+  "role": "Lifesaver",
+  "slot": "support",
+  "summoned": false,
+  "combatTags": [
+    "light",
+    "mechanical",
+    "psionic",
+    "ground"
+  ],
+  "stats": {
+    "shield": 2,
+    "speed": [
+      4,
+      7
+    ],
+    "armour": 5,
+    "evade": 6,
+    "hp": 4,
+    "size": 1
+  },
+  "baseMm": 50,
+  "supplyProfile": [
+    {
+      "min": 1,
+      "max": 1,
+      "supply": 0
+    },
+    {
+      "min": 2,
+      "max": 2,
+      "supply": 1
+    }
+  ],
+  "weapons": [
+    {
+      "id": "disruption-beam",
+      "name": "Disruption Beam",
+      "phase": "assault",
+      "range": 8,
+      "target": "all",
+      "roa": 2,
+      "hit": 2,
+      "surgeTypes": [],
+      "sDice": null,
+      "dmg": 1,
+      "keywords": [
+        {
+          "kw": "INSTANT"
+        }
+      ]
+    },
+    {
+      "id": "beam",
+      "name": "Beam",
+      "phase": "combat",
+      "range": "E",
+      "target": "ground",
+      "roa": 2,
+      "hit": 3,
+      "surgeTypes": [],
+      "sDice": null,
+      "dmg": 1,
+      "keywords": []
+    }
+  ],
+  "abilities": [
+    {
+      "id": "restoration",
+      "name": "Restoration",
+      "type": "reaction",
+      "phase": "any",
+      "cost": {
+        "res": "PE",
+        "n": 1
+      },
+      "trigger": {
+        "event": "debuffReceived",
+        "subject": "friendly",
+        "within": 4
+      },
+      "effects": [
+        {
+          "op": "cleanse",
+          "what": "debuffs",
+          "to": "triggerUnit"
+        }
+      ],
+      "text": "Strip every debuff from a nearby friend the moment it gets one."
+    },
+    {
+      "id": "guardian-shield",
+      "name": "Guardian Shield",
+      "type": "active",
+      "phase": "movement",
+      "cost": {
+        "res": "PE",
+        "n": 1
+      },
+      "effects": [
+        {
+          "op": "aura",
+          "radius": 4,
+          "centre": "self",
+          "los": false,
+          "affects": {
+            "side": "friendly"
+          },
+          "effects": [
+            {
+              "op": "removeDice",
+              "n": 1,
+              "pool": "attack",
+              "when": {
+                "attack": "ranged"
+              }
+            }
+          ],
+          "duration": "endOfRound"
+        }
+      ],
+      "text": "Shots at friends within 4 inches roll one die fewer."
+    },
+    {
+      "id": "force-field",
+      "name": "Force Field",
+      "type": "active",
+      "phase": "movement",
+      "cost": {
+        "res": "PE",
+        "n": 1
+      },
+      "effects": [
+        {
+          "op": "setToken",
+          "token": "force-field",
+          "range": 8,
+          "unoccupied": true
+        }
+      ],
+      "text": "Raise a Force Field up to 8 inches away."
+    }
+  ],
+  "upgrades": [
+    {
+      "id": "solid-field-projectors",
+      "name": "Solid-Field Projectors",
+      "phase": "movement",
+      "ability": {
+        "id": "solid-field-projectors",
+        "name": "Solid-Field Projectors",
+        "type": "active",
+        "phase": "movement",
+        "cost": {
+          "res": "PE",
+          "n": 1
+        },
+        "effects": [
+          {
+            "op": "setToken",
+            "token": "force-field",
+            "range": 8,
+            "unoccupied": true
+          }
+        ],
+        "text": "A second Force Field ability."
+      }
+    },
+    {
+      "id": "hallucination",
+      "name": "Hallucination",
+      "phase": "assault",
+      "ability": {
+        "id": "hallucination",
+        "name": "Hallucination",
+        "type": "reaction",
+        "phase": "assault",
+        "cost": {
+          "res": "PE",
+          "n": 0
+        },
+        "trigger": {
+          "event": "declareRangedAttack",
+          "who": "enemy",
+          "subject": "friendly",
+          "within": 4
+        },
+        "effects": [
+          {
+            "op": "canEvade",
+            "vs": [
+              "all"
+            ],
+            "to": "triggerUnit",
+            "duration": "thisAttack"
+          }
+        ],
+        "text": "A friend shot within 4 inches may Evade that attack."
+      }
+    }
+  ],
+  "cardVersion": "1.04.26",
+  "source": [
+    "CS1-P p.5",
+    "CT p.7",
+    "CL p.2"
+  ],
+  "tokens": [
+    {
+      "id": "force-field",
+      "name": "Force Field",
+      "baseMm": null,
+      "size": null,
+      "blocks": {
+        "maxSize": 2,
+        "removedByLarger": true
+      },
+      "text": "Terrain barrier small Units cannot cross; a bigger Unit moving through breaks it, a PLACE does not.",
+      "terrain": true,
+      "removedBy": "movement"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+[
+  {
+    "id": "redirect-attack",
+    "text": "Moves a declared ranged attack from its original target onto this Unit, only if this Unit is a legal target of that attack.",
+    "source": "CS1-P p.2"
+  },
+  {
+    "id": "not-carrying-claimed-marker",
+    "text": "True only while the Unit holds no claimed Mission Marker (Artefact Hunt).",
+    "source": "F (Psionic Transfer, Artefact Hunt)"
+  }
+]

@@ -1,0 +1,71 @@
+{
+  "id": "overlord",
+  "name": "Overlord",
+  "kind": "tactical",
+  "race": "zerg",
+  "factionTags": [
+    "zerg"
+  ],
+  "unique": true,
+  "slots": {
+    "core": 1,
+    "elite": 1,
+    "hero": 1
+  },
+  "resource": {
+    "res": "BM",
+    "n": 1
+  },
+  "abilities": [
+    {
+      "id": "ventral-sacs",
+      "name": "Ventral Sacs",
+      "type": "active",
+      "phase": "movement",
+      "effects": [
+        {
+          "op": "setToken",
+          "token": "faction-indicator",
+          "range": null
+        },
+        {
+          "op": "altEntry",
+          "kind": "indicator",
+          "filter": {
+            "tags": [
+              "ground"
+            ]
+          },
+          "at": {
+            "event": "endOfRound"
+          }
+        }
+      ],
+      "text": "Mark a landing spot far from enemies; at round end one ground Unit spawns beside it."
+    },
+    {
+      "id": "excrete-creep",
+      "name": "Excrete Creep",
+      "type": "active",
+      "phase": "assault",
+      "effects": [
+        {
+          "op": "code",
+          "code": "creep-tumor-spawn"
+        }
+      ],
+      "text": "Drop a Creep Tumor within 6 inches of a friendly entry edge or tumor, no sight needed."
+    }
+  ],
+  "tokens": [
+    {
+      "id": "creep-tumor",
+      "name": "Creep Tumor",
+      "baseMm": null,
+      "size": null,
+      "text": "A marker that spreads Creep; further tumors can be dropped near it."
+    }
+  ],
+  "cardVersion": "1.04.26",
+  "source": "CS1-Z p.14"
+}

@@ -1,0 +1,189 @@
+{
+ "id": "zergling",
+ "name": "Zergling",
+ "race": "zerg",
+ "factionTags": [
+  "zerg"
+ ],
+ "unique": false,
+ "role": "Damage Dealer",
+ "slot": "core",
+ "summoned": false,
+ "combatTags": [
+  "biological",
+  "light",
+  "ground"
+ ],
+ "stats": {
+  "shield": null,
+  "speed": [
+   4,
+   8
+  ],
+  "armour": 6,
+  "evade": 4,
+  "hp": 1,
+  "size": 1
+ },
+ "baseMm": 32,
+ "supplyProfile": [
+  {
+   "min": 1,
+   "max": 6,
+   "supply": 0
+  },
+  {
+   "min": 7,
+   "max": 12,
+   "supply": 1
+  },
+  {
+   "min": 13,
+   "max": 18,
+   "supply": 2
+  }
+ ],
+ "weapons": [
+  {
+   "id": "claws",
+   "name": "Claws",
+   "phase": "combat",
+   "range": "E",
+   "target": "ground",
+   "roa": 2,
+   "hit": 4,
+   "surgeTypes": [
+    "light"
+   ],
+   "sDice": "D3",
+   "dmg": 1,
+   "keywords": []
+  }
+ ],
+ "abilities": [
+  {
+   "id": "squadron",
+   "name": "Squadron",
+   "type": "passive",
+   "phase": "any",
+   "effects": [
+    {
+     "op": "coherency",
+     "d": 4
+    }
+   ],
+   "text": "Models stay in coherency at up to 4 inches apart."
+  },
+  {
+   "id": "metabolic-boost",
+   "name": "Metabolic Boost",
+   "type": "active",
+   "phase": "assault",
+   "cost": {
+    "res": "BM",
+    "n": 1
+   },
+   "effects": [
+    {
+     "op": "charge",
+     "dice": "best2D6"
+    }
+   ],
+   "text": "Roll two dice for charge distance and keep the higher."
+  },
+  {
+   "id": "devastating-charge",
+   "name": "Devastating Charge",
+   "type": "passive",
+   "phase": "assault",
+   "trigger": {
+    "event": "chargeSucceeded"
+   },
+   "effects": [
+    {
+     "op": "impact",
+     "x": 1,
+     "y": 5
+    }
+   ],
+   "text": "After a successful Charge, IMPACT (1) 5+."
+  }
+ ],
+ "upgrades": [
+  {
+   "id": "burrow-ambush",
+   "name": "Burrow Ambush",
+   "phase": "movement",
+   "ability": {
+    "id": "burrow-ambush",
+    "name": "Burrow Ambush",
+    "type": "passive",
+    "phase": "movement",
+    "trigger": {
+     "event": "nominatedToDeploy"
+    },
+    "endsActivation": true,
+    "effects": [
+     {
+      "op": "place",
+      "x": 18,
+      "from": "entryEdge",
+      "minEnemyDist": 10
+     }
+    ],
+    "text": "Arrives from Reserves up to 18 inches in from its edge, 10 inches clear of enemies."
+   }
+  },
+  {
+   "id": "shredding-claws",
+   "name": "Shredding Claws",
+   "phase": "combat",
+   "replaces": "claws",
+   "weapon": {
+    "id": "shredding-claws",
+    "name": "Shredding Claws",
+    "phase": "combat",
+    "range": "E",
+    "target": "ground",
+    "roa": 2,
+    "hit": 4,
+    "surgeTypes": [
+     "light",
+     "armoured"
+    ],
+    "sDice": "D3",
+    "dmg": 1,
+    "keywords": []
+   }
+  },
+  {
+   "id": "adrenal-glands",
+   "name": "Adrenal Glands",
+   "phase": "combat",
+   "ability": {
+    "id": "adrenal-glands",
+    "name": "Adrenal Glands",
+    "type": "passive",
+    "phase": "combat",
+    "effects": [
+     {
+      "op": "grantKeyword",
+      "kw": {
+       "kw": "PRECISION",
+       "x": 2
+      },
+      "to": {
+       "ids": [
+        "claws",
+        "shredding-claws"
+       ]
+      }
+     }
+    ],
+    "text": "Claw weapons get PRECISION 2."
+   }
+  }
+ ],
+ "cardVersion": "1.04.26",
+ "source": "CS1-Z p.10"
+}

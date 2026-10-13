@@ -1,0 +1,91 @@
+{
+  "id": "kerrigans-swarm",
+  "name": "Kerrigan's Swarm",
+  "kind": "faction",
+  "race": "zerg",
+  "factionTags": [
+    "zerg",
+    "kerrigans-swarm"
+  ],
+  "unique": true,
+  "slots": {
+    "core": 3,
+    "elite": 2,
+    "hero": 1
+  },
+  "resource": {
+    "res": "BM",
+    "n": 1
+  },
+  "requiresCreepCard": true,
+  "abilities": [
+    {
+      "id": "omega-network",
+      "name": "Omega Network",
+      "type": "active",
+      "phase": "movement",
+      "effects": [
+        {
+          "op": "summon",
+          "unit": "omega-worm",
+          "anywhere": true,
+          "minEnemyDist": 10
+        },
+        {
+          "op": "code",
+          "code": "dormant-summoned-structure",
+          "args": {
+            "unit": "omega-worm"
+          }
+        }
+      ],
+      "text": "If none stands, summon an Omega Worm on the ground, 10 inches clear of enemies; it is dormant this Round."
+    },
+    {
+      "id": "wild-mutation",
+      "name": "Wild Mutation",
+      "type": "active",
+      "phase": "any",
+      "target": {
+        "kind": "activeUnit",
+        "filter": {
+          "onCreep": true
+        }
+      },
+      "effects": [
+        {
+          "op": "buff",
+          "char": "speed",
+          "x": 1
+        },
+        {
+          "op": "grantKeyword",
+          "kw": {
+            "kw": "PRECISION",
+            "x": 1
+          },
+          "to": {
+            "first": true
+          },
+          "duration": "endOfActivation"
+        }
+      ],
+      "text": "A Unit on Creep gets BUFF Speed 1 and PRECISION 1 on its first weapon used."
+    },
+    {
+      "id": "zerg-creep",
+      "name": "Zerg Creep",
+      "type": "passive",
+      "phase": "any",
+      "effects": [
+        {
+          "op": "code",
+          "code": "zerg-creep-army-building"
+        }
+      ],
+      "text": "Army building needs one Creep Card from this army."
+    }
+  ],
+  "cardVersion": "1.04.26",
+  "source": "CS1-Z p.14"
+}

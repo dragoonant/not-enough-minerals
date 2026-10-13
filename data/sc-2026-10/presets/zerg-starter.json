@@ -1,0 +1,56 @@
+{
+ "id": "zerg-starter",
+ "name": "Zerg Starter",
+ "scale": "skirmish",
+ "faction": "zerg-swarm",
+ "units": [
+  {
+   "unit": "swarmling",
+   "models": 18,
+   "upgrades": []
+  },
+  {
+   "unit": "corpser",
+   "models": 3,
+   "upgrades": [
+    {
+     "id": "burrow-ambush"
+    },
+    {
+     "id": "tunneling-claws"
+    },
+    {
+     "id": "hydriodic-bile"
+    }
+   ]
+  },
+  {
+   "unit": "hydralisk",
+   "models": 4,
+   "upgrades": [
+    {
+     "id": "ancillary-carapace"
+    }
+   ]
+  },
+  {
+   "unit": "queen",
+   "models": 1,
+   "upgrades": [
+    {
+     "id": "creep-speed"
+    }
+   ]
+  }
+ ],
+ "cards": [
+  "evolution-chamber",
+  "overseer",
+  "hydralisk-den"
+ ],
+ "creepCard": "accelerating-creep",
+ "source": [
+  "R p.110",
+  "CT p.4-6"
+ ]
+}

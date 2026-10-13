@@ -1,0 +1,44 @@
+{
+ "id": "first-battle-terran",
+ "name": "First Battle Terran",
+ "scale": "skirmish",
+ "faction": "terran-armed-forces",
+ "units": [
+  {
+   "unit": "marine",
+   "models": 6,
+   "upgrades": [
+    {
+     "id": "agg-12",
+     "model": 0
+    },
+    {
+     "id": "rocket-launcher",
+     "model": 1
+    }
+   ]
+  },
+  {
+   "unit": "marine",
+   "models": 6,
+   "upgrades": []
+  },
+  {
+   "unit": "marauder",
+   "models": 2,
+   "upgrades": []
+  },
+  {
+   "unit": "medic",
+   "models": 3,
+   "upgrades": []
+  }
+ ],
+ "cards": [
+  "barracks"
+ ],
+ "source": [
+  "R p.7-29",
+  "CT p.2-3"
+ ]
+}

@@ -1,0 +1,63 @@
+{
+  "id": "gate-chronoboosted",
+  "name": "Gate Chronoboosted",
+  "kind": "tactical",
+  "race": "protoss",
+  "factionTags": [
+    "protoss"
+  ],
+  "unique": true,
+  "slots": {
+    "core": 1,
+    "elite": 1
+  },
+  "resource": {
+    "res": "PE",
+    "n": 1
+  },
+  "abilities": [
+    {
+      "id": "quick-strikes",
+      "name": "Quick Strikes",
+      "type": "active",
+      "phase": "combat",
+      "target": {
+        "kind": "activeUnit"
+      },
+      "effects": [
+        {
+          "op": "grantKeyword",
+          "kw": {
+            "kw": "PRECISION",
+            "x": 2
+          },
+          "to": {
+            "phase": "combat",
+            "first": true
+          },
+          "duration": "endOfActivation"
+        }
+      ],
+      "text": "Melee: the first weapon used this activation gets PRECISION 2."
+    },
+    {
+      "id": "zealous-charge",
+      "name": "Zealous Charge",
+      "type": "active",
+      "phase": "movement",
+      "target": {
+        "kind": "activeUnit"
+      },
+      "effects": [
+        {
+          "op": "buff",
+          "char": "speed",
+          "x": 2
+        }
+      ],
+      "text": "The active Unit gets BUFF Speed 2."
+    }
+  ],
+  "cardVersion": "1.03.26",
+  "source": "CS1-P p.8"
+}

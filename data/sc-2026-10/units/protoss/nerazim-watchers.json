@@ -1,0 +1,167 @@
+{
+  "id": "nerazim-watchers",
+  "name": "Nerazim Watchers (Adept)",
+  "race": "protoss",
+  "factionTags": [
+    "protoss",
+    "nerazim"
+  ],
+  "unique": false,
+  "role": "Damage Dealer",
+  "slot": "core",
+  "summoned": false,
+  "combatTags": [
+    "biological",
+    "light",
+    "ground"
+  ],
+  "stats": {
+    "shield": 2,
+    "speed": [
+      5,
+      8
+    ],
+    "armour": 5,
+    "evade": 5,
+    "hp": 3,
+    "size": 2
+  },
+  "baseMm": 40,
+  "supplyProfile": [
+    {
+      "min": 1,
+      "max": 2,
+      "supply": 0
+    },
+    {
+      "min": 3,
+      "max": 4,
+      "supply": 1
+    }
+  ],
+  "weapons": [
+    {
+      "id": "glaive-cannon",
+      "name": "Glaive Cannon",
+      "phase": "assault",
+      "range": 8,
+      "target": "all",
+      "roa": 3,
+      "hit": 3,
+      "surgeTypes": [
+        "light"
+      ],
+      "sDice": "D3+1",
+      "dmg": 1,
+      "keywords": [
+        {
+          "kw": "ANTI_EVADE",
+          "x": 1
+        },
+        {
+          "kw": "PINPOINT"
+        }
+      ]
+    },
+    {
+      "id": "strike",
+      "name": "Strike",
+      "phase": "combat",
+      "range": "E",
+      "target": "ground",
+      "roa": 1,
+      "hit": 5,
+      "surgeTypes": [],
+      "sDice": null,
+      "dmg": 1,
+      "keywords": []
+    }
+  ],
+  "abilities": [
+    {
+      "id": "path-of-shadows",
+      "name": "Path of Shadows",
+      "type": "active",
+      "phase": "any",
+      "cost": {
+        "res": "PE",
+        "n": 1
+      },
+      "effects": [
+        {
+          "op": "status",
+          "status": "HIDDEN",
+          "mode": "gain",
+          "duration": "untilNextAction"
+        }
+      ],
+      "text": "Turns Hidden until its next action."
+    },
+    {
+      "id": "nerazim-farsight",
+      "name": "Nerazim Farsight",
+      "type": "passive",
+      "phase": "any",
+      "effects": [
+        {
+          "op": "detection",
+          "radius": 6,
+          "centre": "token",
+          "token": "shade"
+        }
+      ],
+      "text": "Enemies near the Shade lose Hidden."
+    },
+    {
+      "id": "psionic-transfer",
+      "name": "Psionic Transfer",
+      "type": "active",
+      "phase": "movement",
+      "cost": {
+        "res": "PE",
+        "n": 1
+      },
+      "effects": [
+        {
+          "op": "setToken",
+          "token": "shade",
+          "range": 12,
+          "wholly": true
+        },
+        {
+          "op": "place",
+          "x": 0,
+          "from": "token",
+          "token": "shade",
+          "optional": true,
+          "allowEngage": true,
+          "at": {
+            "event": "endOfRound"
+          }
+        }
+      ],
+      "text": "Send a Shade up to 12 inches out; at round end the squad may reappear around it.",
+      "requires": {
+        "code": "not-carrying-claimed-marker"
+      },
+      "provenance": "F: cannot teleport while carrying a claimed Mission Marker (Artefact Hunt)"
+    }
+  ],
+  "upgrades": [],
+  "cardVersion": "1.06.26",
+  "source": [
+    "CS2-P p.3",
+    "CT p.7"
+  ],
+  "variantOf": "adept",
+  "tokens": [
+    {
+      "id": "shade",
+      "name": "Shade",
+      "baseMm": null,
+      "size": null,
+      "displacement": true,
+      "text": "Psionic echo the squad can jump to at the end of the Round."
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+ "id": "char-plains",
+ "name": "Char Plains",
+ "scale": "skirmish",
+ "size": {
+  "w": 36,
+  "h": 36
+ },
+ "entryEdges": {
+  "red": [
+   {
+    "edge": "S",
+    "from": 18,
+    "to": 36
+   }
+  ],
+  "blue": [
+   {
+    "edge": "N",
+    "from": 18,
+    "to": 36
+   }
+  ]
+ },
+ "markers": [
+  {
+   "n": 1,
+   "x": 6,
+   "y": 6
+  },
+  {
+   "n": 2,
+   "x": 6,
+   "y": 30
+  },
+  {
+   "n": 5,
+   "x": 24,
+   "y": 18
+  }
+ ],
+ "cardVersion": "1.03.26",
+ "source": "CS1-T p.14"
+}

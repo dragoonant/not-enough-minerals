@@ -1,3 +1,4 @@
+import { emptyBundle } from '../../src/data/bundle'
 import { afterEach, describe, expect, it } from 'vitest'
 import { createDemoGame } from '../../src/engine/setup'
 import { buildBeats } from '../../src/client/presentation/beats'
@@ -35,7 +36,7 @@ describe('client shell', () => {
     const roll = before.pending.options.find((o) => o.id === 'roll')!.action
     // apply through the store-free engine path
     return import('../../src/engine/apply').then(({ apply }) => {
-      const r = apply(before, { edition: 'x', records: { units: [], factions: [], scenarios: [] }, singletons: {}, origin: {} }, roll)
+      const r = apply(before, emptyBundle('x'), roll)
       if (!r.ok) throw new Error('rejected')
       const beats = buildBeats(before, r.state, r.state.events.map((event, i) => ({ seq: i + 1, event })), roll)
       expect(beats.map((b) => b.cue.kind)).toEqual(['dice', 'banner'])

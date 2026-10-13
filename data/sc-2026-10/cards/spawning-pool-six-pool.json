@@ -1,0 +1,76 @@
+{
+  "id": "spawning-pool-six-pool",
+  "name": "Spawning Pool (Six Pool)",
+  "kind": "tactical",
+  "race": "zerg",
+  "factionTags": [
+    "zerg"
+  ],
+  "unique": true,
+  "slots": {
+    "core": 2
+  },
+  "resource": {
+    "res": "BM",
+    "n": 2
+  },
+  "abilities": [
+    {
+      "id": "feral-rage",
+      "name": "Feral Rage",
+      "type": "active",
+      "phase": "combat",
+      "target": {
+        "kind": "activeUnit"
+      },
+      "effects": [
+        {
+          "op": "grantKeyword",
+          "kw": {
+            "kw": "PRECISION",
+            "x": 2
+          },
+          "to": {
+            "phase": "combat",
+            "first": true
+          },
+          "duration": "endOfActivation"
+        }
+      ],
+      "text": "Melee: the first weapon used this activation gets PRECISION 2."
+    },
+    {
+      "id": "timing-push",
+      "name": "Timing Push",
+      "type": "active",
+      "phase": "movement",
+      "target": {
+        "kind": "activeUnit",
+        "filter": {
+          "units": [
+            "zergling",
+            "raptor",
+            "swarmling",
+            "kerrigan-swarm-raptor"
+          ]
+        }
+      },
+      "effects": [
+        {
+          "op": "altEntry",
+          "kind": "nonEntryEdge"
+        },
+        {
+          "op": "code",
+          "code": "forward-deploy-clearance",
+          "args": {
+            "minEnemyDist": 10
+          }
+        }
+      ],
+      "text": "A Zergling Unit comes in from a non-entry edge and must finish well clear of enemies."
+    }
+  ],
+  "cardVersion": "1.03.26",
+  "source": "CS1-Z p.15"
+}

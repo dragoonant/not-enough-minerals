@@ -1,0 +1,54 @@
+{
+  "id": "terran-armed-forces",
+  "name": "Terran Armed Forces",
+  "kind": "faction",
+  "race": "terran",
+  "factionTags": [
+    "terran"
+  ],
+  "unique": true,
+  "slots": {
+    "core": 3,
+    "elite": 1,
+    "support": 1,
+    "air": 1
+  },
+  "resource": {
+    "res": "CP",
+    "n": 1
+  },
+  "abilities": [
+    {
+      "id": "tactical-retreat",
+      "name": "Tactical Retreat",
+      "type": "active",
+      "phase": "movement",
+      "target": {
+        "kind": "activeUnit"
+      },
+      "effects": [
+        {
+          "op": "ignoreDisengage",
+          "duration": "endOfRound"
+        }
+      ],
+      "text": "The active Unit pays no Disengage penalty this Round."
+    },
+    {
+      "id": "terran-tenacity",
+      "name": "Terran Tenacity",
+      "type": "active",
+      "phase": "movement",
+      "limit": "oncePerGame",
+      "effects": [
+        {
+          "op": "code",
+          "code": "claim-first-player-marker"
+        }
+      ],
+      "text": "Once a game, grab the First Player Marker; no one else may take it this Phase."
+    }
+  ],
+  "cardVersion": "1.04.26",
+  "source": "CS1-T p.8"
+}

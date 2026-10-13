@@ -1,0 +1,66 @@
+{
+  "id": "void-seeker",
+  "name": "Void Seeker",
+  "kind": "tactical",
+  "race": "protoss",
+  "factionTags": [
+    "protoss",
+    "nerazim"
+  ],
+  "unique": true,
+  "slots": {
+    "core": 1
+  },
+  "resource": {
+    "res": "PE",
+    "n": 1
+  },
+  "abilities": [
+    {
+      "id": "personal-transport",
+      "name": "Personal Transport",
+      "type": "active",
+      "phase": "movement",
+      "insteadOfAction": true,
+      "target": {
+        "kind": "activeUnit",
+        "filter": {
+          "tags": [
+            "ground"
+          ],
+          "engaged": false
+        }
+      },
+      "effects": [
+        {
+          "op": "returnToReserves"
+        },
+        {
+          "op": "altEntry",
+          "kind": "deployNow"
+        }
+      ],
+      "text": "An unengaged ground Unit returns to Reserves in place of acting, then redeploys at once."
+    },
+    {
+      "id": "anakh-sun",
+      "name": "Anakh Su'n",
+      "type": "active",
+      "phase": "movement",
+      "target": {
+        "kind": "activeUnit"
+      },
+      "effects": [
+        {
+          "op": "status",
+          "status": "HIDDEN",
+          "mode": "gain",
+          "duration": "untilNextAction"
+        }
+      ],
+      "text": "This Unit is Hidden until it next acts."
+    }
+  ],
+  "cardVersion": "1.06.26",
+  "source": "CS2-P p.4"
+}

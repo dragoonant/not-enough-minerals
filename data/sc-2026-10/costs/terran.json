@@ -1,0 +1,243 @@
+{
+ "id": "ct-2026-10-terran",
+ "table": "ct-2026-10",
+ "date": "2026-10-09",
+ "units": {
+  "marine": {
+   "compositions": [
+    {
+     "models": 6,
+     "supply": 1,
+     "minerals": 170
+    },
+    {
+     "models": 9,
+     "supply": 2,
+     "minerals": 220
+    }
+   ],
+   "upgrades": {
+    "agg-12": [
+     10,
+     10
+    ],
+    "bayonet": [
+     20,
+     30
+    ],
+    "combat-shield": [
+     20,
+     30
+    ],
+    "grenades-frag": [
+     10,
+     10
+    ],
+    "rocket-launcher": [
+     40,
+     40
+    ],
+    "slugthrower": [
+     10,
+     20
+    ]
+   },
+   "source": [
+    "CT p.2",
+    "CL p.2"
+   ]
+  },
+  "marauder": {
+   "compositions": [
+    {
+     "models": 2,
+     "supply": 1,
+     "minerals": 160
+    },
+    {
+     "models": 4,
+     "supply": 2,
+     "minerals": 290
+    }
+   ],
+   "upgrades": {
+    "kinetic-foam": [
+     20,
+     40
+    ],
+    "laser-targeting-systems": [
+     20,
+     40
+    ],
+    "veteran-of-tarsonis": [
+     20,
+     40
+    ]
+   },
+   "source": [
+    "CT p.2",
+    "CL p.2"
+   ]
+  },
+  "medic": {
+   "compositions": [
+    {
+     "models": 3,
+     "supply": 1,
+     "minerals": 120
+    }
+   ],
+   "upgrades": {
+    "a-13-flash-grenade-launcher": [
+     20
+    ],
+    "advanced-medic-facilities": [
+     60
+    ],
+    "stabilizer-medpacks": [
+     20
+    ]
+   },
+   "source": [
+    "CT p.2",
+    "CL p.2"
+   ]
+  },
+  "goliath": {
+   "compositions": [
+    {
+     "models": 1,
+     "supply": 2,
+     "minerals": 180
+    }
+   ],
+   "upgrades": {
+    "ares-class-targeting-system": [
+     20
+    ],
+    "haywire-missiles": [
+     40
+    ],
+    "scatter-missiles": [
+     30
+    ]
+   },
+   "source": [
+    "CT p.2",
+    "CL p.2"
+   ]
+  },
+  "jim-raynor": {
+   "compositions": [
+    {
+     "models": 1,
+     "supply": 1,
+     "minerals": 280
+    }
+   ],
+   "upgrades": {
+    "c-14-rifle": [
+     0
+    ]
+   },
+   "source": [
+    "CT p.2",
+    "CL p.2"
+   ]
+  },
+  "raynors-raider": {
+   "compositions": [
+    {
+     "models": 6,
+     "supply": 1,
+     "minerals": 230
+    }
+   ],
+   "upgrades": {},
+   "source": "CT p.2"
+  },
+  "siege-tank": {
+   "compositions": [
+    {
+     "models": 1,
+     "supply": 2,
+     "minerals": 220
+    }
+   ],
+   "upgrades": {
+    "mode-transformation": [
+     20
+    ],
+    "coordinated-strike": [
+     20
+    ],
+    "shaped-blast": [
+     10
+    ],
+    "smart-shells": [
+     10
+    ]
+   },
+   "source": "CT p.3"
+  },
+  "nova-stealth-mode": {
+   "compositions": [
+    {
+     "models": 1,
+     "supply": 1,
+     "minerals": 240
+    }
+   ],
+   "upgrades": {},
+   "source": "CT p.3"
+  },
+  "nova-assault-mode": {
+   "compositions": [
+    {
+     "models": 1,
+     "supply": 1,
+     "minerals": 260
+    }
+   ],
+   "upgrades": {},
+   "source": "CT p.3"
+  },
+  "spec-ops-marauder": {
+   "compositions": [
+    {
+     "models": 2,
+     "supply": 1,
+     "minerals": 230
+    }
+   ],
+   "upgrades": {},
+   "source": "CT p.3"
+  },
+  "raven": {
+   "compositions": [
+    {
+     "models": 1,
+     "supply": 1,
+     "minerals": 170
+    }
+   ],
+   "upgrades": {
+    "corvid-reactor": [
+     30
+    ],
+    "internal-tech-module": [
+     20
+    ],
+    "seeker-missile": [
+     20
+    ],
+    "explosive-shrapnel-shells": [
+     10
+    ]
+   },
+   "source": "CT p.3"
+  }
+ },
+ "cards": {},
+ "source": "CT p.2-3"
+}

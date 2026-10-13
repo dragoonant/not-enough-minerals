@@ -18,7 +18,6 @@ the checklist line marked "(RULING)" in `docs/spec/12-rules-test-checklist.md`.
 - RULING: Special win (lead N+ VP) | checked only at Scoring step 3 | 8.9.3 places it there | Unsourced | R p.74
 - RULING: Game ends at step 3 | steps 4-6 skipped; elimination +10 then compare VP | literal 8.9.3/8.10 | Unsourced | R p.74
 - RULING: Reserves eligibility in Phase 1 | only if Supply fits and a legal Deploy exists | keeps legalActions honest | Unsourced | R p.58
-- RULING: Return to Reserves | gives no supply-destroyed VP | the Unit is not Destroyed and its CSV is not reduced | Unsourced | R p.59, F p.5
 - RULING: Any enemy CSV drop, including friendly fire | scores VP | FAQ says 'anytime' | Confirmed | F p.5
 - RULING: Summoned Units' supply losses | give no VP | R 9.1.9 excludes them from the Final Score, and the specific rule beats the FAQ's general one | Unsourced | R p.76
 - RULING: Reserves counted as Destroyed | only when the game ends at the round limit | R 8.10 is scoped that way | Unsourced | R p.72
@@ -55,8 +54,7 @@ the checklist line marked "(RULING)" in `docs/spec/12-rules-test-checklist.md`.
 ## Keywords, abilities and cards
 - RULING: HIDDEN and BURROWED ('every attack') grant Evade in close combat too | the keyword text says every attack | Unsourced | R p.85, p.88
 - RULING: BURROWED Supply 0 in Disengage | applies on both sides, so a burrowed Unit that Disengages never has Tactical Mass | literal keyword text | Unsourced | R p.82
-- RULING: MORPH | Available Supply is checked before the models are removed | read as a precondition | Unsourced | R p.87
-- RULING: MORPH supply check | Available Supply is checked before the Roach model is removed | literal order of the MORPH text | Unsourced | R p.90
+- RULING: MORPH supply check | Available Supply is checked before the models (e.g. the Roach) are removed | literal order of the MORPH text, read as a precondition | Unsourced | R p.87, p.90
 - RULING: Passives printed on an Exhausted card | are off | literal reading of 'its abilities can not be used' | Unsourced | R p.81 10.5.2, F p.4
 - RULING: Detection | removes HIDDEN once and does not suppress it; it returns only from a source (e.g. BURROWED at the next round start) | text says 'lose', and Might of the Nerazim treats the loss as an event | Unsourced | CS, F p.5
 - RULING: Detection vs HIDDEN | a Unit inside a detection area cannot hold HIDDEN, and leaving the area does not restore it | F says 'while within' is checked at every action boundary | Unsourced | F p.5, CS1-Z p.3
@@ -67,7 +65,6 @@ the checklist line marked "(RULING)" in `docs/spec/12-rules-test-checklist.md`.
 - RULING: Omega Worm | it is a Summoned-type Unit (no CT cost) entering via Omega Network | R 9.1.9 says 'such as' | Unsourced | R p.78, CS1-Z p.3, p.14
 
 ## Army building and costs
-- RULING: CL Artanis heading says 'Adept 250->270' | used Artanis 270, Adept 160 | CT confirms | Corrected | CL p.2, CT p.7
 - RULING: CL Artanis line | CL prints 'Adept 250->270' under Artanis; we set Artanis 270, Adept 160 | CT p.7 shows Artanis 270, Adept 160 | Corrected | CL p.2, CT p.7
 - RULING: UNIQUE unit cards | max 1 copy per army | R only states the rule for Tactical Cards | Unsourced | R p.40 5.3
 - RULING: Non-UNIQUE Tactical Cards | may be bought more than once | implied by the UNIQUE rule and R 10.2 'copies' | Unsourced | R p.79 10.2
@@ -100,3 +97,32 @@ the checklist line marked "(RULING)" in `docs/spec/12-rules-test-checklist.md`.
 - RULING: DISPLACEMENT | relocating a Unit's own model counts as being moved (STATIONARY lost) but is not a move for Creep Removal | R p.92 "is moved" | Unsourced | R p.85-86, p.92
 - RULING: BURROWED on return to Reserves | the status stays until the next Deploy removes it | R is silent; Deploy ends BURROWED | Unsourced | R p.61; R p.85
 - RULING: Hydralisk base | the card prints 40x100 mm (oval); the schema supports oval bases and M1 confirms from the card image | `14` assumed circles only | Unsourced | CS1-Z p.1
+- RULING: Veteran of Tarsonis armour | encoded as rollMod armour delta +1 (lowers the Armour TN by 1, i.e. 4+ becomes 3+) | R 3.4: +1 to Armour improves the save | Unsourced | CS1-T p.2; R 3.4
+- RULING: Target Lock duration | endOfRound | the card prints no duration; most literal reading, same as BUFF | Unsourced | CS1-T p.3
+- RULING: Orders Critical Hit option duration | grant on the first used weapon, lasting endOfActivation (consumed on first use) | card says next weapon used, no duration printed | Unsourced | CS1-T p.1
+- RULING: Life Support timing | engine requirement: damageSuffered reaction resolves before damage is allocated, and damageReduce.n accepts a ValueExpr | card reduces damage before allocation | Unsourced | CS1-T p.3
+
+## M1 data entry (unit, card and core batches)
+- RULING: Stimpack PRECISION grant duration | endOfRound on Marine, Marauder and Raynor's Raider | the card prints no duration; matches BUFF | Unsourced | CS1-T p.1, p.2, p.6
+- RULING: Raiders Roll! | lets Stimpack be used while in Reserves at 1 less cost; the cost cut is not optional | the card gives no choice | Unsourced | CS1-T p.6
+- RULING: Jim Raynor faction tags | TERRAN only | his card prints only TERRAN; the Raynor's Raiders card names him directly | Confirmed | CS1-T p.4
+- RULING: Token sizes with no printed base (Creep Tumor, Ravager Burrow, Corrosive Bile, Shade, Adept Shade, Force Field) | baseMm null; the engine treats them as points until a source gives a size | no card or R value found; R 7.3.1 may imply 0 for Force Field | Unsourced | CS1-Z, CS2-Z p.1, CS1-P p.1, p.5, CS2-P p.3; R 7.3.1
+- RULING: Transfusion | may target a friendly Structure (code hook transfusion-allows-structure) | card text names Structures as legal | Unsourced | CS1-Z p.5
+- RULING: Pylon combat tag | printed ARMORED entered as armoured | spelling normalised to our tag set | Confirmed | CS1-P p.4
+- RULING: Psionic Transfer | not usable while the Unit carries a CLAIMed marker (Adept, Nerazim Watchers) | FAQ Artefact Hunt answer | Confirmed | CS1-P p.1, CS2-P p.3; F (Psionic Transfer, Artefact Hunt)
+- RULING: Hierarch's Stand | redirects a declared ranged attack onto Artanis only if Artanis is a legal target for it | redirect cannot create an illegal attack | Unsourced | CS1-P p.2
+- RULING: Psionic Presence (Adept) | a passive on the Unit granting its keyword to friendlies Within 4" of its Shade, not an aura of the Adept | card measures from the Shade | Unsourced | CS1-P p.1
+- RULING: Force Field | counts as terrain, removed only by movement actions; PLACE does not remove it | matches the F rulings for Grass and Creep | Unsourced | CS1-P p.5, F p.4-5
+- RULING: Squadron coherency | Horizontal Coherency (stated in text; no schema axis key yet) | card wording | Unsourced | CS2-P p.3
+- RULING: Timing Push 'Zergling Unit' | includes Raptor, Swarmling and Kerrigan Swarm Raptor (variants print '(Zergling)') | variant reading | Unsourced | CS1-Z, CT p.4
+- RULING: Ravager Morph 'Roach Unit' | includes Vile and Corpser (variants print '(Roach)') | variant reading | Unsourced | CS1-Z, CT p.5
+- RULING: Faction tags on faction and creep cards | Daelaam: PROTOSS only; Accelerating Creep: ZERG; Malignant Creep: ZERG + KERRIGAN'S SWARM | tags as printed under the art | Confirmed | CS1-P p.9, CS1-Z p.14-15
+- RULING: First-weapon grants (Infantry Weapons, Missile Attacks and similar) | last endOfActivation, consumed on first use | the card gives no duration | Unsourced | CS1-T, CS1-Z, CS1-P
+- RULING: Cocoon resource | 1 BM | the card prints no resource box; Zerg pays in BM | Unsourced | CS2-Z p.2; R p.83 10.5.1
+- RULING: Additional Supply Depots duration | endOfRound | the card gives none | Unsourced | CS1-T p.9
+- RULING: Losing HIDDEN trigger (Might of the Nerazim, Twilight Council) | fires on any loss of HIDDEN, from any cause or actor | the card names the event, not the cause | Unsourced | CS1-P p.9, CS2-P p.4
+- RULING: Dae'uhl damage reduction | 2, to a minimum of 1 (code hook damage-reduce-min-one) | printed floor | Confirmed | CS1-P p.9
+- RULING: Forward-deploy clearance (Ready for Dust-off, Ventral Sacs, Warp Conduit, Timing Push, Armed and Ready, Warp In) | Faction Indicator or arrival point more than 10" from enemies; once per Round only where printed (Barracks Proxy, Warp Gate) | literal card text | Unsourced | CS1-T, CS1-Z, CS1-P
+- RULING: Protoss Starter preset | 3 Zealots, 4 Adepts, 2 Sentries, 2 Stalkers (980 minerals under CT 10.2026) | follows the R 12.12 example list | Confirmed | R p.108-113, CT p.7
+- RULING: Preset upgrade 'model' index | 0-based model index as mustered | ArmyListDef does not say; matches Shield's 'first model' = index 0 | Unsourced | R p.108-113
+- RULING: Artefact Hunt CLAIM | happens in the Scoring Phase, only on a Controlled marker (rules.json claimTiming) | card text | Confirmed | CS2-P p.5

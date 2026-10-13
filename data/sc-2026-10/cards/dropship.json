@@ -1,0 +1,70 @@
+{
+  "id": "dropship",
+  "name": "Dropship",
+  "kind": "tactical",
+  "race": "terran",
+  "factionTags": [
+    "terran"
+  ],
+  "unique": true,
+  "slots": {
+    "core": 1,
+    "support": 1
+  },
+  "resource": {
+    "res": "CP",
+    "n": 1
+  },
+  "abilities": [
+    {
+      "id": "strap-in",
+      "name": "Strap In!",
+      "type": "active",
+      "phase": "movement",
+      "insteadOfAction": true,
+      "target": {
+        "kind": "activeUnit",
+        "filter": {
+          "tags": [
+            "ground"
+          ],
+          "engaged": false
+        }
+      },
+      "effects": [
+        {
+          "op": "returnToReserves"
+        }
+      ],
+      "text": "An unengaged ground Unit goes back to Reserves in place of its action."
+    },
+    {
+      "id": "ready-for-dust-off",
+      "name": "Ready for Dust-off",
+      "type": "active",
+      "phase": "movement",
+      "effects": [
+        {
+          "op": "setToken",
+          "token": "faction-indicator",
+          "range": null
+        },
+        {
+          "op": "altEntry",
+          "kind": "indicator",
+          "filter": {
+            "tags": [
+              "ground"
+            ]
+          },
+          "at": {
+            "event": "endOfRound"
+          }
+        }
+      ],
+      "text": "Mark a landing spot far from enemies; at round end one ground Unit drops in beside it."
+    }
+  ],
+  "cardVersion": "1.04.26",
+  "source": "CS1-T p.9"
+}

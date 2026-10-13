@@ -1,0 +1,233 @@
+{
+  "id": "marauder",
+  "name": "Marauder",
+  "race": "terran",
+  "factionTags": [
+    "terran"
+  ],
+  "unique": false,
+  "role": "Tank",
+  "slot": "core",
+  "summoned": false,
+  "combatTags": [
+    "armoured",
+    "biological",
+    "ground"
+  ],
+  "stats": {
+    "shield": null,
+    "speed": [
+      4,
+      7
+    ],
+    "armour": 4,
+    "evade": 6,
+    "hp": 5,
+    "size": 2
+  },
+  "baseMm": 50,
+  "supplyProfile": [
+    {
+      "min": 1,
+      "max": 1,
+      "supply": 0
+    },
+    {
+      "min": 2,
+      "max": 2,
+      "supply": 1
+    },
+    {
+      "min": 3,
+      "max": 4,
+      "supply": 2
+    }
+  ],
+  "weapons": [
+    {
+      "id": "quad-k12",
+      "name": "Quad K12",
+      "phase": "assault",
+      "range": 12,
+      "target": "ground",
+      "roa": 3,
+      "hit": 3,
+      "surgeTypes": [
+        "armoured"
+      ],
+      "sDice": "D3",
+      "dmg": 1,
+      "keywords": [
+        {
+          "kw": "PIERCE",
+          "tag": "armoured",
+          "x": 2
+        }
+      ]
+    },
+    {
+      "id": "strike",
+      "name": "Strike",
+      "phase": "combat",
+      "range": "E",
+      "target": "ground",
+      "roa": 2,
+      "hit": 4,
+      "surgeTypes": [],
+      "sDice": null,
+      "dmg": 1,
+      "keywords": []
+    }
+  ],
+  "abilities": [
+    {
+      "id": "stimpack",
+      "name": "Stimpack",
+      "type": "active",
+      "phase": "movement",
+      "cost": {
+        "res": "CP",
+        "n": 1
+      },
+      "target": {
+        "kind": "self"
+      },
+      "effects": [
+        {
+          "op": "nonLethal",
+          "x": 2
+        },
+        {
+          "op": "buff",
+          "char": "speed",
+          "x": 3
+        },
+        {
+          "op": "grantKeyword",
+          "kw": {
+            "kw": "PRECISION",
+            "x": 2
+          },
+          "to": {
+            "ids": [
+              "quad-k12"
+            ]
+          },
+          "duration": "endOfRound"
+        },
+        {
+          "op": "grantKeyword",
+          "kw": {
+            "kw": "PRECISION",
+            "x": 2
+          },
+          "to": {
+            "phase": "combat"
+          },
+          "duration": "endOfRound"
+        }
+      ],
+      "text": "Take 2 non-lethal damage for +3 Speed and PRECISION 2 on its guns and melee this Round."
+    },
+    {
+      "id": "concussive-shells",
+      "name": "Concussive Shells",
+      "type": "reaction",
+      "phase": "assault",
+      "cost": {
+        "res": "CP",
+        "n": 1
+      },
+      "trigger": {
+        "event": "declareCharge",
+        "who": "enemy",
+        "subject": "friendly",
+        "within": 8
+      },
+      "effects": [
+        {
+          "op": "debuff",
+          "char": "speed",
+          "x": 2,
+          "to": "triggerUnit"
+        }
+      ],
+      "text": "Slow an enemy that charges a friend within 8 inches."
+    }
+  ],
+  "upgrades": [
+    {
+      "id": "veteran-of-tarsonis",
+      "name": "Veteran of Tarsonis",
+      "phase": "any",
+      "ability": {
+        "id": "veteran-of-tarsonis",
+        "name": "Veteran of Tarsonis",
+        "type": "passive",
+        "phase": "any",
+        "effects": [
+          {
+            "op": "rollMod",
+            "roll": "armour",
+            "delta": 1,
+            "when": {
+              "withinMarker": 3
+            }
+          }
+        ],
+        "text": "Better Armour near a Mission Marker."
+      }
+    },
+    {
+      "id": "kinetic-foam",
+      "name": "Kinetic Foam",
+      "phase": "any",
+      "ability": {
+        "id": "kinetic-foam",
+        "name": "Kinetic Foam",
+        "type": "passive",
+        "phase": "any",
+        "effects": [
+          {
+            "op": "modify",
+            "char": "hp",
+            "delta": 1
+          }
+        ],
+        "text": "+1 Hit Point per model."
+      }
+    },
+    {
+      "id": "laser-targeting-systems",
+      "name": "Laser Targeting Systems",
+      "phase": "assault",
+      "ability": {
+        "id": "laser-targeting-systems",
+        "name": "Laser Targeting Systems",
+        "type": "passive",
+        "phase": "assault",
+        "effects": [
+          {
+            "op": "grantKeyword",
+            "kw": {
+              "kw": "LONG_RANGE",
+              "x": 16
+            },
+            "to": {
+              "ids": [
+                "quad-k12"
+              ]
+            }
+          }
+        ],
+        "text": "Quad K12 reaches 16 inches."
+      }
+    }
+  ],
+  "cardVersion": "1.04.26",
+  "source": [
+    "CS1-T p.2",
+    "CT p.2",
+    "CL p.2"
+  ]
+}

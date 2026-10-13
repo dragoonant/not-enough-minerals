@@ -1,0 +1,66 @@
+[
+ {
+  "id": "divide-and-conquer-standard",
+  "name": "Divide and Conquer",
+  "scale": "standard",
+  "startSupply": 8,
+  "escalation": 2,
+  "gameLength": 4,
+  "specialWinLead": 10,
+  "markerStart": "activated",
+  "startOfRound": [],
+  "scoring": [
+   {
+    "kind": "supplyDestroyed"
+   },
+   {
+    "kind": "quarters",
+    "fromRound": 1,
+    "vp": 1,
+    "controlBonus": 1
+   },
+   {
+    "kind": "markerControlled",
+    "marker": 5,
+    "vp": 2,
+    "fromRound": 1
+   }
+  ],
+  "actions": [],
+  "text": "The table is cut into four quarters; win each with more Supply wholly inside it (marker holders count +1), and take 2 VP for marker 5.",
+  "cardVersion": "1.04.26",
+  "source": "CS1-T p.13"
+ },
+ {
+  "id": "divide-and-conquer-skirmish",
+  "name": "Divide and Conquer",
+  "scale": "skirmish",
+  "startSupply": 4,
+  "escalation": 1,
+  "gameLength": 4,
+  "specialWinLead": 8,
+  "markerStart": "activated",
+  "startOfRound": [],
+  "scoring": [
+   {
+    "kind": "supplyDestroyed"
+   },
+   {
+    "kind": "quarters",
+    "fromRound": 1,
+    "vp": 1,
+    "controlBonus": 1
+   },
+   {
+    "kind": "markerControlled",
+    "marker": 5,
+    "vp": 2,
+    "fromRound": 1
+   }
+  ],
+  "actions": [],
+  "text": "The table is cut into four quarters; win each with more Supply wholly inside it (marker holders count +1), and take 2 VP for marker 5.",
+  "cardVersion": "1.04.26",
+  "source": "CS1-T p.13"
+ }
+]

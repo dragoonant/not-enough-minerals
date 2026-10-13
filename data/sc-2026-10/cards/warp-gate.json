@@ -1,0 +1,77 @@
+{
+  "id": "warp-gate",
+  "name": "Warp Gate",
+  "kind": "tactical",
+  "race": "protoss",
+  "factionTags": [
+    "protoss"
+  ],
+  "unique": true,
+  "slots": {
+    "core": 2
+  },
+  "resource": {
+    "res": "PE",
+    "n": 1
+  },
+  "abilities": [
+    {
+      "id": "quick-strikes",
+      "name": "Quick Strikes",
+      "type": "active",
+      "phase": "combat",
+      "target": {
+        "kind": "activeUnit"
+      },
+      "effects": [
+        {
+          "op": "grantKeyword",
+          "kw": {
+            "kw": "PRECISION",
+            "x": 2
+          },
+          "to": {
+            "phase": "combat",
+            "first": true
+          },
+          "duration": "endOfActivation"
+        }
+      ],
+      "text": "Melee: the first weapon used this activation gets PRECISION 2."
+    },
+    {
+      "id": "warp-in",
+      "name": "Warp In",
+      "type": "active",
+      "phase": "movement",
+      "target": {
+        "kind": "activeUnit",
+        "filter": {
+          "tags": [
+            "ground"
+          ]
+        }
+      },
+      "effects": [
+        {
+          "op": "altEntry",
+          "kind": "nonEntryEdge"
+        },
+        {
+          "op": "code",
+          "code": "forward-deploy-clearance",
+          "args": {
+            "minEnemyDist": 10
+          }
+        },
+        {
+          "op": "code",
+          "code": "forward-deploy-once-per-round"
+        }
+      ],
+      "text": "A ground Unit deploys from a non-entry edge, once per Round, clear of enemies."
+    }
+  ],
+  "cardVersion": "1.03.26",
+  "source": "CS1-P p.9"
+}

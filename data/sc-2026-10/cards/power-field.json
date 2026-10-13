@@ -1,0 +1,50 @@
+{
+  "id": "power-field",
+  "name": "Power Field",
+  "kind": "tactical",
+  "race": "protoss",
+  "factionTags": [
+    "protoss"
+  ],
+  "unique": true,
+  "slots": {
+    "core": 1,
+    "elite": 1,
+    "hero": 1
+  },
+  "resource": {
+    "res": "PE",
+    "n": 1
+  },
+  "abilities": [
+    {
+      "id": "guardian-shell",
+      "name": "Guardian Shell",
+      "type": "reaction",
+      "phase": "any",
+      "trigger": {
+        "event": "beforeArmourRoll",
+        "subject": "friendly",
+        "filter": {
+          "tags": [
+            "ground"
+          ]
+        }
+      },
+      "effects": [
+        {
+          "op": "grantKeyword",
+          "kw": {
+            "kw": "DODGE",
+            "x": 2
+          },
+          "to": "triggerUnit",
+          "duration": "thisRoll"
+        }
+      ],
+      "text": "A ground friend gets DODGE 2 on one armour roll."
+    }
+  ],
+  "cardVersion": "1.04.26",
+  "source": "CS1-P p.10"
+}

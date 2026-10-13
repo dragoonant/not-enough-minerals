@@ -1,0 +1,225 @@
+{
+  "id": "raynors-raider",
+  "name": "Raynor's Raider (Marine)",
+  "race": "terran",
+  "factionTags": [
+    "terran",
+    "raynors-raiders"
+  ],
+  "unique": false,
+  "role": "Damage Dealer",
+  "slot": "core",
+  "summoned": false,
+  "combatTags": [
+    "biological",
+    "light",
+    "ground"
+  ],
+  "stats": {
+    "shield": null,
+    "speed": [
+      4,
+      7
+    ],
+    "armour": 5,
+    "evade": 5,
+    "hp": 2,
+    "size": 2
+  },
+  "baseMm": 32,
+  "supplyProfile": [
+    {
+      "min": 1,
+      "max": 6,
+      "supply": 1
+    }
+  ],
+  "weapons": [
+    {
+      "id": "c-14-rifle",
+      "name": "C-14 Rifle",
+      "phase": "assault",
+      "range": 12,
+      "target": "all",
+      "roa": 2,
+      "hit": 3,
+      "surgeTypes": [
+        "light"
+      ],
+      "sDice": "D3",
+      "dmg": 1,
+      "keywords": []
+    },
+    {
+      "id": "bayonet",
+      "name": "Bayonet",
+      "phase": "combat",
+      "range": "E",
+      "target": "ground",
+      "roa": 2,
+      "hit": 5,
+      "surgeTypes": [],
+      "sDice": null,
+      "dmg": 1,
+      "keywords": []
+    }
+  ],
+  "abilities": [
+    {
+      "id": "stimpack",
+      "name": "Stimpack",
+      "type": "active",
+      "phase": "movement",
+      "cost": {
+        "res": "CP",
+        "n": 1
+      },
+      "target": {
+        "kind": "self"
+      },
+      "effects": [
+        {
+          "op": "nonLethal",
+          "x": 2
+        },
+        {
+          "op": "buff",
+          "char": "speed",
+          "x": 3
+        },
+        {
+          "op": "grantKeyword",
+          "kw": {
+            "kw": "PRECISION",
+            "x": 3
+          },
+          "to": {
+            "ids": [
+              "c-14-rifle"
+            ]
+          },
+          "duration": "endOfRound"
+        },
+        {
+          "op": "grantKeyword",
+          "kw": {
+            "kw": "PRECISION",
+            "x": 3
+          },
+          "to": {
+            "phase": "combat"
+          },
+          "duration": "endOfRound"
+        }
+      ],
+      "text": "Take 2 non-lethal damage for +3 Speed and PRECISION 3 on rifles and melee this Round."
+    },
+    {
+      "id": "raiders-roll",
+      "name": "Raiders Roll!",
+      "type": "passive",
+      "phase": "movement",
+      "trigger": {
+        "event": "nominatedToDeploy"
+      },
+      "effects": [
+        {
+          "op": "abilityMod",
+          "ability": "stimpack",
+          "field": "usableInReserves",
+          "value": true
+        },
+        {
+          "op": "costMod",
+          "res": "CP",
+          "delta": -1,
+          "floor": 0,
+          "ability": "stimpack"
+        }
+      ],
+      "text": "May stim on the way in from Reserves for 1 CP less."
+    },
+    {
+      "id": "rapid-reinforcements",
+      "name": "Rapid Reinforcements",
+      "type": "passive",
+      "phase": "movement",
+      "trigger": {
+        "event": "nominatedToDeploy"
+      },
+      "endsActivation": true,
+      "effects": [
+        {
+          "op": "place",
+          "x": 10,
+          "from": "friendlyUnit",
+          "minEnemyDist": 8,
+          "optional": true
+        }
+      ],
+      "text": "Drop in up to 10 inches from another friendly Unit, 8 inches clear of enemies."
+    },
+    {
+      "id": "slugthrower",
+      "name": "Slugthrower",
+      "type": "passive",
+      "phase": "assault",
+      "effects": [
+        {
+          "op": "grantKeyword",
+          "kw": {
+            "kw": "ANTI_EVADE",
+            "x": 1
+          },
+          "to": {
+            "ids": [
+              "c-14-rifle"
+            ]
+          },
+          "when": {
+            "attack": "ranged",
+            "weapons": [
+              "c-14-rifle"
+            ],
+            "targetWithin": 8
+          },
+          "duration": "thisAttack"
+        }
+      ],
+      "text": "Rifle shots at 8 inches or closer get ANTI-EVADE 1."
+    },
+    {
+      "id": "grenades-frag",
+      "name": "Grenades - Frag",
+      "type": "passive",
+      "phase": "assault",
+      "effects": [
+        {
+          "op": "weaponMod",
+          "sDice": "D6",
+          "to": {
+            "ids": [
+              "c-14-rifle"
+            ]
+          },
+          "when": {
+            "attack": "ranged",
+            "weapons": [
+              "c-14-rifle"
+            ],
+            "targetWithin": 8
+          },
+          "duration": "thisAttack"
+        }
+      ],
+      "text": "Rifle Surge dice become D6 at 8 inches or closer."
+    }
+  ],
+  "upgrades": [],
+  "cardVersion": "1.04.26",
+  "source": [
+    "CS1-T p.6",
+    "CT p.2"
+  ],
+  "variantOf": "marine"
+}

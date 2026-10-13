@@ -1,0 +1,316 @@
+{
+  "id": "immortal",
+  "name": "Immortal",
+  "race": "protoss",
+  "factionTags": [
+    "protoss"
+  ],
+  "unique": false,
+  "role": "Tank",
+  "slot": "elite",
+  "summoned": false,
+  "combatTags": [
+    "armoured",
+    "mechanical",
+    "ground"
+  ],
+  "stats": {
+    "shield": 6,
+    "speed": 7,
+    "armour": 4,
+    "evade": null,
+    "hp": 8,
+    "size": 3
+  },
+  "baseMm": 100,
+  "supplyProfile": [
+    {
+      "min": 1,
+      "max": 1,
+      "supply": 2
+    }
+  ],
+  "weapons": [
+    {
+      "id": "left-photon-disruptor",
+      "name": "Left Photon Disruptor",
+      "phase": "assault",
+      "range": 12,
+      "target": "ground",
+      "roa": 4,
+      "hit": 3,
+      "surgeTypes": [
+        "armoured"
+      ],
+      "sDice": "D3",
+      "dmg": 2,
+      "keywords": [
+        {
+          "kw": "CONCENTRATED_FIRE",
+          "x": 1
+        },
+        {
+          "kw": "LONG_RANGE",
+          "x": 16
+        }
+      ]
+    },
+    {
+      "id": "right-photon-disruptor",
+      "name": "Right Photon Disruptor",
+      "phase": "assault",
+      "range": 12,
+      "target": "ground",
+      "roa": 4,
+      "hit": 3,
+      "surgeTypes": [
+        "armoured"
+      ],
+      "sDice": "D3",
+      "dmg": 2,
+      "keywords": [
+        {
+          "kw": "CONCENTRATED_FIRE",
+          "x": 1
+        },
+        {
+          "kw": "LONG_RANGE",
+          "x": 16
+        },
+        {
+          "kw": "SIDEARM"
+        }
+      ]
+    },
+    {
+      "id": "stomp",
+      "name": "Stomp",
+      "phase": "combat",
+      "range": "E",
+      "target": "ground",
+      "roa": 3,
+      "hit": 3,
+      "surgeTypes": [],
+      "sDice": null,
+      "dmg": 1,
+      "keywords": []
+    }
+  ],
+  "abilities": [
+    {
+      "id": "improved-barrier",
+      "name": "Improved Barrier",
+      "type": "reaction",
+      "phase": "any",
+      "cost": {
+        "res": "PE",
+        "n": 0
+      },
+      "trigger": {
+        "event": "targeted",
+        "subject": "self"
+      },
+      "effects": [
+        {
+          "op": "damageCap",
+          "max": 1,
+          "when": {
+            "status": [
+              "SHIELDED"
+            ]
+          },
+          "duration": "thisAttack"
+        }
+      ],
+      "text": "While shielded, the attack deals at most 1 damage per hit."
+    },
+    {
+      "id": "indomitable",
+      "name": "Indomitable",
+      "type": "passive",
+      "phase": "assault",
+      "effects": [
+        {
+          "op": "grantKeyword",
+          "kw": {
+            "kw": "INDOMITABLE"
+          }
+        }
+      ],
+      "text": "Trades shots with Unengaged Units even while Engaged."
+    },
+    {
+      "id": "devastating-charge",
+      "name": "Devastating Charge",
+      "type": "passive",
+      "phase": "assault",
+      "trigger": {
+        "event": "chargeSucceeded"
+      },
+      "effects": [
+        {
+          "op": "impact",
+          "x": 4,
+          "y": 3
+        }
+      ],
+      "text": "After a successful Charge, IMPACT (4) 3+."
+    }
+  ],
+  "upgrades": [
+    {
+      "id": "shield-overcharge",
+      "name": "Shield Overcharge",
+      "phase": "any",
+      "ability": {
+        "id": "shield-overcharge",
+        "name": "Shield Overcharge",
+        "type": "reaction",
+        "phase": "any",
+        "cost": {
+          "res": "PE",
+          "n": 1
+        },
+        "trigger": {
+          "event": "beforeArmourRoll",
+          "subject": "self"
+        },
+        "requires": {
+          "status": [
+            "SHIELDED"
+          ]
+        },
+        "effects": [
+          {
+            "op": "grantKeyword",
+            "kw": {
+              "kw": "TOUGH",
+              "x": 2
+            },
+            "duration": "thisRoll"
+          }
+        ],
+        "text": "TOUGH 2 on this Armour Roll while shielded."
+      }
+    },
+    {
+      "id": "left-phase-disruptor",
+      "name": "Left Phase Disruptor",
+      "phase": "assault",
+      "replaces": "left-photon-disruptor",
+      "weapon": {
+        "id": "left-phase-disruptor",
+        "name": "Left Phase Disruptor",
+        "phase": "assault",
+        "range": 12,
+        "target": "ground",
+        "roa": 4,
+        "hit": 3,
+        "surgeTypes": [
+          "armoured"
+        ],
+        "sDice": "D3",
+        "dmg": 1,
+        "keywords": [
+          {
+            "kw": "PIERCE",
+            "tag": "armoured",
+            "x": 3
+          }
+        ]
+      }
+    },
+    {
+      "id": "right-phase-disruptor",
+      "name": "Right Phase Disruptor",
+      "phase": "assault",
+      "replaces": "right-photon-disruptor",
+      "weapon": {
+        "id": "right-phase-disruptor",
+        "name": "Right Phase Disruptor",
+        "phase": "assault",
+        "range": 12,
+        "target": "ground",
+        "roa": 4,
+        "hit": 3,
+        "surgeTypes": [
+          "armoured"
+        ],
+        "sDice": "D3",
+        "dmg": 1,
+        "keywords": [
+          {
+            "kw": "PIERCE",
+            "tag": "armoured",
+            "x": 3
+          },
+          {
+            "kw": "SIDEARM"
+          }
+        ]
+      }
+    },
+    {
+      "id": "fury-unyielding",
+      "name": "Fury Unyielding",
+      "phase": "assault",
+      "ability": {
+        "id": "fury-unyielding",
+        "name": "Fury Unyielding",
+        "type": "passive",
+        "phase": "assault",
+        "effects": [
+          {
+            "op": "grantKeyword",
+            "kw": {
+              "kw": "CRITICAL_HIT",
+              "x": 1
+            },
+            "to": {
+              "phase": "assault"
+            },
+            "when": {
+              "withinMarker": 3,
+              "targetWithinMarkerOfSelf": 3
+            }
+          }
+        ],
+        "text": "CRITICAL HIT 1 on guns when it and its target share a marker."
+      }
+    },
+    {
+      "id": "for-the-ancients",
+      "name": "For the Ancients",
+      "phase": "assault",
+      "ability": {
+        "id": "for-the-ancients",
+        "name": "For the Ancients",
+        "type": "passive",
+        "phase": "assault",
+        "effects": [
+          {
+            "op": "grantKeyword",
+            "kw": {
+              "kw": "PRECISION",
+              "x": 1
+            },
+            "to": {
+              "phase": "assault"
+            },
+            "when": {
+              "attack": "ranged",
+              "targetBeyond": 8
+            },
+            "duration": "thisAttack"
+          }
+        ],
+        "text": "PRECISION 1 on shots past 8 inches."
+      }
+    }
+  ],
+  "cardVersion": "1.06.26",
+  "source": [
+    "CS2-P p.1",
+    "CT p.8"
+  ]
+}

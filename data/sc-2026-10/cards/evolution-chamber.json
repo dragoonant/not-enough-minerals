@@ -1,0 +1,61 @@
+{
+  "id": "evolution-chamber",
+  "name": "Evolution Chamber",
+  "kind": "tactical",
+  "race": "zerg",
+  "factionTags": [
+    "zerg"
+  ],
+  "unique": false,
+  "slots": {
+    "core": 1
+  },
+  "resource": {
+    "res": "BM",
+    "n": 1
+  },
+  "abilities": [
+    {
+      "id": "extended-claws",
+      "name": "Extended Claws",
+      "type": "active",
+      "phase": "assault",
+      "target": {
+        "kind": "activeUnit"
+      },
+      "effects": [
+        {
+          "op": "rollMod",
+          "roll": "impactHit",
+          "delta": 1,
+          "duration": "endOfActivation"
+        }
+      ],
+      "text": "The active Unit gets +1 on its IMPACT hit rolls."
+    },
+    {
+      "id": "carapace",
+      "name": "Carapace",
+      "type": "reaction",
+      "phase": "any",
+      "trigger": {
+        "event": "beforeArmourRoll",
+        "subject": "friendly"
+      },
+      "effects": [
+        {
+          "op": "grantKeyword",
+          "kw": {
+            "kw": "TOUGH",
+            "x": 1
+          },
+          "to": "triggerUnit",
+          "duration": "thisRoll"
+        }
+      ],
+      "text": "A friend gets TOUGH 1 on one armour roll."
+    }
+  ],
+  "cardVersion": "1.04.26",
+  "source": "CS1-Z p.13"
+}

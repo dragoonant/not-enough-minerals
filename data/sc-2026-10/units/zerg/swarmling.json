@@ -1,0 +1,161 @@
+{
+ "id": "swarmling",
+ "name": "Swarmling (Zergling)",
+ "race": "zerg",
+ "factionTags": [
+  "zerg"
+ ],
+ "unique": false,
+ "role": "Damage Dealer",
+ "slot": "core",
+ "summoned": false,
+ "combatTags": [
+  "biological",
+  "light",
+  "ground"
+ ],
+ "stats": {
+  "shield": null,
+  "speed": [
+   4,
+   8
+  ],
+  "armour": 6,
+  "evade": 5,
+  "hp": 1,
+  "size": 1
+ },
+ "baseMm": 32,
+ "supplyProfile": [
+  {
+   "min": 1,
+   "max": 6,
+   "supply": 0
+  },
+  {
+   "min": 7,
+   "max": 18,
+   "supply": 1
+  }
+ ],
+ "weapons": [
+  {
+   "id": "claws",
+   "name": "Claws",
+   "phase": "combat",
+   "range": "E",
+   "target": "ground",
+   "roa": 2,
+   "hit": 5,
+   "surgeTypes": [],
+   "sDice": null,
+   "dmg": 1,
+   "keywords": []
+  }
+ ],
+ "abilities": [
+  {
+   "id": "squadron",
+   "name": "Squadron",
+   "type": "passive",
+   "phase": "any",
+   "effects": [
+    {
+     "op": "coherency",
+     "d": 4
+    }
+   ],
+   "text": "Models stay in coherency at up to 4 inches apart."
+  },
+  {
+   "id": "zergling-reconstitution",
+   "name": "Zergling Reconstitution",
+   "type": "active",
+   "phase": "movement",
+   "cost": {
+    "res": "BM",
+    "n": 1
+   },
+   "effects": [
+    {
+     "op": "respawn",
+     "x": 2,
+     "when": {
+      "onCreep": false
+     }
+    },
+    {
+     "op": "respawn",
+     "x": 3,
+     "when": {
+      "onCreep": true
+     }
+    }
+   ],
+   "text": "Bring back 2 lost models, or 3 on Creep."
+  },
+  {
+   "id": "devastating-charge",
+   "name": "Devastating Charge",
+   "type": "passive",
+   "phase": "assault",
+   "trigger": {
+    "event": "chargeSucceeded"
+   },
+   "effects": [
+    {
+     "op": "impact",
+     "x": 1,
+     "y": 5
+    }
+   ],
+   "text": "After a successful Charge, IMPACT (1) 5+."
+  },
+  {
+   "id": "metabolic-boost",
+   "name": "Metabolic Boost",
+   "type": "active",
+   "phase": "assault",
+   "cost": {
+    "res": "BM",
+    "n": 1
+   },
+   "effects": [
+    {
+     "op": "charge",
+     "dice": "best2D6"
+    }
+   ],
+   "text": "Roll two dice for charge distance and keep the higher."
+  }
+ ],
+ "upgrades": [
+  {
+   "id": "burrow-ambush",
+   "name": "Burrow Ambush",
+   "phase": "movement",
+   "ability": {
+    "id": "burrow-ambush",
+    "name": "Burrow Ambush",
+    "type": "passive",
+    "phase": "movement",
+    "trigger": {
+     "event": "nominatedToDeploy"
+    },
+    "endsActivation": true,
+    "effects": [
+     {
+      "op": "place",
+      "x": 18,
+      "from": "entryEdge",
+      "minEnemyDist": 10
+     }
+    ],
+    "text": "Arrives from Reserves up to 18 inches in from its edge, 10 inches clear of enemies."
+   }
+  }
+ ],
+ "cardVersion": "1.03.26",
+ "source": "CS1-Z p.12",
+ "variantOf": "zergling"
+}

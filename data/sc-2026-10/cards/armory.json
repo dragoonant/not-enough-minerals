@@ -1,0 +1,77 @@
+{
+  "id": "armory",
+  "name": "Armory",
+  "kind": "tactical",
+  "race": "terran",
+  "factionTags": [
+    "terran"
+  ],
+  "unique": false,
+  "slots": {
+    "elite": 1
+  },
+  "resource": {
+    "res": "CP",
+    "n": 1
+  },
+  "abilities": [
+    {
+      "id": "vehicle-weapons",
+      "name": "Vehicle Weapons",
+      "type": "active",
+      "phase": "assault",
+      "target": {
+        "kind": "activeUnit",
+        "filter": {
+          "tags": [
+            "mechanical"
+          ]
+        }
+      },
+      "effects": [
+        {
+          "op": "grantKeyword",
+          "kw": {
+            "kw": "CRITICAL_HIT",
+            "x": 1
+          },
+          "to": {
+            "phase": "assault",
+            "first": true
+          },
+          "duration": "endOfActivation"
+        }
+      ],
+      "text": "A mechanical Unit adds CRITICAL HIT 1 to its first ranged weapon used."
+    },
+    {
+      "id": "vehicle-plating",
+      "name": "Vehicle Plating",
+      "type": "reaction",
+      "phase": "any",
+      "trigger": {
+        "event": "beforeArmourRoll",
+        "subject": "friendly",
+        "filter": {
+          "tags": [
+            "mechanical"
+          ]
+        }
+      },
+      "effects": [
+        {
+          "op": "grantKeyword",
+          "kw": {
+            "kw": "TOUGH",
+            "x": 1
+          },
+          "to": "triggerUnit",
+          "duration": "thisRoll"
+        }
+      ],
+      "text": "A mechanical friend gets TOUGH 1 on one armour roll."
+    }
+  ],
+  "cardVersion": "1.03.26",
+  "source": "CS1-T p.10"
+}

@@ -1,0 +1,60 @@
+{
+  "id": "overseer",
+  "name": "Overseer",
+  "kind": "tactical",
+  "race": "zerg",
+  "factionTags": [
+    "zerg"
+  ],
+  "unique": true,
+  "slots": {
+    "support": 1
+  },
+  "resource": {
+    "res": "BM",
+    "n": 1
+  },
+  "abilities": [
+    {
+      "id": "pneumatized-carapace",
+      "name": "Pneumatized Carapace",
+      "type": "reaction",
+      "phase": "assault",
+      "trigger": {
+        "event": "chargeDistance",
+        "who": "friendly"
+      },
+      "effects": [
+        {
+          "op": "charge",
+          "dice": "best2D6",
+          "to": "triggerUnit",
+          "duration": "thisRoll"
+        }
+      ],
+      "text": "A friend rolling Charge distance rolls a second die and keeps the higher."
+    },
+    {
+      "id": "oversight-mode",
+      "name": "Oversight Mode",
+      "type": "active",
+      "phase": "movement",
+      "effects": [
+        {
+          "op": "setToken",
+          "token": "faction-indicator",
+          "range": null
+        },
+        {
+          "op": "detection",
+          "radius": 6,
+          "centre": "indicator",
+          "duration": "endOfRound"
+        }
+      ],
+      "text": "Place a scan spot: enemies within 6 inches of it lose Hidden."
+    }
+  ],
+  "cardVersion": "1.04.26",
+  "source": "CS1-Z p.13"
+}

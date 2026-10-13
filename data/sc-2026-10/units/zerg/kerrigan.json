@@ -1,0 +1,187 @@
+{
+ "id": "kerrigan",
+ "name": "Kerrigan",
+ "race": "zerg",
+ "factionTags": [
+  "zerg"
+ ],
+ "unique": true,
+ "role": "Damage Dealer",
+ "slot": "hero",
+ "summoned": false,
+ "combatTags": [
+  "biological",
+  "psionic",
+  "ground"
+ ],
+ "stats": {
+  "shield": null,
+  "speed": 7,
+  "armour": 5,
+  "evade": 6,
+  "hp": 9,
+  "size": 2
+ },
+ "baseMm": 40,
+ "supplyProfile": [
+  {
+   "min": 1,
+   "max": 1,
+   "supply": 1
+  }
+ ],
+ "weapons": [
+  {
+   "id": "energy-blast",
+   "name": "Energy Blast",
+   "phase": "assault",
+   "range": 8,
+   "target": "all",
+   "roa": 5,
+   "hit": 3,
+   "surgeTypes": [
+    "light",
+    "armoured"
+   ],
+   "sDice": "D3",
+   "dmg": 1,
+   "keywords": []
+  },
+  {
+   "id": "blades",
+   "name": "Blades",
+   "phase": "combat",
+   "range": "E",
+   "target": "ground",
+   "roa": 6,
+   "hit": 4,
+   "surgeTypes": [],
+   "sDice": null,
+   "dmg": 2,
+   "keywords": [
+    {
+     "kw": "CRITICAL_HIT",
+     "x": 2
+    }
+   ]
+  }
+ ],
+ "abilities": [
+  {
+   "id": "commander",
+   "name": "Commander",
+   "type": "passive",
+   "phase": "any",
+   "effects": [
+    {
+     "op": "supplyOverride",
+     "purposes": [
+      "control",
+      "contest",
+      "objectives",
+      "disengage"
+     ],
+     "delta": 1
+    }
+   ],
+   "text": "Counts one extra Supply for markers, objectives and Disengage checks."
+  },
+  {
+   "id": "crushing-grip",
+   "name": "Crushing Grip",
+   "type": "active",
+   "phase": "movement",
+   "cost": {
+    "res": "BM",
+    "n": 1
+   },
+   "target": {
+    "kind": "enemyUnit",
+    "range": 12
+   },
+   "effects": [
+    {
+     "op": "activation",
+     "mode": "set"
+    }
+   ],
+   "text": "An enemy within 12 inches counts as already activated this Phase."
+  },
+  {
+   "id": "mutating-carapace",
+   "name": "Mutating Carapace",
+   "type": "active",
+   "phase": "movement",
+   "cost": {
+    "res": "BM",
+    "n": 1
+   },
+   "target": {
+    "kind": "enemyUnit",
+    "range": 18
+   },
+   "effects": [
+    {
+     "op": "canEvade",
+     "vs": [
+      "all"
+     ],
+     "to": "self",
+     "when": {
+      "attackerSelectedBy": "mutating-carapace"
+     }
+    },
+    {
+     "op": "rollMod",
+     "roll": "evade",
+     "delta": 2,
+     "to": "self",
+     "when": {
+      "attackerSelectedBy": "mutating-carapace"
+     }
+    }
+   ],
+   "text": "Pick an enemy within 18 inches: she may Evade its attacks at +2."
+  },
+  {
+   "id": "leaping-strike",
+   "name": "Leaping Strike",
+   "type": "active",
+   "phase": "assault",
+   "cost": {
+    "res": "BM",
+    "n": 1
+   },
+   "requires": {
+    "engaged": false
+   },
+   "effects": [
+    {
+     "op": "place",
+     "x": 6
+    }
+   ],
+   "text": "Leap up to 6 inches when not in melee."
+  },
+  {
+   "id": "devastating-charge",
+   "name": "Devastating Charge",
+   "type": "passive",
+   "phase": "assault",
+   "trigger": {
+    "event": "chargeSucceeded"
+   },
+   "effects": [
+    {
+     "op": "impact",
+     "x": 4,
+     "y": 4
+    }
+   ],
+   "text": "After a successful Charge, IMPACT (4) 4+."
+  }
+ ],
+ "upgrades": [],
+ "cardVersion": "1.04.26",
+ "source": "CS1-Z p.2"
+}

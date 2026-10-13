@@ -1,0 +1,54 @@
+{
+ "id": "frontier",
+ "name": "Frontier",
+ "scale": "skirmish",
+ "size": {
+  "w": 36,
+  "h": 36
+ },
+ "entryEdges": {
+  "red": [
+   {
+    "edge": "N",
+    "from": 12,
+    "to": 24
+   },
+   {
+    "edge": "S",
+    "from": 12,
+    "to": 24
+   }
+  ],
+  "blue": [
+   {
+    "edge": "W",
+    "from": 12,
+    "to": 24
+   },
+   {
+    "edge": "E",
+    "from": 12,
+    "to": 24
+   }
+  ]
+ },
+ "markers": [
+  {
+   "n": 1,
+   "x": 6,
+   "y": 6
+  },
+  {
+   "n": 2,
+   "x": 30,
+   "y": 30
+  },
+  {
+   "n": 5,
+   "x": 18,
+   "y": 18
+  }
+ ],
+ "cardVersion": "1.03.26",
+ "source": "CS1-T p.14"
+}

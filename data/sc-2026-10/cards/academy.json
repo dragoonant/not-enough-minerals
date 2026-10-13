@@ -1,0 +1,50 @@
+{
+  "id": "academy",
+  "name": "Academy",
+  "kind": "tactical",
+  "race": "terran",
+  "factionTags": [
+    "terran"
+  ],
+  "unique": true,
+  "slots": {
+    "support": 2
+  },
+  "resource": {
+    "res": "CP",
+    "n": 1
+  },
+  "abilities": [
+    {
+      "id": "advanced-training",
+      "name": "Advanced Training",
+      "type": "reaction",
+      "phase": "any",
+      "cost": {
+        "res": "CP",
+        "n": 0
+      },
+      "limit": "oncePerRound",
+      "trigger": {
+        "event": "usesAbility",
+        "who": "friendly",
+        "filter": {
+          "code": "unit-slot-support"
+        }
+      },
+      "effects": [
+        {
+          "op": "costMod",
+          "res": "CP",
+          "delta": -1,
+          "floor": 0,
+          "to": "triggerUnit",
+          "duration": "thisRoll"
+        }
+      ],
+      "text": "Once a Round a friendly Support Unit pays 1 less CP for a CP ability; this card stays ready."
+    }
+  ],
+  "cardVersion": "1.04.26",
+  "source": "CS1-T p.8"
+}

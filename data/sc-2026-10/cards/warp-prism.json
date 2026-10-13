@@ -1,0 +1,63 @@
+{
+  "id": "warp-prism",
+  "name": "Warp Prism",
+  "kind": "tactical",
+  "race": "protoss",
+  "factionTags": [
+    "protoss"
+  ],
+  "unique": true,
+  "slots": {
+    "core": 2
+  },
+  "resource": {
+    "res": "PE",
+    "n": 1
+  },
+  "abilities": [
+    {
+      "id": "phase",
+      "name": "Phase",
+      "type": "active",
+      "phase": "movement",
+      "target": {
+        "kind": "activeUnit"
+      },
+      "effects": [
+        {
+          "op": "place",
+          "x": 3
+        }
+      ],
+      "text": "The active Unit is set down up to 3 inches away."
+    },
+    {
+      "id": "warp-conduit",
+      "name": "Warp Conduit",
+      "type": "active",
+      "phase": "movement",
+      "effects": [
+        {
+          "op": "setToken",
+          "token": "faction-indicator",
+          "range": null
+        },
+        {
+          "op": "altEntry",
+          "kind": "indicator",
+          "filter": {
+            "tags": [
+              "ground"
+            ]
+          },
+          "at": {
+            "event": "endOfRound"
+          }
+        }
+      ],
+      "text": "Mark a warp-in spot far from enemies; at round end one ground Unit arrives beside it."
+    }
+  ],
+  "cardVersion": "1.04.26",
+  "source": "CS1-P p.8"
+}

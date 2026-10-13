@@ -1,0 +1,371 @@
+{
+  "id": "siege-tank",
+  "name": "Siege Tank",
+  "race": "terran",
+  "factionTags": [
+    "terran"
+  ],
+  "unique": false,
+  "role": "Damage Dealer",
+  "slot": "elite",
+  "summoned": false,
+  "combatTags": [
+    "armoured",
+    "mechanical",
+    "ground"
+  ],
+  "stats": {
+    "shield": null,
+    "speed": 7,
+    "armour": 5,
+    "evade": null,
+    "hp": 14,
+    "size": 2
+  },
+  "baseMm": 150,
+  "supplyProfile": [
+    {
+      "min": 1,
+      "max": 1,
+      "supply": 2
+    }
+  ],
+  "weapons": [
+    {
+      "id": "twin-cannon",
+      "name": "Twin Cannon",
+      "phase": "assault",
+      "range": 12,
+      "target": "ground",
+      "roa": 8,
+      "hit": 3,
+      "surgeTypes": [
+        "armoured"
+      ],
+      "sDice": "D6",
+      "dmg": 1,
+      "keywords": [
+        {
+          "kw": "PIERCE",
+          "tag": "armoured",
+          "x": 2
+        }
+      ]
+    },
+    {
+      "id": "shock-cannon",
+      "name": "Shock Cannon",
+      "phase": "assault",
+      "range": 18,
+      "target": "ground",
+      "roa": "BT+4",
+      "hit": 4,
+      "surgeTypes": [
+        "light",
+        "armoured"
+      ],
+      "sDice": "BT",
+      "dmg": 1,
+      "keywords": [],
+      "template": "BT",
+      "requiresStatus": "SIEGE_MODE"
+    },
+    {
+      "id": "rolling-over",
+      "name": "Rolling Over",
+      "phase": "combat",
+      "range": "E",
+      "target": "ground",
+      "roa": 2,
+      "hit": 2,
+      "surgeTypes": [],
+      "sDice": null,
+      "dmg": 1,
+      "keywords": []
+    }
+  ],
+  "abilities": [
+    {
+      "id": "large",
+      "name": "Large",
+      "type": "passive",
+      "phase": "any",
+      "effects": [
+        {
+          "op": "grantKeyword",
+          "kw": {
+            "kw": "LARGE"
+          }
+        }
+      ],
+      "text": "Needs 3 inch gaps and flattens small impassable pieces it drives over."
+    },
+    {
+      "id": "heavy-plating",
+      "name": "Heavy Plating",
+      "type": "passive",
+      "phase": "any",
+      "trigger": {
+        "event": "beforeArmourRoll",
+        "subject": "self"
+      },
+      "effects": [
+        {
+          "op": "grantKeyword",
+          "kw": {
+            "kw": "TOUGH",
+            "x": 1
+          },
+          "when": {
+            "notStatus": [
+              "SIEGE_MODE"
+            ]
+          },
+          "duration": "thisRoll"
+        }
+      ],
+      "text": "TOUGH 1 on Armour Rolls while mobile."
+    },
+    {
+      "id": "indomitable",
+      "name": "Indomitable",
+      "type": "passive",
+      "phase": "assault",
+      "effects": [
+        {
+          "op": "grantKeyword",
+          "kw": {
+            "kw": "INDOMITABLE"
+          }
+        }
+      ],
+      "text": "Trades shots with Unengaged Units even while Engaged."
+    },
+    {
+      "id": "point-blank",
+      "name": "Point Blank",
+      "type": "passive",
+      "phase": "assault",
+      "effects": [
+        {
+          "op": "targetRestriction",
+          "cannotTarget": {
+            "engagedWithSelf": true
+          },
+          "when": {
+            "status": [
+              "SIEGE_MODE"
+            ]
+          }
+        }
+      ],
+      "text": "Sieged, it cannot shoot what is in melee with it."
+    },
+    {
+      "id": "aftershock-rounds",
+      "name": "Aftershock Rounds",
+      "type": "passive",
+      "phase": "assault",
+      "effects": [
+        {
+          "op": "setChar",
+          "char": "dmg",
+          "value": "targetSize",
+          "min": 1,
+          "to": {
+            "all": true
+          },
+          "when": {
+            "status": [
+              "SIEGE_MODE"
+            ]
+          }
+        }
+      ],
+      "text": "Sieged, its damage equals the target Size, at least 1."
+    },
+    {
+      "id": "devastating-charge",
+      "name": "Devastating Charge",
+      "type": "passive",
+      "phase": "assault",
+      "trigger": {
+        "event": "chargeSucceeded"
+      },
+      "effects": [
+        {
+          "op": "impact",
+          "x": 4,
+          "y": 3
+        }
+      ],
+      "text": "After a successful Charge, IMPACT (4) 3+."
+    }
+  ],
+  "upgrades": [
+    {
+      "id": "mode-transformation",
+      "name": "Mode Transformation",
+      "phase": "movement",
+      "ability": {
+        "id": "mode-transformation",
+        "name": "Mode Transformation",
+        "type": "active",
+        "phase": "movement",
+        "cost": {
+          "res": "CP",
+          "n": 1
+        },
+        "effects": [
+          {
+            "op": "status",
+            "status": "SIEGE_MODE",
+            "mode": "toggle"
+          },
+          {
+            "op": "setChar",
+            "char": "size",
+            "value": 3,
+            "when": {
+              "status": [
+                "SIEGE_MODE"
+              ]
+            },
+            "duration": "permanent"
+          }
+        ],
+        "text": "Switch siege mode on or off; Size 3 while sieged."
+      }
+    },
+    {
+      "id": "coordinated-strike",
+      "name": "Coordinated Strike",
+      "phase": "movement",
+      "ability": {
+        "id": "coordinated-strike",
+        "name": "Coordinated Strike",
+        "type": "active",
+        "phase": "movement",
+        "cost": {
+          "res": "CP",
+          "n": 0
+        },
+        "target": {
+          "kind": "friendlyUnit",
+          "los": false,
+          "filter": {
+            "engaged": false
+          }
+        },
+        "effects": [
+          {
+            "op": "code",
+            "code": "coordinated-strike"
+          }
+        ],
+        "text": "A free spotter lets the Shock Cannon fire at any range near that friend."
+      }
+    },
+    {
+      "id": "shaped-blast",
+      "name": "Shaped Blast",
+      "phase": "assault",
+      "ability": {
+        "id": "shaped-blast",
+        "name": "Shaped Blast",
+        "type": "reaction",
+        "phase": "assault",
+        "cost": {
+          "res": "CP",
+          "n": 0
+        },
+        "limit": "oncePerGame",
+        "trigger": {
+          "event": "declareRangedAttack"
+        },
+        "requires": {
+          "status": [
+            "SIEGE_MODE"
+          ]
+        },
+        "effects": [
+          {
+            "op": "grantKeyword",
+            "kw": {
+              "kw": "PINPOINT"
+            },
+            "to": {
+              "all": true
+            },
+            "duration": "thisAttack"
+          },
+          {
+            "op": "grantKeyword",
+            "kw": {
+              "kw": "LOCKED_IN",
+              "x": 4
+            },
+            "to": {
+              "all": true
+            },
+            "duration": "thisAttack"
+          }
+        ],
+        "text": "Once a game when sieged: this volley gets PINPOINT and LOCKED IN 4."
+      }
+    },
+    {
+      "id": "smart-shells",
+      "name": "Smart Shells",
+      "phase": "assault",
+      "ability": {
+        "id": "smart-shells",
+        "name": "Smart Shells",
+        "type": "reaction",
+        "phase": "assault",
+        "cost": {
+          "res": "CP",
+          "n": 0
+        },
+        "limit": "oncePerGame",
+        "trigger": {
+          "event": "declareRangedAttack"
+        },
+        "requires": {
+          "status": [
+            "SIEGE_MODE"
+          ]
+        },
+        "effects": [
+          {
+            "op": "grantKeyword",
+            "kw": {
+              "kw": "INDIRECT_FIRE"
+            },
+            "to": {
+              "all": true
+            },
+            "duration": "thisAttack"
+          },
+          {
+            "op": "grantKeyword",
+            "kw": {
+              "kw": "LONG_RANGE",
+              "x": 24
+            },
+            "to": {
+              "all": true
+            },
+            "duration": "thisAttack"
+          }
+        ],
+        "text": "Once a game when sieged: this volley gets INDIRECT FIRE and LONG RANGE 24."
+      }
+    }
+  ],
+  "cardVersion": "1.06.26",
+  "source": [
+    "CS2-T p.1",
+    "CT p.3"
+  ]
+}

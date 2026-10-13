@@ -1,0 +1,253 @@
+{
+  "id": "jim-raynor",
+  "name": "Jim Raynor",
+  "race": "terran",
+  "factionTags": [
+    "terran"
+  ],
+  "unique": true,
+  "role": "Tactician",
+  "slot": "hero",
+  "summoned": false,
+  "combatTags": [
+    "biological",
+    "ground"
+  ],
+  "stats": {
+    "shield": null,
+    "speed": 7,
+    "armour": 4,
+    "evade": 5,
+    "hp": 8,
+    "size": 2
+  },
+  "baseMm": 40,
+  "supplyProfile": [
+    {
+      "min": 1,
+      "max": 1,
+      "supply": 1
+    }
+  ],
+  "weapons": [
+    {
+      "id": "commando-rifle",
+      "name": "Commando Rifle",
+      "phase": "assault",
+      "range": 18,
+      "target": "all",
+      "roa": 3,
+      "hit": 3,
+      "surgeTypes": [
+        "armoured"
+      ],
+      "sDice": "D3",
+      "dmg": 1,
+      "keywords": [
+        {
+          "kw": "BULKY"
+        },
+        {
+          "kw": "PIERCE",
+          "tag": "armoured",
+          "x": 3
+        }
+      ]
+    },
+    {
+      "id": "justice-revolver",
+      "name": "\"Justice\" Revolver",
+      "phase": "assault",
+      "range": 6,
+      "target": "ground",
+      "roa": 2,
+      "hit": 3,
+      "surgeTypes": [],
+      "sDice": null,
+      "dmg": 2,
+      "keywords": [
+        {
+          "kw": "ANTI_EVADE",
+          "x": 2
+        },
+        {
+          "kw": "SIDEARM"
+        },
+        {
+          "kw": "PINPOINT"
+        }
+      ]
+    },
+    {
+      "id": "bayonet",
+      "name": "Bayonet",
+      "phase": "combat",
+      "range": "E",
+      "target": "ground",
+      "roa": 2,
+      "hit": 4,
+      "surgeTypes": [
+        "light"
+      ],
+      "sDice": "D3",
+      "dmg": 1,
+      "keywords": []
+    }
+  ],
+  "abilities": [
+    {
+      "id": "commander",
+      "name": "Commander",
+      "type": "passive",
+      "phase": "any",
+      "effects": [
+        {
+          "op": "supplyOverride",
+          "purposes": [
+            "control",
+            "contest",
+            "objectives",
+            "disengage"
+          ],
+          "delta": 1
+        }
+      ],
+      "text": "Counts one extra Supply for markers, objectives and Disengage checks."
+    },
+    {
+      "id": "freedom-fighters",
+      "name": "Freedom Fighters",
+      "type": "passive",
+      "phase": "any",
+      "effects": [
+        {
+          "op": "aura",
+          "radius": 8,
+          "centre": "self",
+          "affects": {
+            "side": "friendly"
+          },
+          "effects": [
+            {
+              "op": "supplyOverride",
+              "purposes": [
+                "contest",
+                "objectives"
+              ],
+              "floor": 1
+            }
+          ]
+        }
+      ],
+      "text": "Friends within 8 inches count at least 1 Supply on markers and objectives."
+    },
+    {
+      "id": "orders",
+      "name": "Orders",
+      "type": "active",
+      "phase": "movement",
+      "cost": {
+        "res": "CP",
+        "n": "X"
+      },
+      "repeatable": true,
+      "target": {
+        "kind": "otherFriendlyUnit",
+        "range": 8,
+        "filter": {
+          "tags": [
+            "biological"
+          ]
+        }
+      },
+      "options": [
+        {
+          "id": "crit",
+          "cost": {
+            "res": "CP",
+            "n": 1
+          },
+          "effects": [
+            {
+              "op": "grantKeyword",
+              "kw": {
+                "kw": "CRITICAL_HIT",
+                "x": 2
+              },
+              "to": {
+                "first": true
+              },
+              "duration": "endOfActivation"
+            }
+          ],
+          "text": "Its next weapon used gets CRITICAL HIT 2."
+        },
+        {
+          "id": "disengage",
+          "cost": {
+            "res": "CP",
+            "n": 1
+          },
+          "effects": [
+            {
+              "op": "ignoreDisengage",
+              "duration": "endOfRound"
+            }
+          ],
+          "text": "No Disengage penalty this Round."
+        },
+        {
+          "id": "reactivate",
+          "cost": {
+            "res": "CP",
+            "n": 2
+          },
+          "effects": [
+            {
+              "op": "activation",
+              "mode": "remove"
+            }
+          ],
+          "text": "It loses its Activation Marker."
+        }
+      ],
+      "effects": [],
+      "text": "Pay CP to push a nearby biological friend: crit, free disengage or another activation."
+    }
+  ],
+  "upgrades": [
+    {
+      "id": "c-14-rifle",
+      "name": "C-14 Rifle",
+      "phase": "assault",
+      "replaces": "commando-rifle",
+      "weapon": {
+        "id": "c-14-rifle",
+        "name": "C-14 Rifle",
+        "phase": "assault",
+        "range": 12,
+        "target": "all",
+        "roa": 6,
+        "hit": 3,
+        "surgeTypes": [
+          "light"
+        ],
+        "sDice": "D3+1",
+        "dmg": 1,
+        "keywords": [
+          {
+            "kw": "BURST_FIRE",
+            "y": 8,
+            "x": 3
+          }
+        ]
+      }
+    }
+  ],
+  "cardVersion": "1.04.26",
+  "source": [
+    "CS1-T p.4",
+    "CT p.2",
+    "CL p.2"
+  ]
+}

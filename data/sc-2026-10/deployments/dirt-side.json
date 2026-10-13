@@ -1,0 +1,54 @@
+{
+ "id": "dirt-side",
+ "name": "Dirt Side",
+ "scale": "skirmish",
+ "size": {
+  "w": 36,
+  "h": 36
+ },
+ "entryEdges": {
+  "red": [
+   {
+    "edge": "N",
+    "from": 0,
+    "to": 12
+   },
+   {
+    "edge": "W",
+    "from": 24,
+    "to": 36
+   }
+  ],
+  "blue": [
+   {
+    "edge": "S",
+    "from": 24,
+    "to": 36
+   },
+   {
+    "edge": "E",
+    "from": 0,
+    "to": 12
+   }
+  ]
+ },
+ "markers": [
+  {
+   "n": 1,
+   "x": 6,
+   "y": 18
+  },
+  {
+   "n": 2,
+   "x": 30,
+   "y": 18
+  },
+  {
+   "n": 5,
+   "x": 18,
+   "y": 18
+  }
+ ],
+ "cardVersion": "1.03.26",
+ "source": "CS1-T p.14"
+}

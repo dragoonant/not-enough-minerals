@@ -1,0 +1,80 @@
+{
+  "id": "nerazim",
+  "name": "Nerazim",
+  "kind": "faction",
+  "race": "protoss",
+  "factionTags": [
+    "protoss",
+    "nerazim"
+  ],
+  "unique": true,
+  "slots": {
+    "core": 2,
+    "elite": 3,
+    "hero": 1
+  },
+  "resource": {
+    "res": "PE",
+    "n": 1
+  },
+  "abilities": [
+    {
+      "id": "might-of-the-nerazim",
+      "name": "Might of the Nerazim",
+      "type": "reaction",
+      "phase": "any",
+      "trigger": {
+        "event": "actionResolved",
+        "who": "friendly",
+        "filter": {
+          "code": "lost-hidden-status"
+        }
+      },
+      "effects": [
+        {
+          "op": "buff",
+          "char": "speed",
+          "x": 2,
+          "to": "triggerUnit"
+        },
+        {
+          "op": "grantKeyword",
+          "kw": {
+            "kw": "CRITICAL_HIT",
+            "x": 2
+          },
+          "to": {
+            "first": true
+          },
+          "duration": "endOfRound"
+        }
+      ],
+      "text": "A friend losing Hidden gets BUFF Speed 2 and CRITICAL HIT 2 on its first weapon used."
+    },
+    {
+      "id": "darkness-descends",
+      "name": "Darkness Descends",
+      "type": "active",
+      "phase": "movement",
+      "target": {
+        "kind": "activeUnit",
+        "filter": {
+          "tags": [
+            "biological"
+          ]
+        }
+      },
+      "effects": [
+        {
+          "op": "status",
+          "status": "HIDDEN",
+          "mode": "gain",
+          "duration": "endOfRound"
+        }
+      ],
+      "text": "A biological Unit is Hidden until round end."
+    }
+  ],
+  "cardVersion": "1.06.26",
+  "source": "CS2-P p.4"
+}

@@ -1,0 +1,544 @@
+{
+  "id": "keywords",
+  "source": [
+    "R p.84-93",
+    "docs/spec/18-keywords.md"
+  ],
+  "keywords": [
+    {
+      "id": "ANTI_EVADE",
+      "name": "ANTI-EVADE",
+      "kind": "weapon",
+      "params": [
+        "x"
+      ],
+      "stacking": "max",
+      "spec": "18 KW-020",
+      "text": "The target's Evade Roll against this weapon takes a -X modifier.",
+      "source": [
+        "R p.84",
+        "F p.3"
+      ]
+    },
+    {
+      "id": "BULKY",
+      "name": "BULKY",
+      "kind": "weapon",
+      "params": [],
+      "stacking": "flag",
+      "spec": "18 KW-021",
+      "text": "This weapon cannot shoot while its Unit is Engaged.",
+      "source": "R p.84"
+    },
+    {
+      "id": "BURST_FIRE",
+      "name": "BURST FIRE",
+      "kind": "weapon",
+      "params": [
+        "x",
+        "y"
+      ],
+      "stacking": "max",
+      "spec": "18 KW-022",
+      "text": "A model whose target is within Y inches gets +X Rate of Attack with this weapon.",
+      "source": "R p.85"
+    },
+    {
+      "id": "CONCENTRATED_FIRE",
+      "name": "CONCENTRATED FIRE",
+      "kind": "weapon",
+      "params": [
+        "x"
+      ],
+      "stacking": "max",
+      "spec": "18 KW-023",
+      "text": "One attack with this weapon removes at most X models; leftover damage is lost.",
+      "source": "R p.85"
+    },
+    {
+      "id": "CRITICAL_HIT",
+      "name": "CRITICAL HIT",
+      "kind": "weapon",
+      "params": [
+        "x"
+      ],
+      "stacking": "max",
+      "spec": "18 KW-024",
+      "text": "After Surge, shift up to X dice from the Armour Pool straight into the Damage Pool.",
+      "source": [
+        "R p.85",
+        "R p.63 8.7.4",
+        "F p.5"
+      ]
+    },
+    {
+      "id": "INDIRECT_FIRE",
+      "name": "INDIRECT FIRE",
+      "kind": "weapon",
+      "params": [],
+      "stacking": "flag",
+      "spec": "18 KW-025",
+      "text": "May ignore Line of Sight; if no target model is in sight, the target may Evade.",
+      "source": [
+        "R p.88",
+        "F p.5"
+      ]
+    },
+    {
+      "id": "INSTANT",
+      "name": "INSTANT",
+      "kind": "weapon",
+      "params": [],
+      "stacking": "flag",
+      "spec": "18 KW-026",
+      "text": "Enemies cannot use Reactions against an attack made with this weapon.",
+      "source": "R p.88"
+    },
+    {
+      "id": "LOCKED_IN",
+      "name": "LOCKED IN",
+      "kind": "weapon",
+      "params": [
+        "x"
+      ],
+      "stacking": "max",
+      "spec": "18 KW-027",
+      "text": "+X Rate of Attack when the target Unit is Stationary.",
+      "source": [
+        "R p.89",
+        "F p.5"
+      ]
+    },
+    {
+      "id": "LONG_RANGE",
+      "name": "LONG RANGE",
+      "kind": "weapon",
+      "params": [
+        "x"
+      ],
+      "stacking": "max",
+      "spec": "18 KW-028",
+      "text": "Maximum range becomes X inches; dice from models beyond the printed range take -1 to hit.",
+      "source": [
+        "R p.89",
+        "F p.5"
+      ]
+    },
+    {
+      "id": "PIERCE",
+      "name": "PIERCE",
+      "kind": "weapon",
+      "params": [
+        "tag",
+        "x"
+      ],
+      "stacking": "max",
+      "spec": "18 KW-029",
+      "text": "Against a Unit with the named Combat Tag this weapon's Damage becomes X.",
+      "source": "R p.90"
+    },
+    {
+      "id": "PINPOINT",
+      "name": "PINPOINT",
+      "kind": "weapon",
+      "params": [],
+      "stacking": "flag",
+      "spec": "18 KW-030",
+      "text": "May shoot at an Enemy Unit that is already Engaged.",
+      "source": [
+        "R p.90",
+        "F p.4"
+      ]
+    },
+    {
+      "id": "PRECISION",
+      "name": "PRECISION",
+      "kind": "weapon",
+      "params": [
+        "x"
+      ],
+      "stacking": "max",
+      "spec": "18 KW-031",
+      "text": "After hitting, up to X missed dice count as hits.",
+      "source": [
+        "R p.90",
+        "F p.5"
+      ]
+    },
+    {
+      "id": "SIDEARM",
+      "name": "SIDEARM",
+      "kind": "weapon",
+      "params": [],
+      "stacking": "flag",
+      "spec": "18 KW-032",
+      "text": "Used on top of the model's normal weapon, as a separate batch.",
+      "source": [
+        "R p.91",
+        "R p.63 8.7.3"
+      ]
+    },
+    {
+      "id": "SPECIALIST",
+      "name": "SPECIALIST",
+      "kind": "weapon",
+      "params": [],
+      "stacking": "flag",
+      "spec": "18 KW-034",
+      "text": "Only one named model of the Unit carries this upgrade.",
+      "source": [
+        "R p.91",
+        "R p.77 9.1.7",
+        "F p.5"
+      ]
+    },
+    {
+      "id": "SPILLOVER",
+      "name": "SPILLOVER",
+      "kind": "term",
+      "params": [],
+      "stacking": "flag",
+      "spec": "18 KW-035",
+      "text": "Other Units under a template are hit as separate bare batches.",
+      "source": [
+        "R p.91-92",
+        "R p.66 8.7.6",
+        "F p.3",
+        "F p.5"
+      ]
+    },
+    {
+      "id": "BUFF",
+      "name": "BUFF",
+      "kind": "effect",
+      "params": [
+        "char",
+        "x"
+      ],
+      "stacking": "perCharacteristicMax",
+      "spec": "18 KW-040",
+      "text": "Raise a characteristic by X until the End of the Round; only the highest BUFF per characteristic counts.",
+      "source": [
+        "R p.84",
+        "F p.4"
+      ]
+    },
+    {
+      "id": "DEBUFF",
+      "name": "DEBUFF",
+      "kind": "effect",
+      "params": [
+        "char",
+        "x"
+      ],
+      "stacking": "perCharacteristicMax",
+      "spec": "18 KW-041",
+      "text": "Lower a characteristic by X until the End of the Round; only the highest DEBUFF per characteristic counts.",
+      "source": [
+        "R p.85",
+        "F p.4"
+      ]
+    },
+    {
+      "id": "DISPLACEMENT",
+      "name": "DISPLACEMENT",
+      "kind": "effect",
+      "params": [],
+      "stacking": "flag",
+      "spec": "18 KW-042",
+      "text": "The model or token can be pushed aside so others can pass or stand there.",
+      "source": "R p.85-86"
+    },
+    {
+      "id": "HEAL",
+      "name": "HEAL",
+      "kind": "effect",
+      "params": [
+        "x"
+      ],
+      "stacking": "max",
+      "spec": "18 KW-043",
+      "text": "Remove up to X damage from the Unit; never brings back removed models.",
+      "source": [
+        "R p.88",
+        "F p.2",
+        "F p.4"
+      ]
+    },
+    {
+      "id": "HITS",
+      "name": "HITS",
+      "kind": "effect",
+      "params": [
+        "x",
+        "y"
+      ],
+      "stacking": "max",
+      "spec": "18 KW-044",
+      "text": "The Unit takes X automatic hits of Damage Y, starting at the Armour Roll.",
+      "source": "R p.88"
+    },
+    {
+      "id": "IMPACT",
+      "name": "IMPACT",
+      "kind": "effect",
+      "params": [
+        "x",
+        "y"
+      ],
+      "stacking": "max",
+      "spec": "18 KW-045",
+      "text": "Roll X dice per eligible model, each Y+ is a hit on the charged Unit.",
+      "source": [
+        "R p.88",
+        "F p.4",
+        "CS1-P p.2"
+      ]
+    },
+    {
+      "id": "MORPH",
+      "name": "MORPH",
+      "kind": "effect",
+      "params": [
+        "unit",
+        "x"
+      ],
+      "stacking": "flag",
+      "spec": "18 KW-046",
+      "text": "Replace X models of a Unit with the named Unit.",
+      "source": [
+        "R p.90",
+        "F p.5"
+      ]
+    },
+    {
+      "id": "NON_LETHAL_DAMAGE",
+      "name": "NON-LETHAL DAMAGE",
+      "kind": "effect",
+      "params": [
+        "x"
+      ],
+      "stacking": "max",
+      "spec": "18 KW-047",
+      "text": "Deal X damage that can never remove the Unit's last model.",
+      "source": [
+        "R p.90",
+        "F p.2",
+        "F p.4"
+      ]
+    },
+    {
+      "id": "PLACE",
+      "name": "PLACE",
+      "kind": "effect",
+      "params": [
+        "x"
+      ],
+      "stacking": "max",
+      "spec": "18 KW-048",
+      "text": "Lift the Unit and set it down within X inches, ignoring the path between.",
+      "source": [
+        "R p.90",
+        "R p.55 7.2",
+        "F p.3-5"
+      ]
+    },
+    {
+      "id": "RESPAWN",
+      "name": "RESPAWN",
+      "kind": "effect",
+      "params": [
+        "x"
+      ],
+      "stacking": "max",
+      "spec": "18 KW-049",
+      "text": "Return up to X removed models, never raising the Unit's Supply bracket.",
+      "source": "R p.91"
+    },
+    {
+      "id": "SUMMON",
+      "name": "SUMMON",
+      "kind": "effect",
+      "params": [
+        "unit"
+      ],
+      "stacking": "flag",
+      "spec": "18 KW-050",
+      "text": "Put the named Summoned Unit onto the table.",
+      "source": [
+        "R p.92",
+        "R p.78 9.1.9"
+      ]
+    },
+    {
+      "id": "DODGE",
+      "name": "DODGE",
+      "kind": "defensive",
+      "params": [
+        "x"
+      ],
+      "stacking": "max",
+      "spec": "18 KW-060",
+      "text": "When targeted, Surge and CRITICAL HIT move X fewer dice past the Armour Roll.",
+      "source": "R p.86"
+    },
+    {
+      "id": "TOUGH",
+      "name": "TOUGH",
+      "kind": "defensive",
+      "params": [
+        "x"
+      ],
+      "stacking": "max",
+      "spec": "18 KW-061",
+      "text": "On an Armour Roll, up to X failed dice count as passed.",
+      "source": "R p.92-93"
+    },
+    {
+      "id": "BURROWED",
+      "name": "BURROWED",
+      "kind": "status",
+      "params": [],
+      "stacking": "flag",
+      "spec": "18 ST-001",
+      "text": "Underground: limited actions, hard to target, no contesting.",
+      "source": [
+        "R p.84-85",
+        "F p.2"
+      ]
+    },
+    {
+      "id": "HIDDEN",
+      "name": "HIDDEN",
+      "kind": "status",
+      "params": [],
+      "stacking": "flag",
+      "spec": "18 ST-002",
+      "text": "Not Visible to Enemy models more than 4 inches away.",
+      "source": [
+        "R p.88",
+        "R p.93",
+        "F p.5"
+      ]
+    },
+    {
+      "id": "SIEGE_MODE",
+      "name": "SIEGE MODE",
+      "kind": "status",
+      "params": [],
+      "stacking": "flag",
+      "spec": "18 ST-003",
+      "text": "Deployed artillery stance; unlocks siege weapon profiles.",
+      "source": [
+        "R p.91",
+        "CS2-T p.1"
+      ]
+    },
+    {
+      "id": "STATIONARY",
+      "name": "STATIONARY",
+      "kind": "status",
+      "params": [],
+      "stacking": "flag",
+      "spec": "18 ST-004",
+      "text": "The Unit has not repositioned this Round.",
+      "source": [
+        "R p.92",
+        "F p.5"
+      ]
+    },
+    {
+      "id": "SHIELDED",
+      "name": "SHIELDED",
+      "kind": "status",
+      "params": [],
+      "stacking": "flag",
+      "spec": "18 ST-005",
+      "text": "The Unit still has Shield points left.",
+      "source": [
+        "R p.91",
+        "F p.2"
+      ]
+    },
+    {
+      "id": "ON_CREEP",
+      "name": "ON CREEP",
+      "kind": "status",
+      "params": [],
+      "stacking": "flag",
+      "spec": "18 ST-007",
+      "text": "The Unit stands on Creep, which powers some Zerg abilities.",
+      "source": [
+        "R p.90",
+        "F p.3",
+        "F p.5"
+      ]
+    },
+    {
+      "id": "REPEATABLE",
+      "name": "REPEATABLE",
+      "kind": "ability",
+      "params": [],
+      "stacking": "flag",
+      "spec": "18 KW-070",
+      "text": "The ability may be used more than once in a Round.",
+      "source": [
+        "R p.90",
+        "R p.81 10.2",
+        "F p.5"
+      ]
+    },
+    {
+      "id": "STAY_IN_PLAY",
+      "name": "STAY IN PLAY",
+      "kind": "ability",
+      "params": [],
+      "stacking": "flag",
+      "spec": "18 KW-073",
+      "text": "The card's effect lasts across Rounds instead of ending at the End of the Round.",
+      "source": [
+        "R p.92",
+        "R p.74 8.9.5"
+      ]
+    },
+    {
+      "id": "STRUCTURE",
+      "name": "STRUCTURE",
+      "kind": "ability",
+      "params": [],
+      "stacking": "flag",
+      "spec": "18 CA-003",
+      "text": "Never activates or acts, counts as 0 Supply, never holds markers, and ignores most abilities.",
+      "source": [
+        "CS1-T p.5",
+        "CS1-Z p.3",
+        "CS1-P p.4",
+        "F p.4"
+      ]
+    },
+    {
+      "id": "INDOMITABLE",
+      "name": "INDOMITABLE",
+      "kind": "ability",
+      "params": [],
+      "stacking": "flag",
+      "spec": "18 CA-007",
+      "text": "Can shoot and be shot by Unengaged Units while Engaged; the defender may Evade those attacks.",
+      "source": [
+        "CS1-T p.7",
+        "CS2-T p.1",
+        "CS2-P p.1"
+      ]
+    },
+    {
+      "id": "LARGE",
+      "name": "LARGE",
+      "kind": "ability",
+      "params": [],
+      "stacking": "flag",
+      "spec": "18 CA-009",
+      "text": "Needs wide gaps, and crushes small impassable terrain pieces it drives over.",
+      "source": "CS2-T p.1"
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "id": "khalai",
+  "name": "Khalai",
+  "kind": "faction",
+  "race": "protoss",
+  "factionTags": [
+    "protoss",
+    "khalai"
+  ],
+  "unique": true,
+  "slots": {
+    "core": 3,
+    "elite": 2,
+    "hero": 1
+  },
+  "resource": {
+    "res": "PE",
+    "n": 1
+  },
+  "abilities": [
+    {
+      "id": "pylon-warp-in",
+      "name": "Pylon Warp-In",
+      "type": "active",
+      "phase": "movement",
+      "effects": [
+        {
+          "op": "summon",
+          "unit": "pylon",
+          "anywhere": true,
+          "minEnemyDist": 10
+        },
+        {
+          "op": "code",
+          "code": "dormant-summoned-structure",
+          "args": {
+            "unit": "pylon"
+          }
+        }
+      ],
+      "text": "If none stands, summon a Pylon on the ground, 10 inches clear of enemies; it is dormant this Round."
+    },
+    {
+      "id": "bound-by-the-khala",
+      "name": "Bound by the Khala",
+      "type": "active",
+      "phase": "movement",
+      "target": {
+        "kind": "activeUnit"
+      },
+      "effects": [
+        {
+          "op": "code",
+          "code": "bound-by-the-khala"
+        }
+      ],
+      "text": "After the active Unit finishes, another eligible friend activates at once."
+    }
+  ],
+  "cardVersion": "1.04.26",
+  "source": "CS1-P p.8"
+}

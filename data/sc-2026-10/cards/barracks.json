@@ -1,0 +1,44 @@
+{
+  "id": "barracks",
+  "name": "Barracks",
+  "kind": "tactical",
+  "race": "terran",
+  "factionTags": [
+    "terran"
+  ],
+  "unique": false,
+  "slots": {
+    "core": 1
+  },
+  "resource": {
+    "res": "CP",
+    "n": 1
+  },
+  "abilities": [
+    {
+      "id": "go-go-go",
+      "name": "Go! Go! Go!",
+      "type": "active",
+      "phase": "movement",
+      "target": {
+        "kind": "activeUnit",
+        "filter": {
+          "tags": [
+            "biological"
+          ]
+        }
+      },
+      "effects": [
+        {
+          "op": "move",
+          "kind": "move",
+          "x": 2,
+          "freeAction": true
+        }
+      ],
+      "text": "A biological Unit makes a free 2 inch Move that skips its action limit."
+    }
+  ],
+  "cardVersion": "1.04.26",
+  "source": "CS1-T p.8"
+}

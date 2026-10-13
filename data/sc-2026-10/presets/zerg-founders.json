@@ -1,0 +1,43 @@
+{
+ "id": "zerg-founders",
+ "name": "Zerg Founders Edition",
+ "scale": "skirmish",
+ "faction": "kerrigans-swarm",
+ "units": [
+  {
+   "unit": "zergling",
+   "models": 12,
+   "upgrades": []
+  },
+  {
+   "unit": "kerrigan-swarm-raptor",
+   "models": 6,
+   "upgrades": []
+  },
+  {
+   "unit": "roach",
+   "models": 3,
+   "upgrades": []
+  },
+  {
+   "unit": "queen",
+   "models": 1,
+   "upgrades": []
+  },
+  {
+   "unit": "kerrigan",
+   "models": 1,
+   "upgrades": []
+  }
+ ],
+ "cards": [
+  "evolution-chamber",
+  "overseer",
+  "spawning-pool"
+ ],
+ "creepCard": "malignant-creep",
+ "source": [
+  "R p.111",
+  "CT p.4-6"
+ ]
+}

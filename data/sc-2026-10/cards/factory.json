@@ -1,0 +1,42 @@
+{
+  "id": "factory",
+  "name": "Factory",
+  "kind": "tactical",
+  "race": "terran",
+  "factionTags": [
+    "terran"
+  ],
+  "unique": false,
+  "slots": {
+    "elite": 2
+  },
+  "resource": {
+    "res": "CP",
+    "n": 1
+  },
+  "abilities": [
+    {
+      "id": "field-repair",
+      "name": "Field Repair",
+      "type": "active",
+      "phase": "movement",
+      "target": {
+        "kind": "activeUnit",
+        "filter": {
+          "tags": [
+            "mechanical"
+          ]
+        }
+      },
+      "effects": [
+        {
+          "op": "heal",
+          "x": 2
+        }
+      ],
+      "text": "A mechanical Unit heals 2 damage."
+    }
+  ],
+  "cardVersion": "1.03.26",
+  "source": "CS1-T p.10"
+}

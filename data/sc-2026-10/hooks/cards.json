@@ -1,0 +1,97 @@
+[
+  {
+    "id": "deny-deploy-edge",
+    "text": "Mark one non-entry table edge as closed to enemy deployment; the closure lapses when the Round ends.",
+    "source": "CS1-T p.9"
+  },
+  {
+    "id": "claim-first-player-marker",
+    "text": "Seize the First Player Marker immediately; it stays locked to you until the Phase ends.",
+    "source": "CS1-T p.8"
+  },
+  {
+    "id": "unit-slot-support",
+    "text": "Condition: the Unit using the ability fills a Support Army Slot.",
+    "source": "CS1-T p.8"
+  },
+  {
+    "id": "forward-deploy-clearance",
+    "text": "Check at placement: a unit deployed from a non-entry table edge has to finish farther than 10 inches from every enemy model.",
+    "source": [
+      "CS1-T p.10",
+      "CS1-Z p.15",
+      "CS1-P p.9"
+    ]
+  },
+  {
+    "id": "forward-deploy-once-per-round",
+    "text": "Check at nomination: refuse if a friendly Unit of the same kind already came in this way earlier in the current Round.",
+    "source": [
+      "CS1-T p.10",
+      "CS1-P p.9"
+    ]
+  },
+  {
+    "id": "creep-tumor-spawn",
+    "text": "Place a Creep Tumor token up to 6 inches from a Friendly Entry Edge (this includes a friendly Omega Worm base, per F Omega Network) or from one of your tumors; sight is not needed.",
+    "source": [
+      "CS1-Z p.13",
+      "CS1-Z p.14",
+      "CS1-Z p.15"
+    ]
+  },
+  {
+    "id": "creep-tumor-removal",
+    "text": "Remove a tumor when an opposing Unit ends one of exactly these five actions within 1 inch of it: move, deploy, run, charge, disengage (F: PLACE is not movement).",
+    "source": [
+      "CS1-Z p.14",
+      "CS1-Z p.15"
+    ]
+  },
+  {
+    "id": "zerg-creep-army-building",
+    "text": "Army building: the list must include exactly one Creep Card, paid at its listed cost.",
+    "source": [
+      "CS1-Z p.13",
+      "CS1-Z p.14"
+    ]
+  },
+  {
+    "id": "dormant-summoned-structure",
+    "text": "Only usable while no friendly Unit of the named type is on the battlefield; the summoned structure may not use Special Abilities (except Structure) this Round.",
+    "source": [
+      "CS1-P p.8",
+      "CS1-Z p.14"
+    ]
+  },
+  {
+    "id": "bound-by-the-khala",
+    "text": "Once the active Unit is done, choose one more friendly Unit that could still act this Phase and activate it right away.",
+    "source": "CS1-P p.8"
+  },
+  {
+    "id": "mass-recall",
+    "text": "Every friendly Protoss Unit within 6 inches of the placed Faction Indicator leaves the battlefield for Reserves.",
+    "source": "CS1-P p.9"
+  },
+  {
+    "id": "arrival-off-entry-edge",
+    "text": "Condition: the enemy Unit arrives from Reserves anywhere except its own Entry Edge (not a Pylon or Omega Worm base). Evaluate after the arriving Unit is set up on the battlefield (needs an onArrive event).",
+    "source": "CS1-P p.9"
+  },
+  {
+    "id": "resolved-place-effect",
+    "text": "Condition: a PLACE effect has just finished resolving on the friendly Unit, whoever caused it.",
+    "source": "CS1-P p.9"
+  },
+  {
+    "id": "lost-hidden-status",
+    "text": "Condition: the friendly Unit has just lost the Hidden Status from any cause (own action, enemy detection, or a card effect); who acted does not matter.",
+    "source": "CS2-P p.4"
+  },
+  {
+    "id": "damage-reduce-min-one",
+    "text": "Cut the incoming Total Damage by the stated amount, but never lower it below 1.",
+    "source": "CS1-P p.9"
+  }
+]

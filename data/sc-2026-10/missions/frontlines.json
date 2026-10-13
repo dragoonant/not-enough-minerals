@@ -1,0 +1,70 @@
+[
+ {
+  "id": "frontlines-standard",
+  "name": "Frontlines",
+  "scale": "standard",
+  "startSupply": 6,
+  "escalation": 2,
+  "gameLength": 5,
+  "specialWinLead": 10,
+  "markerStart": "activated",
+  "startOfRound": [],
+  "scoring": [
+   {
+    "kind": "supplyDestroyed"
+   },
+   {
+    "kind": "perControlledMarker",
+    "fromRound": 2,
+    "vp": {
+     "own": 1,
+     "neutral": 1,
+     "opponent": 1
+    }
+   },
+   {
+    "kind": "retakeBonus",
+    "fromRound": 2,
+    "vp": 2
+   }
+  ],
+  "actions": [],
+  "text": "From round 2, every marker you hold scores 1 VP, with 2 VP extra for each one you wrested from the enemy this round.",
+  "cardVersion": "1.04.26",
+  "source": "CS1-T p.12"
+ },
+ {
+  "id": "frontlines-skirmish",
+  "name": "Frontlines",
+  "scale": "skirmish",
+  "startSupply": 3,
+  "escalation": 1,
+  "gameLength": 5,
+  "specialWinLead": 8,
+  "markerStart": "activated",
+  "startOfRound": [],
+  "scoring": [
+   {
+    "kind": "supplyDestroyed"
+   },
+   {
+    "kind": "perControlledMarker",
+    "fromRound": 2,
+    "vp": {
+     "own": 1,
+     "neutral": 1,
+     "opponent": 1
+    }
+   },
+   {
+    "kind": "retakeBonus",
+    "fromRound": 2,
+    "vp": 2
+   }
+  ],
+  "actions": [],
+  "text": "From round 2, every marker you hold scores 1 VP, with 2 VP extra for each one you wrested from the enemy this round.",
+  "cardVersion": "1.04.26",
+  "source": "CS1-T p.12"
+ }
+]

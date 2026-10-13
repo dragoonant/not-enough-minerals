@@ -1,0 +1,90 @@
+{
+  "id": "marine",
+  "name": "Marine",
+  "race": "terran",
+  "factionTags": ["terran"],
+  "unique": false,
+  "role": "Damage Dealer",
+  "slot": "core",
+  "summoned": false,
+  "combatTags": ["biological", "light", "ground"],
+  "stats": { "shield": null, "speed": [4, 7], "armour": 5, "evade": 5, "hp": 2, "size": 2 },
+  "baseMm": 32,
+  "supplyProfile": [
+    { "min": 1, "max": 3, "supply": 0 },
+    { "min": 4, "max": 6, "supply": 1 },
+    { "min": 7, "max": 9, "supply": 2 }
+  ],
+  "weapons": [
+    { "id": "c-14-rifle", "name": "C-14 Rifle", "phase": "assault", "range": 12, "target": "all", "roa": 2, "hit": 3,
+      "surgeTypes": ["light"], "sDice": "D3", "dmg": 1, "keywords": [] },
+    { "id": "strike", "name": "Strike", "phase": "combat", "range": "E", "target": "ground", "roa": 1, "hit": 5,
+      "surgeTypes": [], "sDice": null, "dmg": 1, "keywords": [] }
+  ],
+  "abilities": [
+    {
+      "id": "stimpack", "name": "Stimpack", "type": "active", "phase": "movement", "cost": { "res": "CP", "n": 1 },
+      "target": { "kind": "self" },
+      "effects": [
+        { "op": "nonLethal", "x": 2 },
+        { "op": "buff", "char": "speed", "x": 3 },
+        { "op": "grantKeyword", "kw": { "kw": "PRECISION", "x": 3 }, "to": { "ids": ["c-14-rifle"] }, "duration": "endOfRound" },
+        { "op": "grantKeyword", "kw": { "kw": "PRECISION", "x": 3 }, "to": { "phase": "combat" }, "duration": "endOfRound" }
+      ],
+      "text": "Take 2 non-lethal damage to gain +3 Speed and PRECISION 3 on rifles and melee weapons this Round."
+    }
+  ],
+  "upgrades": [
+    {
+      "id": "combat-shield", "name": "Combat Shield", "phase": "movement",
+      "ability": {
+        "id": "combat-shield", "name": "Combat Shield", "type": "active", "phase": "movement", "cost": { "res": "CP", "n": 1 },
+        "target": { "kind": "self" },
+        "effects": [ { "op": "canEvade", "vs": ["closeCombat", "enemyAbilityDamage"], "duration": "endOfRound" } ],
+        "text": "For 1 CP the squad may Evade melee attacks and enemy ability damage this Round."
+      }
+    },
+    {
+      "id": "agg-12", "name": "AGG-12", "phase": "assault", "specialist": true, "replaces": "c-14-rifle",
+      "weapon": { "id": "agg-12", "name": "AGG-12", "phase": "assault", "range": 12, "target": "ground", "roa": 2, "hit": 3,
+        "surgeTypes": ["armoured"], "sDice": "D3", "dmg": 1,
+        "keywords": [ { "kw": "LONG_RANGE", "x": 18 }, { "kw": "SPECIALIST" } ] },
+      "provenance": { "replaces": "CS1-T p.1 prints \"FOR C-14 RIFFLE\" (misprint); CT p.2 reads FOR C-14 Rifle" }
+    },
+    {
+      "id": "rocket-launcher", "name": "Rocket Launcher", "phase": "assault", "specialist": true,
+      "weapon": { "id": "rocket-launcher", "name": "Rocket Launcher", "phase": "assault", "range": 12, "target": "ground", "roa": 4, "hit": 3,
+        "surgeTypes": [], "sDice": null, "dmg": 1,
+        "keywords": [ { "kw": "INDIRECT_FIRE" }, { "kw": "LONG_RANGE", "x": 18 }, { "kw": "SIDEARM" }, { "kw": "SPECIALIST" } ] }
+    },
+    {
+      "id": "slugthrower", "name": "Slugthrower", "phase": "assault",
+      "ability": {
+        "id": "slugthrower", "name": "Slugthrower", "type": "passive", "phase": "assault",
+        "effects": [
+          { "op": "grantKeyword", "kw": { "kw": "ANTI_EVADE", "x": 1 }, "to": { "ids": ["c-14-rifle"] },
+            "when": { "attack": "ranged", "weapons": ["c-14-rifle"], "targetWithin": 8 }, "duration": "thisAttack" }
+        ],
+        "text": "Rifle shots at a target 8 inches away or closer get ANTI-EVADE 1."
+      }
+    },
+    {
+      "id": "grenades-frag", "name": "Grenades - Frag", "phase": "assault",
+      "ability": {
+        "id": "grenades-frag", "name": "Grenades - Frag", "type": "passive", "phase": "assault",
+        "effects": [
+          { "op": "weaponMod", "sDice": "D6", "to": { "ids": ["c-14-rifle"] },
+            "when": { "attack": "ranged", "weapons": ["c-14-rifle"], "targetWithin": 8 }, "duration": "thisAttack" }
+        ],
+        "text": "Rifle Surge dice become D6 against a target 8 inches away or closer."
+      }
+    },
+    {
+      "id": "bayonet", "name": "Bayonet", "phase": "combat", "replaces": "strike",
+      "weapon": { "id": "bayonet", "name": "Bayonet", "phase": "combat", "range": "E", "target": "ground", "roa": 2, "hit": 5,
+        "surgeTypes": [], "sDice": null, "dmg": 1, "keywords": [] }
+    }
+  ],
+  "cardVersion": "1.04.26",
+  "source": ["CS1-T p.1", "CT p.2", "CL p.2"]
+}

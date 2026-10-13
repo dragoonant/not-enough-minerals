@@ -1,0 +1,337 @@
+{
+ "id": "ct-2026-10-zerg",
+ "table": "ct-2026-10",
+ "date": "2026-10-09",
+ "units": {
+  "zergling": {
+   "compositions": [
+    {
+     "models": 12,
+     "supply": 1,
+     "minerals": 150
+    },
+    {
+     "models": 18,
+     "supply": 2,
+     "minerals": 210
+    }
+   ],
+   "upgrades": {
+    "adrenal-glands": [
+     20,
+     20
+    ],
+    "burrow-ambush": [
+     20,
+     30
+    ],
+    "shredding-claws": [
+     10,
+     10
+    ]
+   },
+   "source": [
+    "CT p.4",
+    "CL p.2"
+   ]
+  },
+  "raptor": {
+   "compositions": [
+    {
+     "models": 12,
+     "supply": 1,
+     "minerals": 210
+    },
+    {
+     "models": 18,
+     "supply": 2,
+     "minerals": 260
+    }
+   ],
+   "upgrades": {
+    "adrenal-glands": [
+     20,
+     20
+    ],
+    "burrow-ambush": [
+     20,
+     30
+    ],
+    "shredding-claws": [
+     10,
+     10
+    ]
+   },
+   "source": [
+    "CT p.4",
+    "CL p.2"
+   ]
+  },
+  "roach": {
+   "compositions": [
+    {
+     "models": 3,
+     "supply": 1,
+     "minerals": 170
+    }
+   ],
+   "upgrades": {
+    "burrow-ambush": [
+     20
+    ],
+    "glial-reconstitution": [
+     10
+    ],
+    "hydriodic-bile": [
+     10
+    ],
+    "tunneling-claws": [
+     10
+    ]
+   },
+   "source": [
+    "CT p.4",
+    "CL p.2"
+   ]
+  },
+  "vile": {
+   "compositions": [
+    {
+     "models": 3,
+     "supply": 1,
+     "minerals": 190
+    }
+   ],
+   "upgrades": {
+    "burrow-ambush": [
+     20
+    ],
+    "glial-reconstitution": [
+     10
+    ],
+    "hydriodic-bile": [
+     10
+    ],
+    "tunneling-claws": [
+     10
+    ]
+   },
+   "source": [
+    "CT p.4",
+    "CL p.2"
+   ]
+  },
+  "corpser": {
+   "compositions": [
+    {
+     "models": 3,
+     "supply": 1,
+     "minerals": 220
+    }
+   ],
+   "upgrades": {
+    "burrow-ambush": [
+     20
+    ],
+    "glial-reconstitution": [
+     10
+    ],
+    "hydriodic-bile": [
+     10
+    ],
+    "tunneling-claws": [
+     10
+    ]
+   },
+   "source": [
+    "CT p.4",
+    "CL p.2"
+   ]
+  },
+  "swarmling": {
+   "compositions": [
+    {
+     "models": 18,
+     "supply": 1,
+     "minerals": 210
+    }
+   ],
+   "upgrades": {
+    "burrow-ambush": [
+     20
+    ]
+   },
+   "source": [
+    "CT p.4",
+    "CL p.2"
+   ]
+  },
+  "kerrigan-swarm-raptor": {
+   "compositions": [
+    {
+     "models": 6,
+     "supply": 1,
+     "minerals": 230
+    }
+   ],
+   "upgrades": {},
+   "source": [
+    "CT p.4",
+    "CL p.2"
+   ]
+  },
+  "kerrigan": {
+   "compositions": [
+    {
+     "models": 1,
+     "supply": 1,
+     "minerals": 250
+    }
+   ],
+   "upgrades": {},
+   "source": "CT p.5"
+  },
+  "zagara": {
+   "compositions": [
+    {
+     "models": 1,
+     "supply": 1,
+     "minerals": 250
+    }
+   ],
+   "upgrades": {},
+   "source": "CT p.5"
+  },
+  "vileling": {
+   "compositions": [
+    {
+     "models": 18,
+     "supply": 2,
+     "minerals": 180
+    }
+   ],
+   "upgrades": {},
+   "source": "CT p.5"
+  },
+  "bile-launcher": {
+   "compositions": [
+    {
+     "models": 1,
+     "supply": 1,
+     "minerals": 150
+    }
+   ],
+   "upgrades": {},
+   "source": "CT p.5"
+  },
+  "hydralisk": {
+   "compositions": [
+    {
+     "models": 2,
+     "supply": 2,
+     "minerals": 140
+    },
+    {
+     "models": 4,
+     "supply": 3,
+     "minerals": 260
+    }
+   ],
+   "upgrades": {
+    "ancillary-carapace": [
+     20,
+     30
+    ],
+    "burrow-ambush": [
+     20,
+     40
+    ],
+    "grooved-spines": [
+     20,
+     30
+    ],
+    "lurking": [
+     10,
+     10
+    ]
+   },
+   "source": [
+    "CT p.5",
+    "CL p.2"
+   ]
+  },
+  "queen": {
+   "compositions": [
+    {
+     "models": 1,
+     "supply": 1,
+     "minerals": 140
+    }
+   ],
+   "upgrades": {
+    "creep-speed": [
+     10
+    ],
+    "domineering-presence": [
+     10
+    ]
+   },
+   "source": [
+    "CT p.5",
+    "CL p.2"
+   ]
+  },
+  "ravager": {
+   "compositions": [
+    {
+     "models": 1,
+     "supply": 1,
+     "minerals": 160
+    },
+    {
+     "models": 2,
+     "supply": 2,
+     "minerals": 270
+    }
+   ],
+   "upgrades": {
+    "bloated-bile-ducts": [
+     20,
+     40
+    ],
+    "burrow-ambush": [
+     20,
+     40
+    ],
+    "potent-bile": [
+     20,
+     40
+    ]
+   },
+   "source": "CT p.5"
+  },
+  "defiler": {
+   "compositions": [
+    {
+     "models": 1,
+     "supply": 1,
+     "minerals": 130
+    }
+   ],
+   "upgrades": {
+    "burrow-ambush": [
+     20
+    ],
+    "plague": [
+     20
+    ],
+    "cancerous-bite": [
+     20
+    ]
+   },
+   "source": "CT p.5"
+  }
+ },
+ "cards": {},
+ "source": "CT p.4-6"
+}

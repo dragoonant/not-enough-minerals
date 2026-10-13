@@ -1,0 +1,74 @@
+{
+  "id": "factory-tech-lab",
+  "name": "Factory (Tech Lab)",
+  "kind": "tactical",
+  "race": "terran",
+  "factionTags": [
+    "terran"
+  ],
+  "unique": true,
+  "slots": {
+    "elite": 2
+  },
+  "resource": {
+    "res": "CP",
+    "n": 1
+  },
+  "abilities": [
+    {
+      "id": "pound-em-flat",
+      "name": "Pound 'Em Flat!",
+      "type": "active",
+      "phase": "assault",
+      "target": {
+        "kind": "activeUnit",
+        "filter": {
+          "tags": [
+            "mechanical"
+          ],
+          "status": [
+            "STATIONARY"
+          ]
+        }
+      },
+      "effects": [
+        {
+          "op": "grantKeyword",
+          "kw": {
+            "kw": "PRECISION",
+            "x": 2
+          },
+          "to": {
+            "phase": "assault",
+            "first": true
+          },
+          "duration": "endOfActivation"
+        }
+      ],
+      "text": "A Stationary mechanical Unit adds PRECISION 2 to its first ranged weapon used."
+    },
+    {
+      "id": "field-repair",
+      "name": "Field Repair",
+      "type": "active",
+      "phase": "movement",
+      "target": {
+        "kind": "activeUnit",
+        "filter": {
+          "tags": [
+            "mechanical"
+          ]
+        }
+      },
+      "effects": [
+        {
+          "op": "heal",
+          "x": 2
+        }
+      ],
+      "text": "A mechanical Unit heals 2 damage."
+    }
+  ],
+  "cardVersion": "1.06.26",
+  "source": "CS2-T p.2"
+}

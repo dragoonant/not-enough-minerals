@@ -1,0 +1,59 @@
+{
+ "id": "terran-founders",
+ "name": "Terran Founders Edition",
+ "scale": "skirmish",
+ "faction": "raynors-raiders",
+ "units": [
+  {
+   "unit": "marine",
+   "models": 6,
+   "upgrades": [
+    {
+     "id": "agg-12",
+     "model": 0
+    },
+    {
+     "id": "rocket-launcher",
+     "model": 1
+    }
+   ]
+  },
+  {
+   "unit": "raynors-raider",
+   "models": 6,
+   "upgrades": []
+  },
+  {
+   "unit": "marauder",
+   "models": 2,
+   "upgrades": [
+    {
+     "id": "kinetic-foam"
+    }
+   ]
+  },
+  {
+   "unit": "medic",
+   "models": 3,
+   "upgrades": [
+    {
+     "id": "stabilizer-medpacks"
+    }
+   ]
+  },
+  {
+   "unit": "jim-raynor",
+   "models": 1,
+   "upgrades": []
+  }
+ ],
+ "cards": [
+  "barracks",
+  "academy",
+  "orbital-command"
+ ],
+ "source": [
+  "R p.109",
+  "CT p.2-3"
+ ]
+}

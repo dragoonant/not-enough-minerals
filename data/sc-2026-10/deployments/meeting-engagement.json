@@ -1,0 +1,64 @@
+{
+ "id": "meeting-engagement",
+ "name": "Meeting Engagement",
+ "scale": "standard",
+ "size": {
+  "w": 54,
+  "h": 36
+ },
+ "entryEdges": {
+  "red": [
+   {
+    "edge": "S",
+    "from": 18,
+    "to": 36
+   },
+   {
+    "edge": "E",
+    "from": 12,
+    "to": 24
+   }
+  ],
+  "blue": [
+   {
+    "edge": "N",
+    "from": 18,
+    "to": 36
+   },
+   {
+    "edge": "W",
+    "from": 12,
+    "to": 24
+   }
+  ]
+ },
+ "markers": [
+  {
+   "n": 1,
+   "x": 12,
+   "y": 24
+  },
+  {
+   "n": 2,
+   "x": 42,
+   "y": 12
+  },
+  {
+   "n": 3,
+   "x": 42,
+   "y": 24
+  },
+  {
+   "n": 4,
+   "x": 12,
+   "y": 12
+  },
+  {
+   "n": 5,
+   "x": 27,
+   "y": 18
+  }
+ ],
+ "cardVersion": "1.06.26",
+ "source": "CS2-P p.4"
+}

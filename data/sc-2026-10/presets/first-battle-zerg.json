@@ -1,0 +1,44 @@
+{
+ "id": "first-battle-zerg",
+ "name": "First Battle Zerg",
+ "scale": "skirmish",
+ "faction": "zerg-swarm",
+ "units": [
+  {
+   "unit": "zergling",
+   "models": 12,
+   "upgrades": [
+    {
+     "id": "shredding-claws"
+    }
+   ]
+  },
+  {
+   "unit": "zergling",
+   "models": 12,
+   "upgrades": []
+  },
+  {
+   "unit": "roach",
+   "models": 3,
+   "upgrades": [
+    {
+     "id": "burrow-ambush"
+    }
+   ]
+  },
+  {
+   "unit": "queen",
+   "models": 1,
+   "upgrades": []
+  }
+ ],
+ "cards": [
+  "roach-warren"
+ ],
+ "creepCard": "accelerating-creep",
+ "source": [
+  "R p.7-29",
+  "CT p.4-6"
+ ]
+}

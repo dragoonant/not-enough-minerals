@@ -1,0 +1,274 @@
+{
+ "id": "vile",
+ "name": "Vile (Roach)",
+ "race": "zerg",
+ "factionTags": [
+  "zerg"
+ ],
+ "unique": false,
+ "role": "Tank",
+ "slot": "core",
+ "summoned": false,
+ "combatTags": [
+  "armoured",
+  "biological",
+  "ground"
+ ],
+ "stats": {
+  "shield": null,
+  "speed": [
+   4,
+   7
+  ],
+  "armour": 3,
+  "evade": 5,
+  "hp": 4,
+  "size": 2
+ },
+ "baseMm": 50,
+ "supplyProfile": [
+  {
+   "min": 1,
+   "max": 1,
+   "supply": 0
+  },
+  {
+   "min": 2,
+   "max": 3,
+   "supply": 1
+  }
+ ],
+ "weapons": [
+  {
+   "id": "acid-saliva",
+   "name": "Acid Saliva",
+   "phase": "assault",
+   "range": 8,
+   "target": "ground",
+   "roa": 4,
+   "hit": 3,
+   "surgeTypes": [],
+   "sDice": null,
+   "dmg": 1,
+   "keywords": []
+  },
+  {
+   "id": "vile-claws",
+   "name": "Vile Claws",
+   "phase": "combat",
+   "range": "E",
+   "target": "ground",
+   "roa": 2,
+   "hit": 4,
+   "surgeTypes": [],
+   "sDice": null,
+   "dmg": 1,
+   "keywords": []
+  }
+ ],
+ "abilities": [
+  {
+   "id": "burrow",
+   "name": "Burrow",
+   "type": "active",
+   "phase": "any",
+   "cost": {
+    "res": "BM",
+    "n": 2
+   },
+   "requires": {
+    "engaged": false
+   },
+   "effects": [
+    {
+     "op": "status",
+     "status": "BURROWED",
+     "mode": "toggle"
+    }
+   ],
+   "text": "Dig in or surface while not in melee."
+  },
+  {
+   "id": "debilitating-saliva",
+   "name": "Debilitating Saliva",
+   "type": "reaction",
+   "phase": "any",
+   "cost": {
+    "res": "BM",
+    "n": 1
+   },
+   "trigger": {
+    "event": "declareRangedAttack",
+    "who": "enemy",
+    "within": 8
+   },
+   "effects": [
+    {
+     "op": "debuff",
+     "char": "hit",
+     "x": 1,
+     "to": "triggerUnit",
+     "weapons": {
+      "phase": "assault"
+     }
+    }
+   ],
+   "text": "An enemy shooting from 8 inches or closer gets worse Hit on its guns."
+  },
+  {
+   "id": "regeneration",
+   "name": "Regeneration",
+   "type": "passive",
+   "phase": "assault",
+   "trigger": {
+    "event": "activated"
+   },
+   "effects": [
+    {
+     "op": "heal",
+     "x": 2,
+     "when": {
+      "status": [
+       "BURROWED"
+      ]
+     }
+    }
+   ],
+   "text": "Heals 2 when it activates while burrowed."
+  },
+  {
+   "id": "devastating-charge",
+   "name": "Devastating Charge",
+   "type": "passive",
+   "phase": "assault",
+   "trigger": {
+    "event": "chargeSucceeded"
+   },
+   "effects": [
+    {
+     "op": "impact",
+     "x": 1,
+     "y": 4
+    }
+   ],
+   "text": "After a successful Charge, IMPACT (1) 4+."
+  }
+ ],
+ "upgrades": [
+  {
+   "id": "tunneling-claws",
+   "name": "Tunneling Claws",
+   "phase": "movement",
+   "ability": {
+    "id": "tunneling-claws",
+    "name": "Tunneling Claws",
+    "type": "passive",
+    "phase": "movement",
+    "effects": [
+     {
+      "op": "status",
+      "status": "BURROWED",
+      "mode": "keepOnMove"
+     },
+     {
+      "op": "moveThrough",
+      "what": "units",
+      "when": {
+       "status": [
+        "BURROWED"
+       ]
+      }
+     }
+    ],
+    "text": "Moves and runs underground, passing beneath other bases."
+   }
+  },
+  {
+   "id": "glial-reconstitution",
+   "name": "Glial Reconstitution",
+   "phase": "movement",
+   "ability": {
+    "id": "glial-reconstitution",
+    "name": "Glial Reconstitution",
+    "type": "active",
+    "phase": "movement",
+    "cost": {
+     "res": "BM",
+     "n": 1
+    },
+    "effects": [
+     {
+      "op": "buff",
+      "char": "speed",
+      "x": 1,
+      "when": {
+       "onCreep": false
+      }
+     },
+     {
+      "op": "buff",
+      "char": "speed",
+      "x": 2,
+      "when": {
+       "onCreep": true
+      }
+     }
+    ],
+    "text": "Speed boost of 1, or 2 on Creep."
+   }
+  },
+  {
+   "id": "burrow-ambush",
+   "name": "Burrow Ambush",
+   "phase": "movement",
+   "ability": {
+    "id": "burrow-ambush",
+    "name": "Burrow Ambush",
+    "type": "passive",
+    "phase": "movement",
+    "trigger": {
+     "event": "nominatedToDeploy"
+    },
+    "endsActivation": true,
+    "effects": [
+     {
+      "op": "place",
+      "x": 18,
+      "from": "entryEdge",
+      "minEnemyDist": 10
+     }
+    ],
+    "text": "Arrives from Reserves up to 18 inches in from its edge, 10 inches clear of enemies."
+   }
+  },
+  {
+   "id": "hydriodic-bile",
+   "name": "Hydriodic Bile",
+   "phase": "assault",
+   "ability": {
+    "id": "hydriodic-bile",
+    "name": "Hydriodic Bile",
+    "type": "passive",
+    "phase": "assault",
+    "effects": [
+     {
+      "op": "weaponMod",
+      "addSurgeTypes": [
+       "light"
+      ],
+      "sDice": "D3+1",
+      "to": {
+       "ids": [
+        "acid-saliva"
+       ]
+      }
+     }
+    ],
+    "text": "Acid Saliva gains Light Surge with D3+1 Surge dice."
+   }
+  }
+ ],
+ "cardVersion": "1.04.26",
+ "source": "CS1-Z p.9",
+ "variantOf": "roach"
+}

@@ -1,0 +1,58 @@
+{
+  "id": "orbital-command",
+  "name": "Orbital Command",
+  "kind": "tactical",
+  "race": "terran",
+  "factionTags": [
+    "terran"
+  ],
+  "unique": true,
+  "slots": {
+    "core": 1
+  },
+  "resource": {
+    "res": "CP",
+    "n": 1
+  },
+  "abilities": [
+    {
+      "id": "comsat-station",
+      "name": "Comsat Station",
+      "type": "active",
+      "phase": "movement",
+      "target": {
+        "kind": "tableEdge"
+      },
+      "effects": [
+        {
+          "op": "code",
+          "code": "deny-deploy-edge",
+          "duration": "endOfRound"
+        }
+      ],
+      "text": "Close a non-entry table edge to enemy arrivals this Round."
+    },
+    {
+      "id": "scanner-sweep",
+      "name": "Scanner Sweep",
+      "type": "active",
+      "phase": "movement",
+      "effects": [
+        {
+          "op": "setToken",
+          "token": "faction-indicator",
+          "range": null
+        },
+        {
+          "op": "detection",
+          "radius": 6,
+          "centre": "indicator",
+          "duration": "endOfRound"
+        }
+      ],
+      "text": "Scan any spot: enemies within 6 inches of it lose Hidden."
+    }
+  ],
+  "cardVersion": "1.04.26",
+  "source": "CS1-T p.9"
+}

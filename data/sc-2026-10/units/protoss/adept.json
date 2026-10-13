@@ -1,0 +1,234 @@
+{
+  "id": "adept",
+  "name": "Adept",
+  "race": "protoss",
+  "factionTags": [
+    "protoss"
+  ],
+  "unique": false,
+  "role": "Damage Dealer",
+  "slot": "core",
+  "summoned": false,
+  "combatTags": [
+    "biological",
+    "light",
+    "ground"
+  ],
+  "stats": {
+    "shield": 2,
+    "speed": [
+      5,
+      8
+    ],
+    "armour": 5,
+    "evade": 5,
+    "hp": 3,
+    "size": 2
+  },
+  "baseMm": 40,
+  "supplyProfile": [
+    {
+      "min": 1,
+      "max": 2,
+      "supply": 0
+    },
+    {
+      "min": 3,
+      "max": 4,
+      "supply": 1
+    }
+  ],
+  "weapons": [
+    {
+      "id": "glaive-cannon",
+      "name": "Glaive Cannon",
+      "phase": "assault",
+      "range": 8,
+      "target": "all",
+      "roa": 2,
+      "hit": 3,
+      "surgeTypes": [
+        "light"
+      ],
+      "sDice": "D3+1",
+      "dmg": 1,
+      "keywords": [
+        {
+          "kw": "ANTI_EVADE",
+          "x": 1
+        }
+      ]
+    },
+    {
+      "id": "strike",
+      "name": "Strike",
+      "phase": "combat",
+      "range": "E",
+      "target": "ground",
+      "roa": 1,
+      "hit": 4,
+      "surgeTypes": [],
+      "sDice": null,
+      "dmg": 1,
+      "keywords": []
+    }
+  ],
+  "abilities": [
+    {
+      "id": "psionic-presence",
+      "name": "Psionic Presence",
+      "type": "passive",
+      "phase": "any",
+      "effects": [
+        {
+          "op": "grantKeyword",
+          "kw": {
+            "kw": "PRECISION",
+            "x": 1
+          },
+          "to": "allFriendly",
+          "when": {
+            "targetWithinToken": {
+              "token": "shade",
+              "d": 4
+            }
+          }
+        }
+      ],
+      "text": "Friendly weapons aimed at enemies near the Shade get PRECISION 1."
+    },
+    {
+      "id": "psionic-transfer",
+      "name": "Psionic Transfer",
+      "type": "active",
+      "phase": "movement",
+      "cost": {
+        "res": "PE",
+        "n": 1
+      },
+      "effects": [
+        {
+          "op": "setToken",
+          "token": "shade",
+          "range": 12,
+          "wholly": true
+        },
+        {
+          "op": "place",
+          "x": 0,
+          "from": "token",
+          "token": "shade",
+          "optional": true,
+          "allowEngage": true,
+          "at": {
+            "event": "endOfRound"
+          }
+        }
+      ],
+      "text": "Send a Shade up to 12 inches out; at round end the squad may reappear around it.",
+      "requires": {
+        "code": "not-carrying-claimed-marker"
+      },
+      "provenance": "F: cannot teleport while carrying a claimed Mission Marker (Artefact Hunt)"
+    }
+  ],
+  "upgrades": [
+    {
+      "id": "resonating-glaives",
+      "name": "Resonating Glaives",
+      "phase": "assault",
+      "ability": {
+        "id": "resonating-glaives",
+        "name": "Resonating Glaives",
+        "type": "active",
+        "phase": "assault",
+        "cost": {
+          "res": "PE",
+          "n": 1
+        },
+        "effects": [
+          {
+            "op": "buff",
+            "char": "roa",
+            "x": 1,
+            "to": {
+              "ids": [
+                "glaive-cannon"
+              ]
+            }
+          }
+        ],
+        "text": "+1 RoA on the Glaive Cannon."
+      }
+    },
+    {
+      "id": "guidance",
+      "name": "Guidance",
+      "phase": "assault",
+      "ability": {
+        "id": "guidance",
+        "name": "Guidance",
+        "type": "passive",
+        "phase": "assault",
+        "effects": [
+          {
+            "op": "grantKeyword",
+            "kw": {
+              "kw": "ANTI_EVADE",
+              "x": 2
+            },
+            "to": {
+              "ids": [
+                "glaive-cannon"
+              ]
+            }
+          }
+        ],
+        "text": "Glaive Cannon gets ANTI-EVADE 2."
+      }
+    },
+    {
+      "id": "glaive-strike",
+      "name": "Glaive Strike",
+      "phase": "combat",
+      "replaces": "strike",
+      "weapon": {
+        "id": "glaive-strike",
+        "name": "Glaive Strike",
+        "phase": "combat",
+        "range": "E",
+        "target": "ground",
+        "roa": 1,
+        "hit": 4,
+        "surgeTypes": [
+          "light"
+        ],
+        "sDice": "D3",
+        "dmg": 1,
+        "keywords": [
+          {
+            "kw": "PIERCE",
+            "tag": "light",
+            "x": 2
+          }
+        ]
+      }
+    }
+  ],
+  "cardVersion": "1.04.26",
+  "source": [
+    "CS1-P p.1",
+    "CT p.7",
+    "CL p.2"
+  ],
+  "tokens": [
+    {
+      "id": "shade",
+      "name": "Shade",
+      "baseMm": null,
+      "size": null,
+      "displacement": true,
+      "text": "Psionic echo the squad can jump to at the end of the Round."
+    }
+  ]
+}

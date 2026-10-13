@@ -1,0 +1,207 @@
+{
+  "id": "zealot",
+  "name": "Zealot",
+  "race": "protoss",
+  "factionTags": [
+    "protoss"
+  ],
+  "unique": false,
+  "role": "Damage Dealer",
+  "slot": "core",
+  "summoned": false,
+  "combatTags": [
+    "biological",
+    "light",
+    "ground"
+  ],
+  "stats": {
+    "shield": 3,
+    "speed": [
+      4,
+      7
+    ],
+    "armour": 5,
+    "evade": 5,
+    "hp": 4,
+    "size": 2
+  },
+  "baseMm": 40,
+  "supplyProfile": [
+    {
+      "min": 1,
+      "max": 1,
+      "supply": 1
+    },
+    {
+      "min": 2,
+      "max": 3,
+      "supply": 2
+    }
+  ],
+  "weapons": [
+    {
+      "id": "psi-blades",
+      "name": "Psi Blades",
+      "phase": "combat",
+      "range": "E",
+      "target": "ground",
+      "roa": 4,
+      "hit": 3,
+      "surgeTypes": [
+        "light"
+      ],
+      "sDice": "D3",
+      "dmg": 1,
+      "keywords": []
+    }
+  ],
+  "abilities": [
+    {
+      "id": "charge",
+      "name": "Charge",
+      "type": "active",
+      "phase": "assault",
+      "cost": {
+        "res": "PE",
+        "n": 1
+      },
+      "effects": [
+        {
+          "op": "charge",
+          "dice": "best2D6"
+        }
+      ],
+      "text": "Charge distance uses the best of two dice."
+    },
+    {
+      "id": "devastating-charge",
+      "name": "Devastating Charge",
+      "type": "passive",
+      "phase": "assault",
+      "trigger": {
+        "event": "chargeSucceeded"
+      },
+      "effects": [
+        {
+          "op": "impact",
+          "x": 3,
+          "y": 4
+        }
+      ],
+      "text": "After a successful Charge, IMPACT (3) 4+."
+    }
+  ],
+  "upgrades": [
+    {
+      "id": "my-life-for-aiur",
+      "name": "My Life for Aiur",
+      "phase": "any",
+      "ability": {
+        "id": "my-life-for-aiur",
+        "name": "My Life for Aiur",
+        "type": "passive",
+        "phase": "any",
+        "effects": [
+          {
+            "op": "impactBonus",
+            "dicePerModel": 1
+          }
+        ],
+        "text": "One extra IMPACT die per model."
+      }
+    },
+    {
+      "id": "leg-enhancements",
+      "name": "Leg Enhancements",
+      "phase": "movement",
+      "ability": {
+        "id": "leg-enhancements",
+        "name": "Leg Enhancements",
+        "type": "active",
+        "phase": "movement",
+        "cost": {
+          "res": "PE",
+          "n": 1
+        },
+        "effects": [
+          {
+            "op": "move",
+            "kind": "move",
+            "x": 2,
+            "freeAction": true
+          }
+        ],
+        "text": "A free 2 inch Move outside the action limit."
+      }
+    },
+    {
+      "id": "zealous-round",
+      "name": "Zealous Round",
+      "phase": "assault",
+      "ability": {
+        "id": "zealous-round",
+        "name": "Zealous Round",
+        "type": "reaction",
+        "phase": "assault",
+        "cost": {
+          "res": "PE",
+          "n": 0
+        },
+        "trigger": {
+          "event": "damageSuffered",
+          "subject": "self"
+        },
+        "requires": {
+          "activated": false
+        },
+        "effects": [
+          {
+            "op": "activation",
+            "mode": "set",
+            "to": "self"
+          },
+          {
+            "op": "damageReduce",
+            "n": 2
+          }
+        ],
+        "text": "Spend its activation to shave 2 off incoming damage."
+      }
+    },
+    {
+      "id": "we-stand-as-one",
+      "name": "We Stand as One",
+      "phase": "combat",
+      "ability": {
+        "id": "we-stand-as-one",
+        "name": "We Stand as One",
+        "type": "passive",
+        "phase": "combat",
+        "effects": [
+          {
+            "op": "grantKeyword",
+            "kw": {
+              "kw": "PRECISION",
+              "x": 2
+            },
+            "to": {
+              "phase": "combat"
+            },
+            "when": {
+              "attack": "closeCombat",
+              "targetEngagedWithOtherFriendly": true
+            },
+            "duration": "thisAttack"
+          }
+        ],
+        "text": "PRECISION 2 in melee against foes already fighting another friend."
+      }
+    }
+  ],
+  "cardVersion": "1.04.26",
+  "source": [
+    "CS1-P p.7",
+    "CT p.7",
+    "CL p.2"
+  ]
+}

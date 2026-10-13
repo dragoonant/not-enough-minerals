@@ -1,0 +1,233 @@
+{
+ "id": "ct-2026-10-protoss",
+ "table": "ct-2026-10",
+ "date": "2026-10-09",
+ "units": {
+  "zealot": {
+   "compositions": [
+    {
+     "models": 3,
+     "supply": 2,
+     "minerals": 170
+    }
+   ],
+   "upgrades": {
+    "leg-enhancements": [
+     20
+    ],
+    "my-life-for-aiur": [
+     10
+    ],
+    "we-stand-as-one": [
+     20
+    ],
+    "zealous-round": [
+     10
+    ]
+   },
+   "source": [
+    "CT p.7",
+    "CL p.2"
+   ]
+  },
+  "praetor-guard": {
+   "compositions": [
+    {
+     "models": 3,
+     "supply": 2,
+     "minerals": 260
+    }
+   ],
+   "upgrades": {},
+   "source": [
+    "CT p.7",
+    "CL p.2"
+   ]
+  },
+  "artanis": {
+   "compositions": [
+    {
+     "models": 1,
+     "supply": 1,
+     "minerals": 270
+    }
+   ],
+   "upgrades": {},
+   "source": [
+    "CT p.7",
+    "CL p.2"
+   ]
+  },
+  "zeratul": {
+   "compositions": [
+    {
+     "models": 1,
+     "supply": 1,
+     "minerals": 230
+    }
+   ],
+   "upgrades": {},
+   "source": "CT p.7"
+  },
+  "nerazim-watchers": {
+   "compositions": [
+    {
+     "models": 4,
+     "supply": 1,
+     "minerals": 210
+    }
+   ],
+   "upgrades": {},
+   "source": "CT p.7"
+  },
+  "adept": {
+   "compositions": [
+    {
+     "models": 4,
+     "supply": 1,
+     "minerals": 160
+    }
+   ],
+   "upgrades": {
+    "glaive-strike": [
+     20
+    ],
+    "guidance": [
+     10
+    ],
+    "resonating-glaives": [
+     20
+    ]
+   },
+   "source": [
+    "CT p.7",
+    "CL p.2"
+   ]
+  },
+  "sentry": {
+   "compositions": [
+    {
+     "models": 2,
+     "supply": 1,
+     "minerals": 130
+    }
+   ],
+   "upgrades": {
+    "hallucination": [
+     20
+    ],
+    "solid-field-projectors": [
+     10
+    ]
+   },
+   "source": [
+    "CT p.7",
+    "CL p.2"
+   ]
+  },
+  "stalker": {
+   "compositions": [
+    {
+     "models": 1,
+     "supply": 1,
+     "minerals": 160
+    },
+    {
+     "models": 2,
+     "supply": 2,
+     "minerals": 270
+    }
+   ],
+   "upgrades": {
+    "fury-of-the-nerazim": [
+     20,
+     30
+    ],
+    "path-of-shadows": [
+     20,
+     40
+    ]
+   },
+   "source": [
+    "CT p.7",
+    "CL p.2"
+   ]
+  },
+  "immortal": {
+   "compositions": [
+    {
+     "models": 1,
+     "supply": 2,
+     "minerals": 280
+    }
+   ],
+   "upgrades": {
+    "shield-overcharge": [
+     20
+    ],
+    "left-phase-disruptor": [
+     20
+    ],
+    "right-phase-disruptor": [
+     20
+    ],
+    "fury-unyielding": [
+     20
+    ],
+    "for-the-ancients": [
+     20
+    ]
+   },
+   "source": "CT p.8"
+  },
+  "tassadar": {
+   "compositions": [
+    {
+     "models": 1,
+     "supply": 1,
+     "minerals": 230
+    }
+   ],
+   "upgrades": {},
+   "source": "CT p.8"
+  },
+  "twilight-templar": {
+   "compositions": [
+    {
+     "models": 2,
+     "supply": 1,
+     "minerals": 230
+    }
+   ],
+   "upgrades": {},
+   "source": "CT p.8"
+  },
+  "high-templar": {
+   "compositions": [
+    {
+     "models": 2,
+     "supply": 1,
+     "minerals": 130
+    },
+    {
+     "models": 4,
+     "supply": 2,
+     "minerals": 200
+    }
+   ],
+   "upgrades": {
+    "psionic-storm": [
+     20,
+     30
+    ],
+    "farsight": [
+     20,
+     20
+    ]
+   },
+   "source": "CT p.8"
+  }
+ },
+ "cards": {},
+ "source": "CT p.7-8"
+}

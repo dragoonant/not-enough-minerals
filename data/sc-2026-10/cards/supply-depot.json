@@ -1,0 +1,48 @@
+{
+  "id": "supply-depot",
+  "name": "Supply Depot",
+  "kind": "tactical",
+  "race": "terran",
+  "factionTags": [
+    "terran"
+  ],
+  "unique": true,
+  "slots": {
+    "core": 1,
+    "elite": 1,
+    "hero": 1
+  },
+  "resource": {
+    "res": "CP",
+    "n": 1
+  },
+  "abilities": [
+    {
+      "id": "additional-supply-depots",
+      "name": "Additional Supply Depots",
+      "type": "active",
+      "phase": "movement",
+      "target": {
+        "kind": "activeUnit"
+      },
+      "effects": [
+        {
+          "op": "supplyOverride",
+          "purposes": [
+            "control",
+            "contest",
+            "objectives"
+          ],
+          "delta": 1,
+          "duration": "endOfRound"
+        }
+      ],
+      "text": "The active Unit counts 1 extra Supply for markers and objectives this Round."
+    }
+  ],
+  "cardVersion": "1.04.26",
+  "source": "CS1-T p.9",
+  "provenance": {
+    "abilities.additional-supply-depots.effects.0.duration": "card gives no duration; end of Round assumed (Unsourced)"
+  }
+}

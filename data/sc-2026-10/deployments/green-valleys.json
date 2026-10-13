@@ -1,0 +1,54 @@
+{
+ "id": "green-valleys",
+ "name": "Green Valleys",
+ "scale": "skirmish",
+ "size": {
+  "w": 36,
+  "h": 36
+ },
+ "entryEdges": {
+  "red": [
+   {
+    "edge": "W",
+    "from": 30,
+    "to": 36
+   },
+   {
+    "edge": "E",
+    "from": 12,
+    "to": 24
+   }
+  ],
+  "blue": [
+   {
+    "edge": "W",
+    "from": 12,
+    "to": 24
+   },
+   {
+    "edge": "E",
+    "from": 0,
+    "to": 6
+   }
+  ]
+ },
+ "markers": [
+  {
+   "n": 1,
+   "x": 12,
+   "y": 6
+  },
+  {
+   "n": 2,
+   "x": 24,
+   "y": 30
+  },
+  {
+   "n": 5,
+   "x": 18,
+   "y": 18
+  }
+ ],
+ "cardVersion": "1.06.26",
+ "source": "CS2-P p.4"
+}

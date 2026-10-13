@@ -1,0 +1,60 @@
+[
+ {
+  "id": "hold-position-standard",
+  "name": "Hold Position",
+  "scale": "standard",
+  "startSupply": 6,
+  "escalation": 2,
+  "gameLength": 5,
+  "specialWinLead": 10,
+  "markerStart": "activated",
+  "startOfRound": [],
+  "scoring": [
+   {
+    "kind": "supplyDestroyed"
+   },
+   {
+    "kind": "perControlledMarker",
+    "fromRound": 2,
+    "vp": {
+     "own": 1,
+     "neutral": 1,
+     "opponent": 2
+    }
+   }
+  ],
+  "actions": [],
+  "text": "From round 2, each marker you hold scores 1 VP, or 2 VP when it belongs to the enemy colour.",
+  "cardVersion": "1.04.26",
+  "source": "CS1-T p.11"
+ },
+ {
+  "id": "hold-position-skirmish",
+  "name": "Hold Position",
+  "scale": "skirmish",
+  "startSupply": 3,
+  "escalation": 1,
+  "gameLength": 5,
+  "specialWinLead": 8,
+  "markerStart": "activated",
+  "startOfRound": [],
+  "scoring": [
+   {
+    "kind": "supplyDestroyed"
+   },
+   {
+    "kind": "perControlledMarker",
+    "fromRound": 2,
+    "vp": {
+     "own": 1,
+     "neutral": 1,
+     "opponent": 2
+    }
+   }
+  ],
+  "actions": [],
+  "text": "From round 2, each marker you hold scores 1 VP, or 2 VP when it belongs to the enemy colour.",
+  "cardVersion": "1.04.26",
+  "source": "CS1-T p.11"
+ }
+]

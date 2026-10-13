@@ -1,0 +1,75 @@
+{
+  "id": "cocoon",
+  "name": "Cocoon",
+  "kind": "tactical",
+  "race": "zerg",
+  "factionTags": [
+    "zerg"
+  ],
+  "unique": true,
+  "slots": {
+    "elite": 1
+  },
+  "resource": {
+    "res": "BM",
+    "n": 1
+  },
+  "abilities": [
+    {
+      "id": "spawn-larva",
+      "name": "Spawn Larva",
+      "type": "active",
+      "phase": "movement",
+      "target": {
+        "kind": "activeUnit",
+        "filter": {
+          "tags": [
+            "biological"
+          ],
+          "unique": false,
+          "size": {
+            "min": 1,
+            "max": 1
+          }
+        }
+      },
+      "effects": [
+        {
+          "op": "respawn",
+          "x": 2
+        }
+      ],
+      "text": "A non-unique Size 1 biological Unit regrows up to 2 lost models."
+    },
+    {
+      "id": "ravager-morph",
+      "name": "Ravager Morph",
+      "type": "active",
+      "phase": "movement",
+      "limit": "oncePerGame",
+      "target": {
+        "kind": "activeUnit",
+        "filter": {
+          "units": [
+            "roach",
+            "vile",
+            "corpser"
+          ]
+        }
+      },
+      "effects": [
+        {
+          "op": "morph",
+          "unit": "ravager",
+          "x": 1
+        }
+      ],
+      "text": "Once a game a Roach Unit turns 1 model into a Ravager."
+    }
+  ],
+  "cardVersion": "1.06.26",
+  "source": "CS2-Z p.2",
+  "provenance": {
+    "resource": "card prints no resource box; BM 1 assumed like every other tactical card (Unsourced)"
+  }
+}

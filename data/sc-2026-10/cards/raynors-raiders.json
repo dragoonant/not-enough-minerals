@@ -1,0 +1,66 @@
+{
+  "id": "raynors-raiders",
+  "name": "Raynor's Raiders",
+  "kind": "faction",
+  "race": "terran",
+  "factionTags": [
+    "terran",
+    "raynors-raiders"
+  ],
+  "unique": true,
+  "slots": {
+    "core": 3,
+    "hero": 1,
+    "support": 1,
+    "air": 1
+  },
+  "resource": {
+    "res": "CP",
+    "n": 1
+  },
+  "abilities": [
+    {
+      "id": "rapid-ingress",
+      "name": "Rapid Ingress",
+      "type": "active",
+      "phase": "movement",
+      "effects": [
+        {
+          "op": "summon",
+          "unit": "point-defense-drone",
+          "anywhere": true,
+          "minEnemyDist": 1
+        },
+        {
+          "op": "removeSelf",
+          "to": "summoned",
+          "at": {
+            "event": "endOfRound"
+          }
+        }
+      ],
+      "text": "Drop a Point Defense Drone anywhere 1 inch clear of enemies; it leaves at round end."
+    },
+    {
+      "id": "ready-for-pickup",
+      "name": "Ready for Pickup?",
+      "type": "active",
+      "phase": "movement",
+      "limit": "oncePerGame",
+      "insteadOfAction": true,
+      "target": {
+        "kind": "activeUnit"
+      },
+      "effects": [
+        {
+          "op": "place",
+          "x": 12,
+          "notInEngagement": true
+        }
+      ],
+      "text": "Once a game the active Unit hops up to 12 inches instead of acting."
+    }
+  ],
+  "cardVersion": "1.04.26",
+  "source": "CS1-T p.9"
+}

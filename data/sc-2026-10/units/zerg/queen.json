@@ -1,0 +1,267 @@
+{
+ "id": "queen",
+ "name": "Queen",
+ "race": "zerg",
+ "factionTags": [
+  "zerg"
+ ],
+ "unique": false,
+ "role": "Lifesaver",
+ "slot": "support",
+ "summoned": false,
+ "combatTags": [
+  "armoured",
+  "biological",
+  "psionic",
+  "ground"
+ ],
+ "stats": {
+  "shield": null,
+  "speed": 4,
+  "armour": 4,
+  "evade": null,
+  "hp": 9,
+  "size": 3
+ },
+ "baseMm": 80,
+ "supplyProfile": [
+  {
+   "min": 1,
+   "max": 1,
+   "supply": 1
+  }
+ ],
+ "weapons": [
+  {
+   "id": "talons",
+   "name": "Talons",
+   "phase": "assault",
+   "range": 6,
+   "target": "ground",
+   "roa": 4,
+   "hit": 4,
+   "surgeTypes": [
+    "light"
+   ],
+   "sDice": "D3",
+   "dmg": 2,
+   "keywords": []
+  },
+  {
+   "id": "acid-spines",
+   "name": "Acid Spines",
+   "phase": "assault",
+   "range": 12,
+   "target": "flying",
+   "roa": 4,
+   "hit": 4,
+   "surgeTypes": [
+    "light",
+    "armoured"
+   ],
+   "sDice": "D3",
+   "dmg": 2,
+   "keywords": []
+  },
+  {
+   "id": "talons-cc",
+   "name": "Talons",
+   "phase": "combat",
+   "range": "E",
+   "target": "ground",
+   "roa": 3,
+   "hit": 4,
+   "surgeTypes": [],
+   "sDice": null,
+   "dmg": 1,
+   "keywords": []
+  }
+ ],
+ "abilities": [
+  {
+   "id": "spawn-creep-tumor",
+   "name": "Spawn Creep Tumor",
+   "type": "active",
+   "phase": "any",
+   "cost": {
+    "res": "BM",
+    "n": 1
+   },
+   "effects": [
+    {
+     "op": "setToken",
+     "token": "creep-tumor",
+     "range": 0
+    }
+   ],
+   "text": "Drop a Creep Tumor touching her base."
+  },
+  {
+   "id": "transfusion",
+   "name": "Transfusion",
+   "type": "reaction",
+   "phase": "any",
+   "cost": {
+    "res": "BM",
+    "n": 1
+   },
+   "trigger": {
+    "event": "damageSuffered",
+    "who": "any",
+    "subject": "otherFriendly",
+    "within": 4,
+    "filter": {
+     "tags": [
+      "biological"
+     ]
+    }
+   },
+   "effects": [
+    {
+     "op": "damageReduce",
+     "n": 2,
+     "to": "triggerUnit"
+    },
+    {
+     "op": "code",
+     "code": "transfusion-allows-structure"
+    }
+   ],
+   "text": "Cut 2 damage from a biological friend hit nearby, structures included."
+  },
+  {
+   "id": "restoration",
+   "name": "Restoration",
+   "type": "reaction",
+   "phase": "any",
+   "cost": {
+    "res": "BM",
+    "n": 1
+   },
+   "trigger": {
+    "event": "debuffReceived",
+    "who": "any",
+    "subject": "friendly",
+    "within": 4
+   },
+   "effects": [
+    {
+     "op": "cleanse",
+     "what": "debuffs",
+     "to": "triggerUnit"
+    }
+   ],
+   "text": "Strip every debuff from a nearby friend the moment it gets one."
+  },
+  {
+   "id": "psionic-link",
+   "name": "Psionic Link",
+   "type": "passive",
+   "phase": "any",
+   "limit": "oncePerRound",
+   "trigger": {
+    "event": "usesAbility"
+   },
+   "effects": [
+    {
+     "op": "costMod",
+     "res": "BM",
+     "delta": -1,
+     "floor": 0,
+     "when": {
+      "friendlyModelsWithin": {
+       "n": 7,
+       "d": 6
+      }
+     }
+    }
+   ],
+   "text": "With 7 friendly models close by, one of her abilities a Round costs 1 BM less."
+  },
+  {
+   "id": "devastating-charge",
+   "name": "Devastating Charge",
+   "type": "passive",
+   "phase": "assault",
+   "trigger": {
+    "event": "chargeSucceeded"
+   },
+   "effects": [
+    {
+     "op": "impact",
+     "x": 4,
+     "y": 3
+    }
+   ],
+   "text": "After a successful Charge, IMPACT (4) 3+."
+  }
+ ],
+ "upgrades": [
+  {
+   "id": "creep-speed",
+   "name": "Creep Speed",
+   "phase": "any",
+   "ability": {
+    "id": "creep-speed",
+    "name": "Creep Speed",
+    "type": "passive",
+    "phase": "any",
+    "effects": [
+     {
+      "op": "modify",
+      "char": "speed",
+      "delta": 2,
+      "when": {
+       "onCreep": true
+      }
+     }
+    ],
+    "text": "+2 Speed on Creep."
+   }
+  },
+  {
+   "id": "domineering-presence",
+   "name": "Domineering Presence",
+   "phase": "movement",
+   "ability": {
+    "id": "domineering-presence",
+    "name": "Domineering Presence",
+    "type": "active",
+    "phase": "movement",
+    "cost": {
+     "res": "BM",
+     "n": 1
+    },
+    "target": {
+     "kind": "otherFriendlyUnit",
+     "range": 6,
+     "los": false
+    },
+    "effects": [
+     {
+      "op": "supplyOverride",
+      "purposes": [
+       "control",
+       "contest",
+       "objectives"
+      ],
+      "delta": 1,
+      "duration": "endOfRound"
+     }
+    ],
+    "text": "A friend within 6 inches counts 1 more Supply on markers."
+   }
+  }
+ ],
+ "cardVersion": "1.04.26",
+ "source": "CS1-Z p.5",
+ "tokens": [
+  {
+   "id": "creep-tumor",
+   "name": "Creep Tumor",
+   "baseMm": null,
+   "size": null,
+   "text": "Spreads Creep around it."
+  }
+ ]
+}

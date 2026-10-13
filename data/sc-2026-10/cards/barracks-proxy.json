@@ -1,0 +1,76 @@
+{
+  "id": "barracks-proxy",
+  "name": "Barracks (Proxy)",
+  "kind": "tactical",
+  "race": "terran",
+  "factionTags": [
+    "terran"
+  ],
+  "unique": true,
+  "slots": {
+    "core": 2
+  },
+  "resource": {
+    "res": "CP",
+    "n": 2
+  },
+  "abilities": [
+    {
+      "id": "go-go-go",
+      "name": "Go! Go! Go!",
+      "type": "active",
+      "phase": "movement",
+      "target": {
+        "kind": "activeUnit",
+        "filter": {
+          "tags": [
+            "biological"
+          ]
+        }
+      },
+      "effects": [
+        {
+          "op": "move",
+          "kind": "move",
+          "x": 2,
+          "freeAction": true
+        }
+      ],
+      "text": "A biological Unit makes a free 2 inch Move that skips its action limit."
+    },
+    {
+      "id": "armed-and-ready",
+      "name": "Armed and Ready",
+      "type": "active",
+      "phase": "movement",
+      "target": {
+        "kind": "activeUnit",
+        "filter": {
+          "tags": [
+            "biological"
+          ]
+        }
+      },
+      "effects": [
+        {
+          "op": "altEntry",
+          "kind": "nonEntryEdge"
+        },
+        {
+          "op": "code",
+          "code": "forward-deploy-clearance",
+          "args": {
+            "minEnemyDist": 10
+          }
+        },
+        {
+          "op": "code",
+          "code": "forward-deploy-once-per-round"
+        }
+      ],
+      "text": "A biological Unit deploys from a non-entry edge, once per Round, clear of enemies."
+    }
+  ],
+  "cardVersion": "1.04.26",
+  "source": "CS1-T p.10"
+}

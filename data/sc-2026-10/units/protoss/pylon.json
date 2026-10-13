@@ -1,0 +1,105 @@
+{
+  "id": "pylon",
+  "name": "Pylon",
+  "race": "protoss",
+  "factionTags": [
+    "protoss",
+    "khalai"
+  ],
+  "unique": false,
+  "role": "Tactician",
+  "slot": null,
+  "summoned": true,
+  "combatTags": [
+    "armoured",
+    "ground"
+  ],
+  "stats": {
+    "shield": 2,
+    "speed": null,
+    "armour": 5,
+    "evade": null,
+    "hp": 8,
+    "size": 3
+  },
+  "baseMm": 80,
+  "supplyProfile": [
+    {
+      "min": 1,
+      "max": 1,
+      "supply": 0
+    }
+  ],
+  "weapons": [],
+  "abilities": [
+    {
+      "id": "khalai-ingenuity",
+      "name": "Khalai Ingenuity",
+      "type": "passive",
+      "phase": "any",
+      "limit": "oncePerRound",
+      "effects": [
+        {
+          "op": "aura",
+          "radius": 4,
+          "centre": "self",
+          "affects": {
+            "side": "friendly"
+          },
+          "effects": [
+            {
+              "op": "costMod",
+              "res": "PE",
+              "delta": -1,
+              "floor": 0
+            }
+          ]
+        }
+      ],
+      "text": "Once a Round a nearby friend pays 1 PE less for an ability."
+    },
+    {
+      "id": "structure",
+      "name": "Structure",
+      "type": "passive",
+      "phase": "any",
+      "effects": [
+        {
+          "op": "grantKeyword",
+          "kw": {
+            "kw": "STRUCTURE"
+          }
+        }
+      ],
+      "text": "A building: never activates and never counts for Supply or markers."
+    },
+    {
+      "id": "warp-conduit",
+      "name": "Warp Conduit",
+      "type": "passive",
+      "phase": "movement",
+      "limit": "oncePerRound",
+      "endsActivation": true,
+      "effects": [
+        {
+          "op": "altEntry",
+          "kind": "unitBase",
+          "filter": {
+            "tags": [
+              "ground"
+            ]
+          }
+        }
+      ],
+      "text": "Once a Round a ground Unit may warp in at its base."
+    }
+  ],
+  "upgrades": [],
+  "cardVersion": "1.04.26",
+  "source": [
+    "CS1-P p.4"
+  ],
+  "provenance": {
+    "combatTags": "card prints ARMORED (19 D-06); entered as armoured"
+  }
+}

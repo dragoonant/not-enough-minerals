@@ -1,0 +1,71 @@
+{
+ "id": "terran-starter",
+ "name": "Terran Starter",
+ "scale": "skirmish",
+ "faction": "terran-armed-forces",
+ "units": [
+  {
+   "unit": "marine",
+   "models": 9,
+   "upgrades": [
+    {
+     "id": "combat-shield"
+    },
+    {
+     "id": "grenades-frag"
+    },
+    {
+     "id": "bayonet"
+    }
+   ]
+  },
+  {
+   "unit": "marauder",
+   "models": 2,
+   "upgrades": [
+    {
+     "id": "laser-targeting-systems"
+    }
+   ]
+  },
+  {
+   "unit": "marauder",
+   "models": 2,
+   "upgrades": [
+    {
+     "id": "veteran-of-tarsonis"
+    },
+    {
+     "id": "kinetic-foam"
+    }
+   ]
+  },
+  {
+   "unit": "medic",
+   "models": 3,
+   "upgrades": [
+    {
+     "id": "stabilizer-medpacks"
+    }
+   ]
+  },
+  {
+   "unit": "goliath",
+   "models": 1,
+   "upgrades": [
+    {
+     "id": "scatter-missiles"
+    }
+   ]
+  }
+ ],
+ "cards": [
+  "barracks",
+  "factory",
+  "orbital-command"
+ ],
+ "source": [
+  "R p.108",
+  "CT p.2-3"
+ ]
+}

@@ -1,0 +1,74 @@
+{
+  "id": "barracks-tech-lab",
+  "name": "Barracks (Tech Lab)",
+  "kind": "tactical",
+  "race": "terran",
+  "factionTags": [
+    "terran"
+  ],
+  "unique": true,
+  "slots": {
+    "core": 1,
+    "elite": 1
+  },
+  "resource": {
+    "res": "CP",
+    "n": 2
+  },
+  "abilities": [
+    {
+      "id": "go-go-go",
+      "name": "Go! Go! Go!",
+      "type": "active",
+      "phase": "movement",
+      "target": {
+        "kind": "activeUnit",
+        "filter": {
+          "tags": [
+            "biological"
+          ]
+        }
+      },
+      "effects": [
+        {
+          "op": "move",
+          "kind": "move",
+          "x": 2,
+          "freeAction": true
+        }
+      ],
+      "text": "A biological Unit makes a free 2 inch Move that skips its action limit."
+    },
+    {
+      "id": "lets-have-a-blast",
+      "name": "Let's Have a Blast!",
+      "type": "active",
+      "phase": "assault",
+      "target": {
+        "kind": "activeUnit",
+        "filter": {
+          "tags": [
+            "biological"
+          ]
+        }
+      },
+      "effects": [
+        {
+          "op": "grantKeyword",
+          "kw": {
+            "kw": "ANTI_EVADE",
+            "x": 1
+          },
+          "to": {
+            "phase": "assault",
+            "first": true
+          },
+          "duration": "endOfActivation"
+        }
+      ],
+      "text": "A biological Unit adds ANTI-EVADE 1 to its first ranged weapon used."
+    }
+  ],
+  "cardVersion": "1.04.26",
+  "source": "CS1-T p.10"
+}
