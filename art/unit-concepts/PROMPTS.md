@@ -276,3 +276,145 @@ glaive); a Gemini edit pass can fix these later if the owner wants.
 - sentry: "... of a small hovering robot of the same race: a big round gold orb body with a glowing cyan
   crystal core set in its front, two small jointed arms, no legs, floating on a thin clear stem above the
   base. Gold and deep blue frame, cyan glow. 50mm base."
+
+---
+
+## Batch 4 (Gemini, 2026-10-13, owner at the PC)
+
+Redo of the batch-3 SDXL concepts per `art/models-staging/REVIEW.md`, plus seven new units. One fresh
+Gemini chat per faction (Pro mode). First prompt of each chat uploads three images: the MGSD style image,
+the faction anchor (`marine.png`, `zergling.png`, `zealot.png`) and a photo of the real miniature.
+Later units are subject-swap edits in the same chat. No miniature photos were found locally for the new
+units (siege tank, immortal, zeratul, artanis, ravager, raider, praetor guard), so those used our own
+approved concepts as the shape anchor instead (`roach.png` for the ravager, `stalker.png` for the
+immortal). Every unit came out right on the first try. Old redo images kept as `<slug>-v1.png`.
+Images are 1024x572 (Terran, Zerg, immortal) or 1024x687 (other Protoss).
+
+| Slug | Base | Result | Measured on the image |
+|---|---|---|---|
+| medic (redo) | 32mm | pass | helmet ~38%, ~2.6 heads; white + steel blue, empty hands, tiny forearm injector stub, no gun |
+| siege-tank (new) | 150mm | pass | squat hull on stubby tracks, round turret ~45% of height, one short siege cannon |
+| raynors-raider (new) | 32mm | pass | marine edit: helmet ~36%, ~2.7 heads, leather trim + helmet stripe, one rifle |
+| hydralisk (redo) | 50mm | pass | coiled serpent tail, no legs, hood + head ~45%, two scythe arms, compact |
+| queen (redo) | 80mm | pass | crested head ~50%, two talons + small arms, stubby legs, no back limbs |
+| ravager (new) | 50mm | pass | roach body, tall bone crest cradling a glowing bile sac, stubby legs |
+| sentry (redo) | 50mm | pass | orb ~75% of height, crystal centred, two small arms, no legs, one thin stand on a flat base |
+| adept (redo) | 40mm | pass | head ~43%, ~2.3 heads; twin-prong glaive on the right forearm, empty fists, deep blue under-armour |
+| immortal (new) | 100mm | pass | domed body ~55%, exactly two side cannons, four stubby legs on the base (cannon tips overhang) |
+| zeratul (new) | 40mm | pass | hooded head ~42%, ~2.4 heads, one green warp blade, dark violet-black with gold trim |
+| artanis (new) | 50mm | pass | head + gold crest ~45%, two wrist blades, no cape |
+| praetor-guard (new) | 40mm | pass | zealot edit: head ~40%, ~2.5 heads, heavier gold plates, two wrist blades |
+
+### Terran chat (images: style, marine.png, medic photo)
+medic (first prompt):
+> Generate an image: an SD Gundam style model kit figure (Bandai MGSD line) of a sci-fi combat field medic
+> in light powered armour. Match the style, proportions, palette and framing of the SECOND image (our
+> trooper): the huge rounded helmet with a wide dark visor is the biggest part, as wide as the shoulder span
+> and as tall as torso plus legs (about 2 heads tall). FIRST image = style and proportion reference only;
+> THIRD image = armour and backpack shapes only. White armour plates, steel blue trim and joints, a compact
+> boxy medical backpack with plain smooth panels, big gloved hands EMPTY and relaxed, one small stubby
+> injector cuff flat on the left forearm, no longer than the hand. NO gun, rifle, pistol, rods, tubes,
+> barrels or hoses, nothing in the hands. Stubby legs, chunky boots, Master Grade panel lines. No
+> lettering, crosses, logos or emblems. Front three-quarter view, plain round black base (32mm), white
+> background. Exactly ONE single figure, centred.
+
+siege-tank (edit):
+> Generate an image: start from the SECOND image I uploaded and keep the same SD model kit style, steel
+> blue and gunmetal palette, panel lines, round black base and white background. Change the subject to a
+> heavy tracked siege tank for a 150mm base, chunky and toy-like: a short, squat, wide hull on two fat
+> stubby tracks; on top a HUGE rounded turret (the SD "head", about 45% of the height) with ONE big, thick,
+> short siege cannon. Not a realistic tank. No crew, lettering, numbers or logos. Front three-quarter view,
+> whole vehicle inside one round black base. Exactly ONE single vehicle, centred.
+
+raynors-raider (edit of the uploaded marine):
+> Generate an image: start from the SECOND image I uploaded (the SD trooper with a rifle) and keep
+> EVERYTHING the same (pose, huge helmet, proportions, rifle, steel blue and gunmetal, base, background).
+> Change only the paint trim: worn leather-brown trim on the shoulder pad edges, belt and knee pads, and one
+> plain leather-brown stripe front to back over the helmet like a bandana. Slightly battered edges. No
+> lettering, numbers, logos or emblems. 32mm trooper. Exactly ONE single figure, centred.
+
+### Zerg chat (images: style, zergling.png, hydralisk photo)
+hydralisk (first prompt):
+> Generate an image: an SD Gundam style model kit figure (Bandai MGSD line) of an upright alien serpent
+> warrior beast. Match the style, chunky shapes, violet carapace and pale bone palette and framing of the
+> SECOND image (our swarm beast); FIRST image = style reference only; THIRD image = anatomy only. NO legs:
+> the lower body is one thick, short snake tail resting in a compact coil on the base. The head is the
+> biggest part (about 40-45%): a huge armoured skull with a wide flared bony cobra hood and a fanged jaw.
+> Two big curved bone scythe arms held forward, a short ridge of back spines. Compact so it fits a 50mm
+> base. Fierce, not cute. No lettering or logos. Front three-quarter view, round black base, white
+> background. Exactly ONE single creature, centred.
+
+queen (edit, queen photo attached):
+> Generate an image: start from the previous image and keep the same style, palette, base and background.
+> Change the subject to the swarm's broodmother for an 80mm base, standing upright on two very short thick
+> legs with clawed feet. The head is the biggest part (about 40-45%): a huge skull with a tall swept-back
+> bony crest and a fanged jaw. Two big hooked talon arms in front, two smaller clawed arms under them, a
+> plump abdomen behind. NO long thin back limbs, no spindly legs, no wings; compact, well inside the
+> base. Attached image = anatomy only. No lettering or logos. Exactly ONE single creature, centred.
+
+ravager (edit, roach.png attached):
+> Generate an image: start from the attached image (our SD armoured burrowing beast) and keep the same
+> style, palette, base and background. Change the subject to its evolved artillery form for a 50mm base:
+> the same squat body on stubby clawed legs, but the domed carapace rises at the back into a tall upright
+> bony crest of curved bone plates cradling a glowing orange-green bile sac, like a living mortar. Low wide
+> head with bone tusks. Compact. No lettering or logos. Exactly ONE single creature, centred.
+
+### Protoss chat (images: style, zealot.png, sentry photo)
+sentry (first prompt):
+> Generate an image: an SD Gundam style model kit figure (Bandai MGSD line) of a small hovering alien
+> support robot. Match the style, gold and deep blue palette with cyan glow, panel lines and framing of the
+> SECOND image; FIRST image = style reference only; THIRD image = part shapes only. One big round gold orb
+> body (about 60% of the height) with a large glowing cyan crystal core in the CENTRE of its front face,
+> two small short jointed arms with little claws, NO legs or feet, nothing below the orb. The orb hovers on
+> ONE small thin stand rising from the centre of a plain flat round black base (50mm). No rings, pedestal or
+> second base. No lettering or logos. Front three-quarter view, white background. Exactly ONE single robot.
+
+adept (edit, adept photo attached):
+> Generate an image: start from the SECOND image I uploaded (the SD templar warrior) and keep the same
+> style, huge head (biggest part, about 40-45%, as wide as the shoulders), stubby legs, base and
+> background. Change the subject to a lighter, agile warrior for a 40mm base: sleeker light gold plates
+> over DEEP ROYAL BLUE under-armour (blue, not black or grey), the same head, eyes and tendrils, and ONE
+> crescent glaive cannon built onto the right forearm like a bracer, glowing cyan, reaching past the fist.
+> Both hands empty fists, nothing held, no blade on the left arm. Attached image = armour and weapon shapes
+> only. No lettering or logos. Exactly ONE single figure, centred.
+
+immortal (edit, stalker.png attached):
+> Generate an image: start from the attached image (our SD gold four-legged walker) and keep the same
+> style, palette, base and background. Change the subject to a heavier assault walker for a 100mm base: a
+> large rounded DOMED body (the SD "head", about half the height) with a cyan lens, TWO big chunky cannons,
+> one on each side, pointing forward (exactly two), four short thick stubby legs with chunky feet inside
+> the base. No lettering or logos. Exactly ONE single walker, centred.
+
+zeratul (edit of the uploaded zealot):
+> Generate an image: start from the SECOND image I uploaded and keep the same style, huge head, stubby
+> legs, base and background. Change the subject to a shadowy hero assassin for a 40mm base: a big deep
+> hood and short wrapped scarf over the head, two glowing green eyes in the shadow, sleek deep
+> violet-black armour with small muted gold trims and green glow lights, ONE long curved green warp blade
+> from the right wrist. Left hand an empty fist, no second blade, no cape. No lettering or logos. Exactly
+> ONE single figure, centred.
+
+artanis (edit of the uploaded zealot):
+> Generate an image: start from the SECOND image I uploaded and keep the same style, huge head, stubby
+> legs, base and background. Change the subject to the race's hero commander for a 50mm base: grander
+> ornate polished gold armour, tall swept-up gold shoulder plates, a gold crest-like headpiece framing the
+> head, deep blue under-armour, one long cyan blade from each wrist (two in total). NO cape, cloak or
+> banner. No lettering or logos. Exactly ONE single figure, centred.
+
+praetor-guard (edit of the uploaded zealot):
+> Generate an image: start from the SECOND image I uploaded and keep EVERYTHING the same (pose, head,
+> proportions, both wrist blades, deep blue under-armour, base, background). Change only the armour to an
+> elite honour guard version for a 40mm base: heavier, thicker, more ornate gold plates, bigger layered
+> shoulder plates, a gold gorget, thicker greaves, a few small cyan gems. No cape, lettering or logos.
+> Exactly ONE single figure, centred.
+
+### Lessons (batch 4)
+- Uploading the approved faction anchor as image 2 and saying "match the SECOND image" held the MGSD look
+  on the first try for all 12 units; later edits that name "the SECOND image I uploaded" reuse the anchor.
+- Negative wording fixed the old misses: "NO legs", "no long thin back limbs", "nothing held in the
+  hands", "ONE single small stand ... no rings, no pedestal".
+- The Gemini tab often reports `visibilityState=hidden` while the window is visible; the "+" menu then
+  needs a second click (or a screenshot first) before the file inputs appear. Generation and canvas
+  extraction still work while hidden.
+- Receiver page: open the popup from a real click, then `postMessage` canvas data URLs to a local
+  127.0.0.1 page that POSTs them to a small local server. Keep JS inside a Python bytes literal free of
+  backslash escapes (a raw newline broke the first receiver).

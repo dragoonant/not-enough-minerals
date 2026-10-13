@@ -38,12 +38,68 @@ so Terran figures at 33-38% are judged against the marine, not against the 40% i
 | sentry | orb ~60%, crystal and two horn-prongs on top, two claw arms plus two short lower legs (prompt said no legs). Sits over a raised ring pedestal, not a plain flat base. Gold + cyan matches the stalker | Faithful: orb, crystal, prongs, arms, lower legs. The ring pedestal became a navy torus on top of the black base (a second base); the orb floats above it. Claw tips overhang the 50mm base | **ship** (borderline; optional finalize to paint the ring black or cut it) |
 | medic (re-mesh) | unchanged concept (see batch 2) | **Still not faithful.** The wrist injector on the right forearm grew into a long twin-barrel gun as long as the forearm (side view); the left-hand injector is still a ragged spiky blob. Backpack glyphs are gone but a pale rectangular label patch and a chevron mark remain on the back | **redo mesh** again: a crop that masks or shortens the wrist injector, or a Gemini edit to a compact wrist-mounted injector, before the next seed |
 
-## Veto list
-- **medic**: do not wire the current GLB (re-mesh 2 still grows a long gun barrel from the wrist injector).
-- **hydralisk**: do not wire until the loose floating whip/arm fragments are removed (re-finalize).
+## Batch 4 (Gemini, 1024x572 / 1024x687; redo of batch 3 plus seven new units)
 
-Cleared from the veto list in batch 2: raynor (new concept passes), stalker (feet now on the base).
-Batch 3 ships: queen, adept, sentry.
+All 12 concepts: one figure, round black uncropped base, no lettering or logos, MGSD proportions held (the
+faction anchor was uploaded as image 2). Mesh bounds checked in the GLBs: every figure starts at the base top
+(y 0.12 in), so no blade or claw dips below the table.
+
+| Slug | Concept | Mesh (contact sheet) | Verdict |
+|---|---|---|---|
+| medic (redo 3) | helmet ~38%, ~2.6 heads, empty hands, small forearm injector stub, boxy backpack. White + steel blue (as before) | Shape faithful: no gun, no rod, stub injector only. **Paint invented a text-like label on the backpack back** (a dark panel with a pseudo-word and readout lines, clearly text-like up close) | **redo paint only** (new paint seed, then finalize; reject any run with a label on the back). Owner may accept as is: the label is on the back of a 1.6" figure |
+| siege-tank | squat hull, fat tracks, round turret ~45% of height, ONE short thick cannon; steel blue + gunmetal | Faithful: hull, turret, single cannon, road wheels. Tracks and barrel sleeve came out brown (same Terran gunmetal drift). Footprint 2.6 x 3.5 in on the 150mm base, well inside | **ship** (split turret per 9.6; optional paint re-run) |
+| raynors-raider | marine edit: helmet ~36%, ~2.7 heads, one rifle, leather-brown trim and helmet stripe | Faithful: stripe, trim, rifle, pads. Trim reads orange-tan. Rifle overhangs the 32mm base (like the marine) | **ship** |
+| hydralisk (redo) | no legs, coiled tail, hood + head ~45%, two bone scythes, violet + bone | Faithful: hood, jaw, scythes, coil sits on the base. No floating islands this time | **ship** (replaces the vetoed v1) |
+| queen (redo) | crested head ~50%, two scythe talons + small arms, stubby legs, abdomen, no back limbs | Faithful: crest, talons, legs, abdomen. Abdomen tip trails slightly past the 80mm base edge (back view) | **ship** (replaces the wired batch-3 GLB; new height 1.97 in) |
+| ravager | roach body, tall bone crest cradling a glowing bile sac, tusks, stubby legs | Faithful: carapace, crest, bile sac, tusks, claws. Body length 3.2 in on a 50mm base (overhangs like the roach). A mottled painted disc sits on the base top | **ship** (check `yaw` and quadruped height in the gallery) |
+| sentry (redo) | orb ~75%, centred crystal, two small arms, no legs, one thin stand, flat base | Faithful: orb, crystal, arms, single stand; no ring. The crystal is mirrored onto the back. Gold pale tan | **ship** (replaces the wired batch-3 GLB) |
+| adept (redo) | head ~43%, ~2.3 heads, twin-prong glaive on the right forearm, deep blue under-armour, empty fists | Faithful: head, tendrils, glaive, blue under-armour. Gold pale tan (as the stalker) | **ship** (replaces the wired batch-3 GLB) |
+| immortal | domed body ~55%, exactly two side cannons, four stubby legs, cyan lens | Faithful: dome, halo arch, both cannons, four legs inside the 100mm base. Back of the dome got an invented eye-like panel (no text) | **ship** |
+| zeratul | hooded head ~42%, ~2.4 heads, one green warp blade, violet-black with gold trim | Faithful: hood, scarf, green eyes, one blade, empty left fist. Back: tendrils and a short ragged cloth panel (in the concept silhouette) | **ship** |
+| artanis | head + gold crest ~45%, two wrist blades, no cape | Faithful: crest, swept pads, both blades. Unseen back of the head became a gold crest slab (reads fine) | **ship** |
+| praetor-guard | zealot edit: head ~40%, ~2.5 heads, heavier gold, two wrist blades | Faithful: head, tendrils, both blades, ornate plates, blue tabard | **ship** |
+
+Protoss gold drifted to pale tan in every batch-4 Protoss mesh, matching the shipped stalker, so the faction
+reads consistently; a paint re-run is optional for the whole faction, not per unit.
+
+## Veto list (all batches, current)
+- **medic** (`medic.glb`, batch 4): hold until a paint re-run removes the text-like label on the backpack back.
+  The shape passes; only stage_paint + finalize are needed. Owner may override and ship it as is.
+- **All `*-v1.glb` files** (adept, hydralisk, medic, queen, sentry): superseded batch-3 meshes; never wire them.
+
+Cleared: raynor and stalker (batch 2); hydralisk (batch 4 redo, no floating islands); medic gun/rod defect
+(batch 4 redo; now held only for the paint label).
+
+## Ship list (staging slug -> data unit id)
+
+| Staging GLB | Unit id | Status |
+|---|---|---|
+| marine | marine | ship (wired) |
+| raynor | jim-raynor | ship (wired as jim-raynor.glb) |
+| raynors-raider | raynors-raider | ship (new) |
+| marauder | marauder | ship (wired) |
+| medic | medic | **hold** (paint redo; see veto list) |
+| goliath | goliath | ship (wired) |
+| siege-tank | siege-tank | ship (new) |
+| zergling | zergling | ship (wired) |
+| roach | roach | ship (wired) |
+| hydralisk | hydralisk | ship (new; batch-4 redo) |
+| queen | queen | ship (replace the wired batch-3 GLB) |
+| kerrigan | kerrigan | ship (wired) |
+| ravager | ravager | ship (new) |
+| zealot | zealot | ship (wired) |
+| praetor-guard | praetor-guard | ship (new) |
+| adept | adept | ship (replace the wired batch-3 GLB) |
+| sentry | sentry | ship (replace the wired batch-3 GLB) |
+| stalker | stalker | ship (wired) |
+| immortal | immortal | ship (new) |
+| zeratul | zeratul | ship (new) |
+| artanis | artanis | ship (new) |
+
+Use each GLB's own figure top as the manifest `height` (queen is now 1.969, not 2.513). Check quadruped
+`yaw` (zergling, roach, ravager, immortal, stalker) and the `?gallery` front/side close-ups before pushing.
+
+## Earlier notes
 
 Batches 1-2: no duplicate figures, extra limbs or real lettering/logos found in any concept. All concept bases
 are round, black and uncropped; all mesh footprints except overhanging blades/tusks sit inside their bases.
