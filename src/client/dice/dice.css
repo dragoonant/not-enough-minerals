@@ -1,0 +1,19 @@
+.dt { position: absolute; right: 8px; bottom: 56px; z-index: 2; width: 220px; max-width: calc(100% - 24px); color: var(--bone); background: linear-gradient(180deg, rgba(27,35,45,.9), rgba(15,20,27,.92)); border: 1px solid #59b8d655; border-right: 3px solid var(--amber); border-radius: 4px; padding: 6px 8px; font-size: 12px; }
+@media (max-width: 600px) { .dt { width: 150px; right: 4px; opacity: .92; } }
+.dt-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.dt-label { font-weight: 700; }
+.dt-dice { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 4px; }
+.die { min-width: 36px; height: 36px; display: grid; place-items: center; border-radius: 7px; border: 2px solid #8fa3b5; background: #e8eef3; color: #0f141b; }
+.die b { font-size: 18px; }
+.die-reroll { outline: 2px dashed var(--cyan); outline-offset: 1px; }
+.die-old { opacity: .4; text-decoration: line-through; }
+.die-rolling { animation: dt-spin .5s linear infinite; }
+.die-rolling b { visibility: hidden; }
+@keyframes dt-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .die-rolling { animation: none; opacity: .6; } }
+.dt-meta { font-size: 12px; opacity: .85; display: flex; flex-wrap: wrap; gap: 4px 10px; }
+.dt-tag { color: var(--cyan); }
+.dt-toggle { margin-top: 6px; background: none; border: 0; padding: 0; color: var(--amber); cursor: pointer; font: inherit; font-size: 12px; text-decoration: underline; }
+.dtl { margin: 6px 0 0; padding: 0; list-style: none; max-height: 180px; overflow: auto; border-top: 1px solid #2c3a48; }
+.dtl li { display: flex; gap: 6px; align-items: center; justify-content: space-between; padding: 3px 0; border-bottom: 1px solid #1b232d; font-size: 12px; }
+.dtl-faces { opacity: .85; }
