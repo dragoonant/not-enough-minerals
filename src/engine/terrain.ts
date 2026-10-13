@@ -242,3 +242,164 @@ export function terrainResistance(state: Pick<GameState, 'terrain'>, pos: Vec2, 
 export function hazardsUnder(state: Pick<GameState, 'terrain'>, pos: Vec2, r: number): TerrainPiece[] {
   return terrainPieces(state).filter((p) => p.traits.hazard && circleOverlapsShape(pos, r, p.shape))
 }
+
+// =====================================================================================================================
+// StarCraft layer (spec 14 s4-5, s8): Size, Effective Size, Grass, walkable tops, ramps, ACCESS POINTS and openings.
+// A piece is a TerrainInstance; the StarCraft facts ride in its free-form `props` (so the frozen types stay as they are):
+//   size: number            terrain Size (default by rulesType, see defaultSize)
+//   grass: true             a Size 2 patch that never blocks movement and is destroyed on contact (MOVE-030)
+//   standsOn: pieceId       the piece it is set on; Effective Size and levels stack through it (SIZE-002)
+//   walkable: true          models may stand on its top (HIGH / MID GROUND); needs access points to be reached
+//   ramp: true              Size 1 MID GROUND walkable piece with an access point at each end (ELEV-004)
+//   accessPoints: Vec2[]    world points on the piece edge where models change level (ELEV-003)
+//   openings: {a,b,width}[] agreed passable gaps inside a Size 2+ piece (MOVE-041); they stay closed for LoS (LOS-004)
+//   topElev: number         height of the walkable top in inches (default: the instance height)
+// =====================================================================================================================
+
+export interface Opening { a: Vec2; b: Vec2; width: number }
+export interface ScPiece {
+  t: TerrainInstance
+  shape: WorldShape
+  size: number
+  /** Effective Size: own Size plus the Effective Size of what it stands on. */
+  es: number
+  grass: boolean
+  walkable: boolean
+  ramp: boolean
+  /** Elevation level of a model standing on top: 0 GROUND, 1 MID, 2 HIGH (0 for pieces nobody can stand on). */
+  level: 0 | 1 | 2
+  /** Ids of the pieces it stands on, nearest first. */
+  below: string[]
+  access: Vec2[]
+  openings: Opening[]
+  /** Height of the walkable top in inches (rendering only; rules read the level). */
+  top: number
+}
+
+/** Size when props.size is absent: the generic rulesType mapped onto the Size scale. */
+export function defaultSize(t: TerrainInstance): number {
+  switch (effectiveType(t)) {
+    case 'obstacle': return 1
+    case 'obstruction': return 2
+    case 'building': return 3
+    case 'hill': return 3
+    default: return 0
+  }
+}
+
+const scCache = new WeakMap<readonly TerrainInstance[], ScPiece[]>()
+/** Every terrain piece with its StarCraft facts, cached per `state.terrain` array (grass removal builds a new array). */
+export function scPieces(state: Pick<GameState, 'terrain'>): ScPiece[] {
+  let out = scCache.get(state.terrain)
+  if (out) return out
+  const byId = new Map(state.terrain.map((t) => [t.id, t]))
+  const sizeOfT = (t: TerrainInstance): number => {
+    const p = t.props['size']
+    if (typeof p === 'number') return p
+    return t.props['grass'] === true ? 2 : t.props['ramp'] === true ? 1 : defaultSize(t)
+  }
+  const chainOf = (t: TerrainInstance): TerrainInstance[] => {
+    const seen = new Set<string>([t.id])
+    const chain: TerrainInstance[] = []
+    let cur = t
+    for (;;) {
+      const id = cur.props['standsOn']
+      const next = typeof id === 'string' ? byId.get(id) : undefined
+      if (!next || seen.has(next.id)) break
+      seen.add(next.id)
+      chain.push(next)
+      cur = next
+    }
+    return chain
+  }
+  out = state.terrain.map((t) => {
+    const chain = chainOf(t)
+    const size = sizeOfT(t)
+    const es = size + chain.reduce((s, c) => s + sizeOfT(c), 0)
+    const ramp = t.props['ramp'] === true
+    const walkable = ramp || t.props['walkable'] === true
+    const level: 0 | 1 | 2 = !walkable ? 0 : ramp ? 1 : es >= 3 ? 2 : 1
+    const pts = (k: string): Vec2[] => (Array.isArray(t.props[k]) ? (t.props[k] as Vec2[]) : [])
+    return {
+      t, shape: worldShape(t), size, es, grass: t.props['grass'] === true, walkable, ramp, level,
+      below: chain.map((c) => c.id), access: pts('accessPoints'),
+      openings: (Array.isArray(t.props['openings']) ? t.props['openings'] : []) as Opening[],
+      top: typeof t.props['topElev'] === 'number' ? (t.props['topElev'] as number) : t.height,
+    }
+  })
+  scCache.set(state.terrain, out)
+  return out
+}
+
+/** Does the piece stop movement through it (Size 2+, Grass excepted; walkable tops count as solid from outside)? */
+export const isSolid = (p: ScPiece): boolean => !p.grass && p.size >= SOLID_TERRAIN_SIZE
+
+/** Smallest terrain Size that stops movement and Engagement (R p.39 4.6: Size 0-1 can be moved through). DATA MISFIT:
+ *  rules.json has no key for it and data/** is frozen, so it is named here once; every module reads this constant. */
+export const SOLID_TERRAIN_SIZE = 2
+
+/** Size 0-1 pieces a LARGE unit flattens when it crosses or ends on them: not Grass, not a walkable top (KW-086, CA-009). */
+export const crushable = (p: ScPiece): boolean => !p.grass && !p.walkable && !p.ramp && p.size < SOLID_TERRAIN_SIZE
+
+/** Small pieces a base overlaps (the ones a LARGE unit crushes). */
+export function crushableUnder(state: Pick<GameState, 'terrain'>, pos: Vec2, r: number): ScPiece[] {
+  return scPieces(state).filter((p) => crushable(p) && circleOverlapsShape(pos, r, p.shape))
+}
+
+/** The highest walkable piece whose footprint contains the point (where a base centred there stands), or null. */
+export function surfaceAt(state: Pick<GameState, 'terrain'>, pos: Vec2): ScPiece | null {
+  let best: ScPiece | null = null
+  for (const p of scPieces(state)) {
+    if (!p.walkable || !pointInShape(pos, p.shape)) continue
+    if (!best || p.es > best.es) best = p
+  }
+  return best
+}
+
+/** Elevation level of a base (R p.59: a base spanning levels counts as the highest, SIZE-004 / ELEV-001). */
+export function levelOfBase(state: Pick<GameState, 'terrain'>, pos: Vec2, r: number): 0 | 1 | 2 {
+  let lv: 0 | 1 | 2 = 0
+  for (const p of scPieces(state)) {
+    if (p.walkable && p.level > lv && circleOverlapsShape(pos, r, p.shape)) lv = p.level
+  }
+  return lv
+}
+
+/** Surface height in inches under a base centred at pos (the top of the surface piece, else 0). */
+export const heightAt = (state: Pick<GameState, 'terrain'>, pos: Vec2): number => surfaceAt(state, pos)?.top ?? 0
+
+/** Pieces the base may not end overlapping: everything except Grass, the walkable top it stands on (centre inside) and
+ *  the pieces under that (BASE-003, MOVE-014). Flying bases get no walkable exception. */
+export function endBlockers(state: Pick<GameState, 'terrain'>, pos: Vec2, r: number, flying = false, crush = false): ScPiece[] {
+  const stand = flying ? null : surfaceAt(state, pos)
+  return scPieces(state).filter((p) => {
+    if (p.grass || !circleOverlapsShape(pos, r, p.shape) || (crush && crushable(p))) return false
+    if (stand && (p === stand || stand.below.includes(p.t.id))) return false
+    return true
+  })
+}
+
+/** Grass patches a base overlaps. */
+export function grassUnder(state: Pick<GameState, 'terrain'>, pos: Vec2, r: number): ScPiece[] {
+  return scPieces(state).filter((p) => p.grass && circleOverlapsShape(pos, r, p.shape))
+}
+
+/** Distance from a point to the nearest access point of the piece (Infinity when it has none). */
+export function accessDistance(p: ScPiece, pos: Vec2): number {
+  let d = Infinity
+  for (const a of p.access) d = Math.min(d, hyp(pos.x - a.x, pos.z - a.z))
+  return d
+}
+
+/** Is the point inside an opening of the piece (a gap agreed passable, wide enough for `need` inches)? */
+export function inOpening(p: ScPiece, pos: Vec2, need: number): boolean {
+  return p.openings.some((o) => o.width + 1e-9 >= need && segDistPt(o.a, o.b, pos) <= o.width / 2 + 1e-9)
+}
+
+/** Distance from a base edge to the footprint of a piece (0 when touching or overlapping). */
+export function baseToPiece(p: ScPiece, pos: Vec2, r: number): number {
+  return Math.max(0, distToShape(pos, p.shape) - r)
+}
+
+/** Does the straight segment a-b cross the piece's footprint? */
+export const segmentCrosses = (p: ScPiece, a: Vec2, b: Vec2): boolean => segmentInsideIntervals(a, b, p.shape).length > 0

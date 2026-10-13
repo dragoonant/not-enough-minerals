@@ -1,5 +1,5 @@
 // Public engine surface. Contract files (frozen after M1): types, decider, view, rng, pending.
-// Foundations (frozen for the M2 rules owners): registry, apply, setup.
+// Foundations (frozen for the M2 rules owners): registry, apply, errors, dice, edition, query signatures.
 export * from './types'
 export * from './geometry'
 export * from './measure'
@@ -13,5 +13,10 @@ export { createDemoGame, createGame, modelDefaults, gameDefaults, TABLES, type C
 export { apply, matchesOption, type ApplyResult } from './apply'
 export {
   modules, moduleFor, namespaceOf, allOptions, controller, raiseDecision, option, reject, isRejection, todo, TodoError,
-  pushEvents, updateModel, type ModuleDef, type Controller, type ModuleId, type StepResult, type ActionDone, type Trigger,
+  pushEvents, updateModel, updateUnit, resumeIn, NAMESPACES, type ModuleDef, type Controller, type ModuleId, type StepResult,
+  type ActionDone, type Trigger,
 } from './registry'
+// M2 shared services, as namespaces (dice.test, edition.rule, query.attackPreview...).
+export * as dice from './dice'
+export * as edition from './edition'
+export * as query from './query'

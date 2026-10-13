@@ -29,7 +29,7 @@
         "event": "usesAbility",
         "who": "friendly",
         "filter": {
-          "code": "unit-slot-support"
+          "slots": ["support"]
         }
       },
       "effects": [

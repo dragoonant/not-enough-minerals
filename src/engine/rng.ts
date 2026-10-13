@@ -52,15 +52,23 @@ export const rollD6 = (s: RngState): [number, RngState] => rollDie(s, 6)
 export interface RollSpec { count: number; sides: number; purpose: RollPurpose; ownerId?: Id }
 export interface DiceRolled { type: 'DiceRolled'; rollId: string; purpose: RollPurpose; ownerId?: Id; sides: number; dice: number[]; total: number }
 
-// The only way the engine rolls: advances state.rng and rollSeq, returns the DiceRolled event.
-// TODO(M2): the D6 attack pipeline (hit and damage rolls, Surge) builds on this.
+// The only way the engine rolls: advances state.rng and rollSeq, returns the DiceRolled event. dice.ts builds every
+// test, re-roll, D3 and Roll-Off on top of this. M2: test-only `state.debug.forcedDice` faces are consumed first (in
+// order, without advancing state.rng) so a golden test can replay a printed example (spec 00 s7).
 export function roll(state: GameState, spec: RollSpec): { state: GameState; event: DiceRolled } {
   let cur = state.rng
+  const forced = state.debug?.forcedDice ? [...state.debug.forcedDice] : null
   const dice: number[] = []
-  for (let i = 0; i < Math.max(1, spec.count); i++) { const [v, n] = rollDie(cur, spec.sides); dice.push(v); cur = n }
+  for (let i = 0; i < Math.max(1, spec.count); i++) {
+    const f = forced?.shift()
+    if (f !== undefined) { dice.push(f); continue }
+    const [v, n] = rollDie(cur, spec.sides); dice.push(v); cur = n
+  }
   const rollId = `r:${state.rollSeq + 1}`
   const event: DiceRolled = { type: 'DiceRolled', rollId, purpose: spec.purpose, ownerId: spec.ownerId, sides: spec.sides, dice, total: dice.reduce((a, b) => a + b, 0) }
-  return { state: { ...state, rng: cur, rollSeq: state.rollSeq + 1 }, event }
+  const next: GameState = { ...state, rng: cur, rollSeq: state.rollSeq + 1 }
+  if (forced) next.debug = { ...state.debug, forcedDice: forced }
+  return { state: next, event }
 }
 
 // Seed for out-of-engine randomness (AI, random bot): never touches state.rng.

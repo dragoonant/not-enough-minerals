@@ -47,7 +47,8 @@
         {
           "op": "setToken",
           "token": "faction-indicator",
-          "range": null
+          "range": null,
+          "minEnemyDist": 10
         },
         {
           "op": "altEntry",

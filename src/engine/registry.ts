@@ -1,30 +1,49 @@
-// The action protocol (FROZEN at M2 foundations; docs/spec/00-architecture.md).
+// The action protocol (FROZEN at M2 foundations; docs/spec/00-architecture.md s3).
 // Every rules module exports one ModuleDef. apply.ts validates an Action against the open PendingDecision, then hands it
-// to the module that owns the pending kind's namespace (the text before the first '.', e.g. 'turn' in 'turn.choose').
-// The turn-flow module is the controller: it owns the activation menu, forwards a chosen menu action to the module that
-// owns the action type's namespace, and runs afterAction() when a module reports its Action done.
-// M0: the table holds only the placeholder turn flow (turnflow.ts). M2 adds the StarCraft rules modules here.
+// to the module that owns the pending kind's namespace (the text before the first '.', e.g. 'shoot' in 'shoot.batch').
+// The turn-flow module is the controller: it owns the activation menu (turn.activate), forwards a chosen menu action to
+// the module that owns the action type's namespace, and runs afterAction() when a module reports its Action done.
+// A sub-pipeline (the attack, a reaction window, a payment) that another module started hands control back through
+// that module's resume(): AttackState.returnTo names the namespace.
 import type { EditionBundle } from '../data/types'
-import type { DiceRolled } from './rng'
+import { abilities } from './abilities'
+import { attack } from './attack'
+import { charge } from './charge'
+import { isRejection, reject, todo, TodoError } from './errors'
+import { melee } from './melee'
+import { missions } from './missions'
+import { movement } from './movement'
 import { raise } from './pending'
-import type { Action, DecisionOption, GameEvent, GameState, ModelId, PendingDecision, Rejection, RejectionCode } from './types'
+import { reserves } from './reserves'
+import type { DiceRolled } from './rng'
+import { scoring } from './scoring'
+import { setupModule } from './setup'
+import { shooting } from './shooting'
 import { turnflow } from './turnflow'
+import type { Action, DecisionOption, GameEvent, GameState, Id, ModelId, PendingDecision, Rejection } from './types'
+
+export { isRejection, reject, todo, TodoError }
 
 export type ModuleId = string
 
-/** What happened in a finished Action, for triggered rules and bookkeeping (M2 defines the kinds). */
+/** What happened in a finished Action, for triggered rules and bookkeeping. */
 export interface Trigger {
   kind: string
-  sourceId: ModelId
-  targetId?: ModelId
+  sourceId: Id
+  targetId?: Id
 }
 
-/** A module reports this when the current Action (or Quick Action / Reaction) is completely resolved. */
+/** A module reports this when the current Action (or Reaction) is completely resolved. */
 export interface ActionDone {
-  modelId: ModelId
-  /** The action type that finished, e.g. 'shoot.fire'. */
+  /** M0: the acting model. M2: the acting Unit id (same as unitId; kept for the placeholder flow). */
+  modelId: Id
+  /** M2: the acting Unit. */
+  unitId?: Id
+  /** The action type that finished, e.g. 'shoot.go'. */
   type: string
   triggers: Trigger[]
+  /** M2: the activation ends now (no after-action window), e.g. Pylon deploys or endsActivation abilities. */
+  endsActivation?: boolean
 }
 
 /**
@@ -38,12 +57,16 @@ export interface ModuleDef {
   /** Namespaces this module owns, for both pending kinds and action types: 'shoot' owns 'shoot.*'. Disjoint across modules. */
   kinds: string[]
   /**
-   * Main-menu entries this module offers the active model right now (e.g. Shoot, Charge, Use Expertise). Empty when
-   * none is legal. Action types are '<namespace>.<verb>'; decisionId/seat are stamped by raiseDecision(). Never throws.
+   * Main-menu entries this module offers the active Unit right now (Move, Shoot, Charge, a mission action...). Empty
+   * when none is legal. M2: `unitId` is the activating Unit (M0 passed a model id). Action types are
+   * '<namespace>.<verb>'; decisionId/seat are stamped by raiseDecision(). Never throws.
    */
-  options(state: GameState, bundle: EditionBundle, modelId: ModelId): DecisionOption[]
+  options(state: GameState, bundle: EditionBundle, unitId: Id): DecisionOption[]
   /** Resolve one Action against this module's open decision (or a forwarded menu action). Bad input -> Rejection. */
   resolve(state: GameState, bundle: EditionBundle, action: Action): StepResult
+  /** M2: continue after a sub-pipeline this module started has finished (attack.ts calls it when the open attack and
+   *  its queue are resolved; `state.attack` is null by then). Optional for modules that never start one. */
+  resume?(state: GameState, bundle: EditionBundle): StepResult
 }
 
 /** Turnflow's extra hook: after an Action, run reactions/triggers, then raise the next menu or end the activation. */
@@ -51,17 +74,25 @@ export interface Controller extends ModuleDef {
   afterAction(state: GameState, bundle: EditionBundle, done: ActionDone): GameState
 }
 
+/** Namespace -> owning module id (spec 00 s3.2). modules() checks the table against it at load. */
+export const NAMESPACES: Readonly<Record<string, ModuleId>> = {
+  setup: 'setup', turn: 'turnflow', move: 'movement', deploy: 'reserves', shoot: 'shooting', charge: 'charge',
+  melee: 'melee', atk: 'attack', ability: 'abilities', mission: 'missions', score: 'scoring',
+}
+
 // ---------- module table (built lazily: modules import this file, so nothing here runs at import time) ----------
 let table: readonly ModuleDef[] | null = null
 export function modules(): readonly ModuleDef[] {
   if (!table) {
-    table = [turnflow]
+    const list: ModuleDef[] = [turnflow, setupModule, movement, reserves, shooting, charge, melee, attack, abilities, missions, scoring]
     const seen = new Map<string, string>()
-    for (const m of table) for (const k of m.kinds) {
+    for (const m of list) for (const k of m.kinds) {
       const prev = seen.get(k)
       if (prev) throw new Error(`registry: namespace "${k}" claimed by both ${prev} and ${m.id}`)
+      if (NAMESPACES[k] !== m.id) throw new Error(`registry: namespace "${k}" belongs to ${NAMESPACES[k] ?? 'nobody'} (spec 00 s3.2), not ${m.id}`)
       seen.set(k, m.id)
     }
+    table = list
   }
   return table
 }
@@ -76,24 +107,19 @@ export function moduleFor(kindOrType: string): ModuleDef | undefined {
   return modules().find((m) => m.kinds.includes(ns))
 }
 
-/** Every module's menu entries for a model, in table order (turnflow builds the activation menu from this). */
-export function allOptions(state: GameState, bundle: EditionBundle, modelId: ModelId): DecisionOption[] {
-  return modules().flatMap((m) => m.options(state, bundle, modelId))
+/** Every module's menu entries for the active Unit, in table order (only turnflow calls this). */
+export function allOptions(state: GameState, bundle: EditionBundle, unitId: Id): DecisionOption[] {
+  return modules().flatMap((m) => m.options(state, bundle, unitId))
+}
+
+/** Hand control back to the module owning `namespace` after a sub-pipeline (see ModuleDef.resume). */
+export function resumeIn(state: GameState, bundle: EditionBundle, namespace: string): StepResult {
+  const m = moduleFor(namespace)
+  if (!m?.resume) return todo(`resume() for namespace "${namespace}"`)
+  return m.resume(state, bundle)
 }
 
 // ---------- helpers every module uses ----------
-export const isRejection = (r: unknown): r is Rejection =>
-  typeof r === 'object' && r !== null && typeof (r as Rejection).code === 'string' && typeof (r as Rejection).message === 'string' && !('state' in r)
-
-export const reject = (code: RejectionCode, message: string, detail?: Record<string, unknown>): Rejection =>
-  detail ? { code, message, detail } : { code, message }
-
-/** Thrown by unimplemented bodies. apply() turns it into an E_TODO rejection; anything else is a real bug. */
-export class TodoError extends Error {
-  constructor(what: string) { super(`TODO(M2): ${what}`); this.name = 'TodoError' }
-}
-export function todo(what: string): never { throw new TodoError(what) }
-
 /**
  * Raise the one open decision and stamp its id and seat into every option's action (raise() alone does not).
  * Options are templates: a chosen action must carry every field of one option unchanged; extra fields are parameters
@@ -122,4 +148,11 @@ export function updateModel(state: GameState, id: ModelId, patch: Partial<GameSt
   const m = state.models[id]
   if (!m) return state
   return { ...state, models: { ...state.models, [id]: { ...m, ...patch } } }
+}
+
+/** M2: replace one unit immutably. */
+export function updateUnit(state: GameState, id: Id, patch: Partial<GameState['units'][string]>): GameState {
+  const u = state.units[id]
+  if (!u) return state
+  return { ...state, units: { ...state.units, [id]: { ...u, ...patch } } }
 }

@@ -27,6 +27,12 @@ export type Characteristic = 'speed' | 'armour' | 'evade' | 'hp' | 'size' | 'shi
 /** Status ids are keyword ids of kind 'status' in keywords.json (BURROWED, HIDDEN, SIEGE_MODE, STATIONARY, SHIELDED, ON_CREEP). */
 export type StatusId = string
 export type Duration = 'endOfRound' | 'endOfPhase' | 'endOfActivation' | 'untilNextAction' | 'thisAttack' | 'thisRoll' | 'permanent'
+/** M2 (additive): how a Unit came onto the table. 'edge' = its own Deployment Card Entry Edge; 'friendlyEdge' = a
+ *  friendly Unit base that acts as an Entry Edge (Pylon, Omega Worm); 'nonEntryEdge' = a table edge that is not an
+ *  Entry Edge (Proxy Barracks, Warp Gate, Timing Push); 'indicator' = beside a Faction Indicator at End of Round;
+ *  'place' = a PLACE from Reserves (Burrow Ambush, Rapid Reinforcements). The engine's arrive() uses the same values. */
+export type EntryKind = 'edge' | 'friendlyEdge' | 'nonEntryEdge' | 'indicator' | 'place'
+export const ENTRY_KINDS: readonly EntryKind[] = ['edge', 'friendlyEdge', 'nonEntryEdge', 'indicator', 'place']
 
 /** Keyword reference. PIERCE Armoured (2) -> {kw:'PIERCE', tag:'armoured', x:2}; BURST FIRE 8" (3) -> {kw:'BURST_FIRE', y:8, x:3};
  *  IMPACT (4) 3+ -> {kw:'IMPACT', x:4, y:3}; HITS 5 (1) -> {kw:'HITS', x:5, y:1}; BUFF Speed (3) -> {kw:'BUFF', char:'speed', x:3};
@@ -69,6 +75,10 @@ export interface Condition {
   /** First roll of its kind in this scope (Ancillary Carapace: 'activation'; Shield Overcharge: 'round'; Lurking first Ranged Attack). */
   first?: 'activation' | 'round'
   phase?: Phase[]
+  /** M2 (additive): the Unit fills one of these Army Slots on its list (Advanced Training: ['support']). */
+  slots?: Slot[]
+  /** M2 (additive): the arriving Unit came in by one of these entry kinds (Photon Overcharge: not its own edges). */
+  entryKinds?: EntryKind[]
   code?: Id
 }
 
@@ -107,6 +117,14 @@ export const EFFECT_OPS = [
 export type EffectOp = typeof EFFECT_OPS[number]
 /** Value that depends on the board: Medpack HEAL (X) with X = models of this Unit Within 4" of the target. */
 export interface ValueExpr { count: 'ownModelsWithinTarget' | 'modelsInUnit' | 'tokensWithin'; d?: number; plus?: number; token?: Id }
+/** M2 (additive): a number field that may also be a ValueExpr (heal.x, nonLethal.x, damageReduce.n). */
+export type NumOrExpr = number | ValueExpr
+/** M2 (additive): the closed list of AbilityDef fields an `abilityMod` effect may change. A dotted name reaches into a
+ *  nested object or ValueExpr ('count.plus' = the ValueExpr `plus` of the ability's first counted effect). */
+export const ABILITY_MOD_FIELDS = ['usableInReserves', 'count.plus', 'radius', 'target.range'] as const
+export type AbilityModField = typeof ABILITY_MOD_FIELDS[number]
+/** M2 (additive): `coherency` op axis. 'horizontal' = the distance applies top-down only (Squadron); default 'all'. */
+export type CoherencyAxis = 'horizontal' | 'all'
 
 // ---------------------------------------------------------------- weapons, abilities, upgrades
 export interface WeaponProfile {
@@ -136,6 +154,17 @@ export type TriggerEvent =
   | 'declareRangedAttack' | 'declareCharge' | 'targeted' | 'attackResolved' | 'beforeArmourRoll' | 'beforeEvadeRoll'
   | 'damageSuffered' | 'debuffReceived' | 'chargeDistance' | 'chargeSucceeded' | 'activated' | 'actionResolved'
   | 'nominatedToDeploy' | 'leadingModelMoveEnd' | 'usesAbility' | 'startOfRound' | 'endOfRound' | 'endOfPhase' | 'modelsRemoved'
+  /** M2 (additive): the subject Unit just lost HIDDEN, from any cause (VIS-013). */
+  | 'loseHidden'
+  /** M2 (additive): the actor Unit has just been set up on the table from Reserves (any entry kind; filter entryKinds). */
+  | 'arrived'
+  /** M2 (additive): a PLACE effect has just finished resolving on the subject Unit, whoever caused it. */
+  | 'placeResolved'
+export const TRIGGER_EVENTS: readonly TriggerEvent[] = ['declareRangedAttack', 'declareCharge', 'targeted', 'attackResolved',
+  'beforeArmourRoll', 'beforeEvadeRoll', 'damageSuffered', 'debuffReceived', 'chargeDistance', 'chargeSucceeded', 'activated',
+  'actionResolved', 'nominatedToDeploy', 'leadingModelMoveEnd', 'usesAbility', 'startOfRound', 'endOfRound', 'endOfPhase',
+  'modelsRemoved', 'loseHidden', 'arrived', 'placeResolved']
+/** `who` defaults to 'self' when `subject` is absent, and to 'any' when `subject` is set (M2 convention, spec 20 s2.3). */
 export interface Trigger {
   event: TriggerEvent
   /** Who acts in the event (declares, attacks, charges, resolves): this Unit (default), a Friendly, another Friendly, an Enemy. */
@@ -195,6 +224,11 @@ export interface TokenDef {
   /** How it interacts with movement: none, or blocks Units up to a Size and is removed when a bigger one crosses (Force Field). */
   blocks?: { maxSize: number; removedByLarger: boolean }
   stayInPlay?: boolean
+  /** M2 (additive): the token is a terrain piece for movement and LoS (Force Field). */
+  terrain?: boolean
+  /** M2 (additive): what removes it besides Cleanup: 'movement' = a Unit allowed past `blocks` moving through it
+   *  (a PLACE does not count); 'place' = also a PLACE through it; 'any' = any model crossing or touching it. */
+  removedBy?: 'movement' | 'place' | 'any'
   text: string
 }
 
@@ -282,6 +316,10 @@ export interface MissionAction {
 export interface ClaimRule {
   fromRound: number; within: number; markerSides: ('neutral' | 'opponent')[]; maxPerUnit: number
   dropOn: ('supplyDrop' | 'beforePlace' | 'outmassedEngaged' | 'leftTable')[]; dropWithin: number
+  /** M2 (additive): the Phase in which CLAIMs are made (Artefact Hunt: 'scoring', after control, before VP). */
+  phase?: Phase
+  /** M2 (additive): the marker must be controlled by the claiming player at that moment. */
+  controlled?: boolean
 }
 export interface MissionDef {
   id: Id; name: string; scale: Scale
@@ -376,6 +414,8 @@ export interface RulesDef {
   factionTags: Sourced<Record<FactionTag, string>>
   /** Tokens and indicators shared by every faction (Faction Indicator). */
   tokens: TokenDef[]
+  /** M2 (additive): when CLAIMs resolve (mirrors ClaimRule phase/controlled; `order` is display text). */
+  claimTiming?: Sourced<{ phase: Phase; markerMustBeControlled: boolean; order: string }>
   source: Source
 }
 

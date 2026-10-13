@@ -69,7 +69,8 @@
    "effects": [
     {
      "op": "coherency",
-     "d": 4
+     "d": 4,
+     "axis": "horizontal"
     }
    ],
    "text": "Models stay in coherency at up to 4 inches apart."

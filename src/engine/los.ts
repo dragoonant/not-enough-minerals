@@ -1,193 +1,180 @@
-// LOS with an explaining verdict. Pure functions, generic geometry carried over from the base project. TODO(M2): check the height and cover rules against the StarCraft spec.
-// LOS = some straight line from any part of A's volume to any part of B's volume passes every test:
-// terrain by height in 3D, intervening models in 2D, clouds in 2D.
-import {
-  angleOf, baseRadius, dist, edgeDistance, isOnTable, segPointDist, sub, volumeHeight,
-} from './geometry'
-import { modelDistance, within } from './measure'
-import {
-  circleInsideShape, distToShape, insideCoverOf, pointInShape, segmentInsideIntervals,
-  terrainPieces, type CoverKind, type TerrainPiece, type WorldShape,
-} from './terrain'
-import type { Cloud, GameState, Id, LosReason, LosVerdict, ModelState, Mod, Vec2 } from './types'
+// Checklist: LOS (LOS-001..008), COV (COV-001..061), SIZE (SIZE-001..004), MEAS-004, FLY-003. Owner M.
+// los.ts: Line of Sight and Cover per spec 14 s6-7. Pure geometry; the HIDDEN 4" filter and detectors are visibility.ts.
+// A trace is a straight line from any part of A's base to any part of B's base. Each terrain piece is judged alone:
+// Full Cover (its Effective Size is at least that of both models), Direct Cover (a model Within 1" of it and the piece at
+// least that model's Effective Size), the Elevation Dead Zone, and the Close Quarters exemption. Models never block.
+import type { EditionBundle } from '../data/types'
+import { rule } from './edition'
+import { baseRadius, dist, isOnTable } from './geometry'
+import { modelDistance } from './measure'
+import { isFlyingModel, modelSize, tableModels, unitModels } from './squads'
+import { baseToPiece, levelOfBase, scPieces, segmentCrosses, surfaceAt, type ScPiece } from './terrain'
+import type { GameState, Id, LosReason, LosVerdict, ModelState, Vec2 } from './types'
 
 export interface LosOptions {
-  /** weapon RNG; sets verdict.inRange (LOS itself ignores range) */
+  /** Data bundle, for model Size, Flying and BURROWED. Without it a model adds no Size of its own and counts as Ground. */
+  bundle?: EditionBundle
+  /** Weapon range; sets verdict.inRange (LoS itself ignores range). */
   range?: number
-  /** True Sight / Alchemical Mask */
-  ignoreClouds?: boolean
-  /** Arcing Fire, spray: intervening models never block */
-  ignoreModels?: boolean
-  /** Incorporeal and similar: this model is never an intervening model (cryx.md) */
+  /** Kept for callers of the base-project signature; models never block LoS in this game (LOS-008). */
   skipModel?: (m: ModelState) => boolean
-  /** Treewalker: forests never block this viewer's line of sight (circle.md) */
+  ignoreModels?: boolean
+  ignoreClouds?: boolean
   ignoreForest?: boolean
-  /** viewer is the channelling arc node etc.: use this model as point of origin (default: the first arg) */
 }
 
-/** The verdict plus everything the LOS view needs to draw the answer. */
+export type LosCover = 'none' | 'direct' | 'full' | 'deadZone'
+
+/** The verdict plus what the LOS view needs to draw the answer. */
 export interface LosReport extends LosVerdict {
-  /** best line tried (the passing one if visible, else the least-blocked one) */
-  line: { from: Vec2; to: Vec2; fromZ: number; toZ: number } | null
+  /** What stopped the trace when it did not pass (none when visible). */
+  cover: LosCover
+  line: { from: Vec2; to: Vec2 } | null
   terrainBlockers: Id[]
-  modelBlockers: Id[]
-  cloudBlockers: Id[]
-  /** short human sentence for the UI */
+  /** Short sentence for the UI, in our own words. */
   why: string
 }
 
-type Line = { a: Vec2; za: number; b: Vec2; zb: number }
-
-function basePoints(c: Vec2, r: number, toward: Vec2): Vec2[] {
-  const base = angleOf(sub(toward, c))
-  const pts: Vec2[] = [c]
-  for (const off of [0, Math.PI / 4, -Math.PI / 4, Math.PI / 2, -Math.PI / 2]) pts.push({ x: c.x + Math.cos(base + off) * r, z: c.z + Math.sin(base + off) * r })
-  return pts
+/** One end of a trace: a model, or a Mission Marker (Size 0, LOS-007). */
+export interface Actor {
+  id: Id
+  pos: Vec2
+  r: number
+  /** Effective Size: Size plus the Effective Size of the piece stood on; Infinity for Flying (SIZE-003). */
+  es: number
+  flying: boolean
+  surface: ScPiece | null
+  level: 0 | 1 | 2
 }
 
-/** Candidate lines, centre-to-centre first. */
-export function sampleLines(A: ModelState, B: ModelState): Line[] {
-  const rA = baseRadius(A.base), rB = baseRadius(B.base)
-  const hA = volumeHeight(A.base), hB = volumeHeight(B.base)
-  const pa = basePoints(A.pos, rA, B.pos), pb = basePoints(B.pos, rB, A.pos)
-  const zA = [A.elev + hA * 0.95, A.elev + hA * 0.5]
-  const zB = [B.elev + hB * 0.95, B.elev + hB * 0.5, B.elev + 0.1]
-  const out: Line[] = []
-  for (const a of pa) for (const b of pb) for (const za of zA) for (const zb of zB) out.push({ a, za, b, zb })
+/** Size added by a model whose Size cannot be read (no bundle, or a model with no unit record). It adds nothing to Effective
+ *  Size, like a Mission Marker (LOS-007); the engine never invents a printed Size. */
+const UNREADABLE_SIZE = 0
+
+export function modelActor(state: GameState, bundle: EditionBundle | undefined, m: ModelState): Actor {
+  const flying = bundle ? isFlyingModel(bundle, m) : false
+  const size = (bundle ? modelSize(state, bundle, m) : null) ?? UNREADABLE_SIZE
+  const r = baseRadius(m.base)
+  const surface = flying ? null : surfaceAt(state, m.pos)
+  return {
+    id: m.id, pos: m.pos, r, flying, surface, level: flying ? 0 : levelOfBase(state, m.pos, r),
+    es: flying ? Infinity : size + (surface?.es ?? 0),
+  }
+}
+export function markerActor(state: GameState, bundle: EditionBundle, n: number): Actor | null {
+  const mk = state.markers.find((x) => x.n === n)
+  if (!mk) return null
+  const r = baseRadius(rule(bundle, 'markerDiameterMm'))
+  const surface = surfaceAt(state, mk.pos)
+  return { id: `marker:${n}`, pos: mk.pos, r, flying: false, surface, level: levelOfBase(state, mk.pos, r), es: surface?.es ?? 0 }
+}
+
+const K = 16
+function rim(a: Actor): Vec2[] {
+  const out: Vec2[] = [a.pos]
+  for (let i = 0; i < K; i++) {
+    const ang = (i / K) * 2 * Math.PI
+    out.push({ x: a.pos.x + Math.cos(ang) * a.r, z: a.pos.z + Math.sin(ang) * a.r })
+  }
   return out
 }
 
-function cloudBlocks(c: Cloud): boolean {
-  return c.blocksLos ?? c.kind !== 'flare'
-}
-function cloudConceals(c: Cloud): boolean {
-  return c.concealment ?? c.kind !== 'flare'
-}
-export const cloudShape = (c: Cloud): WorldShape => ({ kind: 'circle', c: c.pos, r: c.diameter / 2 })
-const inCloud = (m: ModelState, c: Cloud): boolean => dist(m.pos, c.pos) < c.diameter / 2 + baseRadius(m.base) - 1e-9
+interface Qualified { piece: ScPiece; kind: 'full' | 'direct' | 'deadZone' }
 
-/** True when the line is stopped by this terrain piece (height test; forests by depth are separate). */
-function pieceBlocksLine(p: TerrainPiece, l: Line): boolean {
-  if (!p.traits.blocksLos) return false
-  if (pointInShape(l.a, p.shape) || pointInShape(l.b, p.shape)) return false // a model standing on it
-  const top = (typeof p.t.props['baseElev'] === 'number' ? (p.t.props['baseElev'] as number) : 0) + p.traits.height
-  for (const [t0, t1] of segmentInsideIntervals(l.a, l.b, p.shape)) {
-    const z0 = l.za + (l.zb - l.za) * t0, z1 = l.za + (l.zb - l.za) * t1
-    if (Math.min(z0, z1) < top - 1e-9) return true
+/** Pieces that qualify as Cover against this pair (spec 14 s6 engine notes, steps 2-3). */
+function qualifying(state: GameState, A: Actor, B: Actor): Qualified[] {
+  const out: Qualified[] = []
+  const between = Math.max(0, dist(A.pos, B.pos) - A.r - B.r)
+  const stands = (p: ScPiece, x: Actor): boolean => !!x.surface && (x.surface === p || x.surface.below.includes(p.t.id))
+  for (const p of scPieces(state)) {
+    const aNear = baseToPiece(p, A.pos, A.r) <= 1 + 1e-9
+    const bNear = baseToPiece(p, B.pos, B.r) <= 1 + 1e-9
+    const closeQuarters = aNear && bNear && between <= 3 + 1e-9 // COV-040: Direct Cover and the Dead Zone of this piece off
+    // Elevation Dead Zone (COV-030): one model on HIGH GROUND of this piece, the other at GROUND LEVEL Within 1" of it
+    const deadFor = (hi: Actor, lo: Actor, loNear: boolean): boolean =>
+      !hi.flying && hi.surface === p && hi.level === 2 && lo.level === 0 && loNear
+    if (!closeQuarters && (deadFor(A, B, bNear) || deadFor(B, A, aNear))) { out.push({ piece: p, kind: 'deadZone' }); continue }
+    if (p.es < 1 || stands(p, A) || stands(p, B)) continue // the surface a model stands on never blocks (LOS-005)
+    if (p.es >= A.es && p.es >= B.es) { out.push({ piece: p, kind: 'full' }); continue } // COV-010 (never for Flying: ES Infinity)
+    if (closeQuarters) continue
+    if ((aNear && p.es >= A.es) || (bNear && p.es >= B.es)) out.push({ piece: p, kind: 'direct' }) // COV-020/021
   }
-  return false
-}
-function forestBlocksLine(p: TerrainPiece, l: Line): boolean {
-  const iv = segmentInsideIntervals(l.a, l.b, p.shape)
-  if (!iv.length) return false
-  const L = dist(l.a, l.b)
-  const inside = iv.reduce((s, [t0, t1]) => s + (t1 - t0) * L, 0)
-  const endInside = pointInShape(l.a, p.shape) || pointInShape(l.b, p.shape)
-  return endInside ? inside > p.traits.losThrough + 1e-9 : inside > 1e-9
+  return out
 }
 
-interface Ctx {
-  state: GameState
-  A: ModelState
-  B: ModelState
-  bHuge: boolean
-  pieces: TerrainPiece[]
-  clouds: Cloud[]
-  interveners: ModelState[]
-  ignoreForest?: boolean
-}
-interface LineResult { reasons: LosReason[]; terrain: Id[]; models: Id[]; clouds: Id[] }
-
-function buildCtx(state: GameState, A: ModelState, B: ModelState, opts: LosOptions): Ctx {
-  const interveners: ModelState[] = []
-  if (!opts.ignoreModels) {
-    for (const o of Object.values(state.models)) {
-      if (o.id === A.id || o.id === B.id || !isOnTable(o)) continue
-      if (o.conditions.includes('prone')) continue
-      if (A.unitId && o.unitId === A.unitId) continue
-      if (opts.skipModel?.(o)) continue
-      if (o.base < B.base) continue // only bases >= the target's can block (TODO(M2): confirm)
-      interveners.push(o)
-    }
+function traces(A: Actor, B: Actor): [Vec2, Vec2][] {
+  const out: [Vec2, Vec2][] = [[A.pos, B.pos]]
+  const d = dist(A.pos, B.pos)
+  if (d > 1e-9) {
+    const nx = -(B.pos.z - A.pos.z) / d, nz = (B.pos.x - A.pos.x) / d
+    for (const s of [1, -1]) out.push([{ x: A.pos.x + nx * A.r * s, z: A.pos.z + nz * A.r * s }, { x: B.pos.x + nx * B.r * s, z: B.pos.z + nz * B.r * s }])
   }
-  // Veil of Mists: a cloud that is transparent to its owner's side only (c.friendlyTransparent)
-  const clouds = opts.ignoreClouds || B.base >= 80 ? [] : state.clouds.filter((c) => cloudBlocks(c) && !inCloud(A, c) && !inCloud(B, c) && !(false))
-  return { state, A, B, bHuge: B.base >= 80, pieces: terrainPieces(state), clouds, interveners, ignoreForest: !!opts.ignoreForest }
+  const pa = rim(A), pb = rim(B)
+  for (const a of pa) for (const b of pb) out.push([a, b])
+  return out
 }
 
-function evalLine(ctx: Ctx, l: Line): LineResult {
-  const r: LineResult = { reasons: [], terrain: [], models: [], clouds: [] }
-  let forest = false, terr = false
-  for (const p of ctx.pieces) {
-    if (p.traits.forest) {
-      if (!ctx.bHuge && !ctx.ignoreForest && forestBlocksLine(p, l)) { forest = true; r.terrain.push(p.t.id) }
-    } else if (pieceBlocksLine(p, l)) { terr = true; r.terrain.push(p.t.id) }
+/** Core trace between two actors. */
+export function traceBetween(state: GameState, A: Actor, B: Actor): { visible: boolean; cover: LosCover; blockers: Id[]; line: [Vec2, Vec2] | null } {
+  const set = qualifying(state, A, B)
+  if (!set.length) return { visible: true, cover: 'none', blockers: [], line: [A.pos, B.pos] }
+  // a Dead Zone blocks outright, whatever the trace
+  const dead = set.find((q) => q.kind === 'deadZone')
+  if (dead) return { visible: false, cover: 'deadZone', blockers: [dead.piece.t.id], line: [A.pos, B.pos] }
+  for (const [s, t] of traces(A, B)) {
+    if (!set.some((q) => segmentCrosses(q.piece, s, t))) return { visible: true, cover: 'none', blockers: [], line: [s, t] }
   }
-  if (terr) r.reasons.push('terrain')
-  if (forest) r.reasons.push('forestDepth')
-  const { A, B } = ctx
-  for (const o of ctx.interveners) {
-    if (segPointDist(l.a, l.b, o.pos).d >= baseRadius(o.base) - 1e-9) continue
-    if (A.elev - o.elev >= 1 && edgeDistance(o.pos, o.base, B.pos, B.base) > 1) continue // elevated viewer
-    if (B.elev - A.elev >= 1 && o.elev <= B.elev - 1) continue // lower viewer ignores models below the target
-    r.models.push(o.id)
-  }
-  if (r.models.length) r.reasons.push('model')
-  for (const c of ctx.clouds) {
-    if (segmentInsideIntervals(l.a, l.b, cloudShape(c)).length) r.clouds.push(c.id)
-  }
-  if (r.clouds.length) r.reasons.push('cloud')
-  return r
+  const crossed = set.filter((q) => segmentCrosses(q.piece, A.pos, B.pos))
+  const used = crossed.length ? crossed : set
+  return { visible: false, cover: used.some((q) => q.kind === 'full') ? 'full' : 'direct', blockers: used.map((q) => q.piece.t.id), line: [A.pos, B.pos] }
 }
 
-const score = (r: LineResult) => r.terrain.length * 4 + r.models.length * 2 + r.clouds.length
-
-function sentence(reasons: LosReason[], blockers: Id[]): string {
-  if (reasons.includes('self')) return 'A model cannot target itself.'
+function sentence(visible: boolean, cover: LosCover, reasons: LosReason[]): string {
+  if (reasons.includes('self')) return 'A model cannot see itself.'
   if (reasons.includes('outOfTable')) return 'One of the models is not on the table.'
-  if (reasons.includes('clear')) return 'Clear line of sight.'
-  const parts: string[] = []
-  if (reasons.includes('terrain')) parts.push('terrain blocks the line')
-  if (reasons.includes('forestDepth')) parts.push('too much forest in the way')
-  if (reasons.includes('model')) parts.push('a model in the way is at least as big as the target')
-  if (reasons.includes('cloud')) parts.push('a cloud is in the way')
-  return `Blocked: ${parts.join('; ')}${blockers.length ? ` (${blockers.join(', ')})` : ''}.`
+  if (visible) return 'Clear line of sight.'
+  if (cover === 'deadZone') return 'Blocked: the high ground hides the foot of its own wall.'
+  if (cover === 'full') return 'Blocked: a piece of terrain is as tall as both models.'
+  return 'Blocked: terrain next to a model is as tall as that model.'
 }
 
-/** Full LOS report from the point of origin to the target. */
+const verdictOf = (visible: boolean, reasons: LosReason[], d: number, range: number | undefined, extra: Partial<LosReport> = {}): LosReport => ({
+  visible, reasons, blockers: [], inRange: range === undefined || d <= range + 1e-6, distance: d, cover: 'none', line: null,
+  terrainBlockers: [], why: sentence(visible, extra.cover ?? 'none', reasons), ...extra,
+})
+
+/** Full LOS report from one model to another (spec 14 s6). */
 export function losReport(state: GameState, originId: Id, targetId: Id, opts: LosOptions = {}): LosReport {
-  const A = state.models[originId], B = state.models[targetId]
-  const mk = (visible: boolean, reasons: LosReason[], d: number, extra: Partial<LosReport> = {}): LosReport => ({
-    visible, reasons, blockers: [], inRange: false, distance: d, line: null,
-    terrainBlockers: [], modelBlockers: [], cloudBlockers: [], why: sentence(reasons, []), ...extra,
+  const a = state.models[originId], b = state.models[targetId]
+  if (!a || !b) return verdictOf(false, ['outOfTable'], Infinity, opts.range)
+  if (a.id === b.id) return verdictOf(false, ['self'], 0, opts.range)
+  const d = modelDistance(a, b)
+  if (!isOnTable(a) || !isOnTable(b)) return verdictOf(false, ['outOfTable'], d, opts.range)
+  const t = traceBetween(state, modelActor(state, opts.bundle, a), modelActor(state, opts.bundle, b))
+  const reasons: LosReason[] = t.visible ? ['clear'] : ['terrain']
+  return verdictOf(t.visible, reasons, d, opts.range, {
+    cover: t.cover, blockers: t.blockers, terrainBlockers: t.blockers,
+    line: t.line ? { from: t.line[0], to: t.line[1] } : null, why: sentence(t.visible, t.cover, reasons),
   })
-  if (!A || !B) return mk(false, ['outOfTable'], Infinity)
-  if (A.id === B.id) return mk(false, ['self'], 0)
-  const d = modelDistance(A, B)
-  const rangeOk = opts.range === undefined || d <= opts.range + 1e-6
-  if (!isOnTable(A) || !isOnTable(B)) return mk(false, ['outOfTable'], d, { inRange: rangeOk })
-
-  const ctx = buildCtx(state, A, B, opts)
-  let best: { l: Line; r: LineResult } | null = null
-  for (const l of sampleLines(A, B)) {
-    const r = evalLine(ctx, l)
-    if (!r.reasons.length) {
-      return mk(true, ['clear'], d, {
-        inRange: rangeOk, line: { from: l.a, to: l.b, fromZ: l.za, toZ: l.zb }, why: 'Clear line of sight.',
-      })
-    }
-    if (!best || score(r) < score(best.r)) best = { l, r }
-  }
-  const { l, r } = best!
-  const blockers = [...r.terrain, ...r.models, ...r.clouds]
-  return {
-    visible: false, reasons: r.reasons, blockers, inRange: rangeOk, distance: d,
-    line: { from: l.a, to: l.b, fromZ: l.za, toZ: l.zb },
-    terrainBlockers: r.terrain, modelBlockers: r.models, cloudBlockers: r.clouds, why: sentence(r.reasons, blockers),
-  }
 }
 
-/** Frozen-contract verdict (what AttackContext.losVerdict holds). */
+/** Model-to-model LoS with the bundle first (the spec 14 signature). */
+export const losBetween = (state: GameState, bundle: EditionBundle, aId: Id, bId: Id, range?: number): LosReport =>
+  losReport(state, aId, bId, { bundle, ...(range !== undefined ? { range } : {}) })
+
+/** LoS from a model to a Mission Marker, which counts as Size 0 (LOS-007). */
+export function losToMarker(state: GameState, bundle: EditionBundle, modelId: Id, markerN: number): LosReport {
+  const m = state.models[modelId]
+  const mk = markerActor(state, bundle, markerN)
+  if (!m || !mk || !isOnTable(m)) return verdictOf(false, ['outOfTable'], Infinity, undefined)
+  const t = traceBetween(state, modelActor(state, bundle, m), mk)
+  const reasons: LosReason[] = t.visible ? ['clear'] : ['terrain']
+  return verdictOf(t.visible, reasons, Math.max(0, dist(m.pos, mk.pos) - baseRadius(m.base) - mk.r), undefined, {
+    cover: t.cover, blockers: t.blockers, terrainBlockers: t.blockers, line: t.line ? { from: t.line[0], to: t.line[1] } : null,
+  })
+}
+
+/** Frozen-contract verdict (what the client query holds). */
 export function losVerdict(state: GameState, originId: Id, targetId: Id, opts: LosOptions = {}): LosVerdict {
   const { visible, reasons, blockers, inRange, distance } = losReport(state, originId, targetId, opts)
   return { visible, reasons, blockers, inRange, distance }
@@ -195,11 +182,30 @@ export function losVerdict(state: GameState, originId: Id, targetId: Id, opts: L
 export const hasLos = (state: GameState, originId: Id, targetId: Id, opts: LosOptions = {}): boolean =>
   losReport(state, originId, targetId, opts).visible
 
-/** LOS from a model to an arbitrary pose (placement checks: a trooper placed at pos must see the anchor). */
+/** LoS from a model to an arbitrary pose (placement checks). */
 export function hasLosFromPose(state: GameState, moverId: Id, pos: Vec2, targetId: Id, opts: LosOptions = {}): boolean {
-  const m = state.models[moverId]!
+  const m = state.models[moverId]
+  if (!m) return false
   const probe: GameState = { ...state, models: { ...state.models, [moverId]: { ...m, pos } } }
   return hasLos(probe, moverId, targetId, opts)
 }
 
-// TODO(M2): StarCraft cover and range queries go here (the base project rules were removed).
+/** Does any model of unit A see any model of unit B (live models on the table)? */
+export function unitsSee(state: GameState, bundle: EditionBundle, aUnit: Id, bUnit: Id): boolean {
+  for (const a of tableModels(state, aUnit)) for (const b of tableModels(state, bUnit)) if (losBetween(state, bundle, a.id, b.id).visible) return true
+  return false
+}
+
+/** HIGH GROUND Cover (COV-060/061): every model of the target stands on HIGH GROUND (any part of its base) and at least
+ *  one attacking model does not; Flying units neither get it nor count as attacking from lower ground. */
+export function highGroundCover(state: GameState, bundle: EditionBundle, attackerUnit: Id, targetUnit: Id): boolean {
+  const tm = unitModels(state, targetUnit).filter(isOnTable)
+  const am = unitModels(state, attackerUnit).filter(isOnTable)
+  if (!tm.length || !am.length) return false
+  if (tm.some((m) => isFlyingModel(bundle, m)) || am.some((m) => isFlyingModel(bundle, m))) return false
+  const high = (m: ModelState): boolean => levelOfBase(state, m.pos, baseRadius(m.base)) === 2
+  return tm.every(high) && am.some((m) => !high(m))
+}
+
+/** All terrain pieces a straight line crosses (for the LoS overlay). */
+export const piecesOnLine = (state: GameState, a: Vec2, b: Vec2): Id[] => scPieces(state).filter((p) => segmentCrosses(p, a, b)).map((p) => p.t.id)

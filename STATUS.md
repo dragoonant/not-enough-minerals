@@ -1,66 +1,58 @@
 # Status: what exists
 
-Milestone reached: **M1 data** (generated snapshot, 2026-10-13; this file lists only what is real; plans live in
-PLAN.md). M1 gate report: `tools/out/m1-data-report.md`. The specs under `docs/spec/` are written by the spec agents and are not listed here.
+Milestone reached: **M2 rules engine** (generated snapshot, 2026-10-13; this file lists only what is real; plans live
+in PLAN.md). Gate reports: `tools/out/m1-data-report.md` (M1), `tools/out/m2-followups.md` (M2 open items). The specs
+under `docs/spec/` (00 architecture, 10-19 rules, 20-21 data, 30 AI, 50 client, 60 testing) are not listed here.
 
 ## Repo and tooling
 - Vite 8 + React 19 + R3F 9 + drei + zustand 5, TypeScript 7 (strict), Vitest 5, Playwright. Pages base
   `/not-enough-minerals/`; chunks react / three / r3f / engine.
 - `.github/workflows/deploy.yml`: typecheck, test, build, deploy on push to `main` (and manual dispatch).
 - `.claude/launch.json`: `nem-dev` on port 5201. Playwright previews the build on port 5202 (`PW_PORT`).
-- `tools/`: `sim.ts` (random bots, invariants, replay determinism, 2000-decision stall cap), `sim-core.ts` (data
-  loader for node tools), `ai-bench.ts` (tier vs tier, alternating seats), `validate-data.ts`.
-- `tools/gen-music.ts` + `audio-manifest.json` (music generation), `tools/workflows/` (workflow scripts), `tools/out/`
-  (reports). Not carried over yet: GLB optimizer.
+- `tools/`: `sim.ts` (seeded random bots over real armies, rotating missions and deployments, a draft every 4th
+  game; invariants, replay determinism, 2000-decision stall cap, per-namespace coverage that fails when `melee.go`,
+  `atk.casualty` or `charge.succeeded` never happen), `sim-core.ts` (data loader for node tools), `ai-bench.ts`,
+  `validate-data.ts`, `gen-music.ts`, `workflows/`, `out/` (reports).
 
-## Engine (`src/engine/`, no StarCraft rules yet)
-- Contracts: `types.ts` (generic GameState, models with round bases 25-150 mm, seats, one PendingDecision, PlayerView),
-  `decider.ts` (random and replay deciders), `view.ts` (pass-through until hidden information lands), `rng.ts`
-  (seeded sfc32, `rollD6`, `roll`), `pending.ts`.
-- Foundations: `registry.ts` (ModuleDef/Controller action protocol), `apply.ts` (validate, dispatch, log; never
-  throws on bad input).
-- Generic geometry carried over: `geometry.ts` (bases, sweeps, placement, path checks), `measure.ts` (base-edge
-  distances), `terrain.ts` (terrain prisms), `los.ts` (3D line of sight with reasons). Their movement/LOS/cover
-  details are base-project behaviour marked TODO(M2) until the StarCraft spec replaces them.
-- `turnflow.ts`: PLACEHOLDER turn loop (each seat rolls a test D6 or passes once per round, 3 rounds, draw). Not a rule.
-- `setup.ts`: `createGame` / `createDemoGame` (given a data bundle, seat 0 fields a 6-model Marine squad from data; placeholder models on 25/32/40/50 mm bases, 5 terrain pieces,
-  36 x 36 in; `table: 'standard'` gives 36 x 54 in).
+## Engine (`src/engine/`, StarCraft rules, pure TS)
+- Contracts: `types.ts`, `decider.ts`, `view.ts`, `rng.ts` (seeded sfc32, only `roll()` advances `state.rng`),
+  `pending.ts` (one PendingDecision; `answeringId()` names the decision `apply()` is resolving).
+- Foundations: `registry.ts` (action protocol, namespaces), `apply.ts` (validate, dispatch, log; bad input is a
+  Rejection, unbuilt bodies give E_TODO), `errors.ts`, `dice.ts` (one dice service), `edition.ts` (every rules number
+  from the data bundle or `rules.json`), `query.ts` (previews; fold-only hook calls), `hooks.ts` (HOOK_WIRING, one
+  `runHook` per point), `effects.ts` (statuses, mods, durations, Supply overrides).
+- Rules modules, each tagged with its checklist IDs: `setup` (set-up, terrain, draft, first-player Roll-Off),
+  `turnflow` (rounds, initiative, activations, Pass, before/after windows), `army` (muster, costs, loadouts), `squads`
+  (coherency, formation placer), `movement` (Move, Run, Disengage, Flying, elevation), `reserves` (Deploy, arrivals,
+  transports), `engage`, `los`, `terrain`, `geometry`, `measure`, `visibility` (HIDDEN, BURROWED, detection),
+  `shooting` (targets, Batches, templates), `attack` (Hit/Surge/Armour/Evade, keywords), `damage` (HP, Shields,
+  casualties, Supply drops), `charge` (Charge and IMPACT), `melee` (Close Combat, Close Ranks), `supply`, `control`
+  (marker control), `missions`, `scoring` (VP, End of Round, Cleanup, game end), `abilities` + `code-hooks` (unit
+  abilities, Reactions, faction and tactical cards, the 20 `{"code": ...}` hooks).
+- Rules decisions: `docs/needs-rules-check.md` (142 RULING lines; the M2 engine set is appended under its own heading).
 
-## Data (`src/data/`, `data/`)
-- Schema FROZEN in `docs/spec/20-data-schema.md` (types in `src/data/types.ts`); entry guide `docs/spec/21-data-entry-guide.md`.
-  Loader `src/data/index.ts` (`edition`, `all`, `find`, `get`, `singleton`), `bundle.ts`, `query.ts` (`mergedCostTable`),
-  `validate.ts` (ids, sources, keywords, effect ops, statuses, hooks, Supply brackets, CT prices vs card brackets).
-  `npm run validate:data` checks the edition on disk: ok, 15 warnings (CT rows with no card, by design).
-- Edition `sc-2026-10` (default in `data/editions.json`), every value cites R/CL/CT/F/CS pages:
-  - Units: Terran 8, Zerg 13, Protoss 10 (31, of which 4 summoned), 64 upgrades, 112 abilities, 53 weapons.
-  - Cards: 42 (Terran 13, Zerg 14, Protoss 15: 7 faction, 33 tactical, 2 creep).
-  - Costs: Cost Table 10.2026 with Changelog 10.2026 applied (`costs/terran|zerg|protoss|cards.json`), including
-    CT-only units and cards that have no card sheet yet.
-  - 12 Mission Cards (6 missions x 2 scales), 12 Deployment Cards, 6 presets (Terran/Zerg/Protoss starters,
-    Terran/Zerg Founders, two First Battle lists), 39 keywords, `rules.json`.
-  - 20 `{"code": ...}` hooks in `hooks/*.json`; none is implemented by the engine yet.
-- Rules decisions in `docs/needs-rules-check.md` (101 RULING lines). Open schema misfits and engine contracts for
-  M2 are listed in the M1 report.
-- Unit concept art for M5 in `art/unit-concepts/` (10 images).
+## Data (`src/data/`, `data/`; schema FROZEN)
+- Schema `docs/spec/20-data-schema.md` (types `src/data/types.ts`), entry guide `docs/spec/21-data-entry-guide.md`.
+  `npm run validate:data`: ok, 15 warnings (CT rows with no card, by design).
+- Edition `sc-2026-10`: 31 units (Terran 8, Zerg 13, Protoss 10; 4 summoned), 64 upgrades, 112 abilities, 53 weapons,
+  42 cards, Cost Table and Changelog 10.2026, 12 Mission Cards, 12 Deployment Cards, 6 presets, 39 keywords,
+  `rules.json`. Open data misfits (missing `rules.json` keys, creep grant shape) are listed in the M2 follow-ups.
 
 ## AI (`src/ai/`)
-- `decider.ts` (tier decider with an empty POLICIES table and random fallback), `random.ts`, `types.ts` (tiers random /
-  easy / normal, `aiBudgetMs` from `VITE_AI_MS` / `AI_MS`), `worker.ts` (Web Worker host). Every tier plays random.
+- Tier decider with an empty POLICIES table; every tier plays random (M4).
 
 ## Client (`src/client/`)
-- Start screen "Not Enough Minerals" with the fan notice (mode, bot tier, speed, seed, Continue) -> game screen.
-- `contract.ts` surface; `store/gameStore.ts` is the only apply caller (autosave per round, save/replay);
-  `presentation/` director, beats, cues, presented and announce stores; `bot/` driver with watchdog, random brain,
-  AI worker client; `board/` 36 x 36 in placeholder mat with a 6 in grid, camera presets, procedural terrain, DOM model
-  proxies, `?fps` meter; `figures/` procedural MGSD-proportioned placeholder figures (about 2.25 heads) and the GLB
-  loader shape; `ui/` HUD shell (top bar, banner, generic option prompt, rejection toast, game over); `dice/` D6 tray
-  and log; `audio/` Web Audio manager with procedural SFX and mood music.
-- Test hooks: `?test=1` (window.__game), `?seats=`, `?seed=`, `?tier=`, `?speed=`, `?fps`.
+- Start screen with the fan notice -> game screen: placeholder mat and terrain, procedural figures, HUD with the
+  generic option prompt, dice tray, Web Audio. `store/gameStore.ts` is the only apply caller. Test hooks `?test=1`,
+  `?seats=`, `?seed=`, `?tier=`, `?speed=`, `?fps`. No rules-specific UI yet (M3).
 
-## Tests (`npm test`: 31 tests; `npm run e2e`: 3)
-RNG-001, SETUP-001..002, VIEW-001, DECIDER-001, APPLY-001, FLOW-000, GEOM-001..005, LOS-001..003, DATA-001..005,
-COST-002, AI-001..002, AUD-001..004, CLI-001..004. E2E: boot with the fan notice, `?test=1` hooks, screenshots `screenshots/m0-start.png`
-and `screenshots/m0-table.png`. `npm run sim -- --games 20`: 20 finished, 0 errors.
+## Verification (2026-10-13)
+- `npm run typecheck`: clean. `npm test`: 330 tests in 31 files, all pass; each `it()` is named by a checklist ID
+  from `docs/spec/12-rules-test-checklist.md` (largest groups SUP, ATK, VIS, MOVE, DEP, DICE, ABL, MSN, GOLD, DMG)
+  plus HOOK-000..100 (every hook point fires in real games). `npm run e2e`: 3.
+- `npm run build`: ok. `npm run sim -- --games 60`: 60 finished, 0 errors, avg 4.72 rounds, 16597 decisions, max
+  step 137 ms (winners B 27, A 17, draws 16).
 
 ## Not yet
-Every StarCraft rule and the hook implementations (M2), the playable slice (M3), the AI (M4), art, audio files, terrain.
+The playable slice with rules UI (M3), the AI policies (M4), art, audio files, real terrain. Open M2 items:
+`tools/out/m2-followups.md`.

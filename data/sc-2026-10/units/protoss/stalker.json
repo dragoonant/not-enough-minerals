@@ -77,7 +77,8 @@
       "effects": [
         {
           "op": "coherency",
-          "d": 4
+          "d": 4,
+          "axis": "horizontal"
         }
       ],
       "text": "Horizontal Coherency between models is 4 inches (vertical stays normal)."

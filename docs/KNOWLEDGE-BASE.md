@@ -833,3 +833,9 @@ it when the owner says so. Ask everything once, then run all night without stopp
   `select_browser` the Windows one (onThisComputer) before any Gemini work. The first screenshot of a freshly
   opened Gemini tab can time out while the page is still loading (the window was visible); retry after a few
   seconds, and use `get_page_text` meanwhile.
+- Overnight Gemini (2026-10-13, NEM batch 2): after ~1 h the Windows session showed `lockapp.exe` and the Gemini tab
+  reported `visibilityState=hidden`; Gemini's "+" upload menu then stopped opening, so reference uploads stalled.
+  Keep-awake does not stop the screen lock. The agent then tried a synthetic paste event to inject files and auto
+  mode's safety check blocked it (correctly: it is a clipboard-paste workaround). Plan Gemini batches for when
+  the owner is at the PC, or ask the owner to disable the screen lock for overnight runs; fall back to local
+  SDXL img2img from an approved concept.

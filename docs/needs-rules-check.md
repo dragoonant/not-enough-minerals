@@ -126,3 +126,47 @@ the checklist line marked "(RULING)" in `docs/spec/12-rules-test-checklist.md`.
 - RULING: Protoss Starter preset | 3 Zealots, 4 Adepts, 2 Sentries, 2 Stalkers (980 minerals under CT 10.2026) | follows the R 12.12 example list | Confirmed | R p.108-113, CT p.7
 - RULING: Preset upgrade 'model' index | 0-based model index as mustered | ArmyListDef does not say; matches Shield's 'first model' = index 0 | Unsourced | R p.108-113
 - RULING: Artefact Hunt CLAIM | happens in the Scoring Phase, only on a Controlled marker (rules.json claimTiming) | card text | Confirmed | CS2-P p.5
+
+## M2 engine rulings (final gate, 2026-10-13)
+- RULING: LoS to a Mission Marker | checked against terrain only, models never block it | Marker is Size 0 and a unit standing on it would otherwise hide it from itself | Unsourced | R p.55, R17 spec 17 s5
+- RULING: Divide and Conquer quarter totals | use supplyFor(unit, 'vp'), +1 once per unit that holds a marker | follows spec 17 R17-6 and spec 15 purposes | Unsourced | CS1-T p.13
+- RULING: Forced Pass | raised as a one-option turn.activate decision (only Pass) mid-Phase; auto-skipped only when no seat can act at the start of a Phase | matches PASS-001 and R11-3 | Unsourced | R p.57 8.2.1
+- RULING: First Player Marker moves at the moment of the first Pass in Phases 1 and 2 | state.firstPlayer is set at once, firstPasser also recorded | INIT-004 | Unsourced | R p.57 8.2.1
+- RULING: Draft state | DraftState.control holds the Mission draft controller; the Deployment controller is the other seat; banned entries are 'mission:<row index>' so duplicate copies are removed one at a time | DRF-005 | Unsourced | F p.2
+- RULING: Elimination check | a seat is out when it owns no model with life not dead, anywhere | END-002/007 count Reserves, Summoned and STRUCTURE models | Unsourced | R p.74 8.9.3
+- RULING: Split Speed | second value only for a single-model unit, Run uses the same Speed as Move | spec 14 s8.1 and PH2 Run = Move | Unsourced | R p.40 5.1
+- RULING: Gap Clearance transit | the Leading Model centre is walked in 0.1" steps with obstacles inflated by half the clearance; base fit is checked only at the end | spec 14 s8 engine notes | Unsourced | R p.39 4.6
+- RULING: Level change | a path or link may change level only within Engagement Range (1") of a listed access point | reuses the adjacency ruling | Unsourced | R p.59, F p.2
+- RULING: Coherency link past enemies | an enemy within Engagement Range of either linked model does not break the link | Engagement is read at proposal time | Unsourced | F p.2
+- RULING: Arrivals are not moved | the Speed '-' ban applies only to units already on the table, so a summoned Pylon can arrive | SUMMON enters, it does not move | Unsourced | R p.40
+- RULING: Deploy onto High Ground | no access point is needed within 0.25" of the table edge while entering | F p.3 says High Ground touching the Entry Edge is legal | Unsourced | F p.3
+- RULING: casualty choice | atk.casualty is raised only when candidates differ in HP or loadout; equal models are removed last-in-muster-order without asking | avoids one prompt per identical model | Unsourced | R p.64 step 5
+- RULING: DODGE | reduces the dice actually moved (after the Armour Pool cap), Surge first then CRITICAL HIT | literal 'dice moved' | Unsourced | R p.86
+- RULING: split melee Batch | PRECISION and CRITICAL HIT go wholly to the Surge target's pool, other pools keep PIERCE and ANTI-EVADE | F p.5 lets the attacker allocate and gives no rule | Unsourced | F p.5
+- RULING: PIERCE | sets DMG to X even when X is below the printed DMG; with several matching setters the highest is used | 'DMG becomes X', attacker picks | Unsourced | R p.90
+- RULING: IMPACT split | a model ranked against several targets spreads its X dice evenly in target order with no decision | keeps the Charge flow decision-free | Unsourced | R p.88
+- RULING: INDOMITABLE | an Engaged INDOMITABLE shooter may fire at Unengaged units, an Unengaged shooter may fire at an Engaged INDOMITABLE target, and the defender Evades the cross-engagement shot | card text 'defender may Evade' | Unsourced | CS1-T p.7
+- RULING: Charge odds | chargeNeeded uses the straight-line edge distance of the best Leading Model minus Engagement Range, ignoring terrain | no pathfinder service is frozen | Unsourced | spec 13 s12
+- RULING: Spillover | Friendly covered units (including the firing unit) share a Combat Tag with the Primary and become Spillover Batches, unit models never self-exclude | F p.5 says 'friendly or enemy' | Unsourced | F p.5
+- RULING: Psionic Link friendlyModelsWithin | counts every friendly model within d of the Unit, its own models included | card says 'Friendly models Within' | Unsourced | CS1-Z
+- RULING: Reactions with no hook point (debuffReceived, usesAbility) | answered inside abilities.ts; attackResolved is served by the afterAction hook; nominatedToDeploy by onArrive | HOOK_WIRING has no points for them | Unsourced | spec 00 s4.3
+- RULING: Advanced Training (costMod reaction) | applied automatically when it lowers a cost, spends the player's reaction for that activation | it is optional but never harmful | Unsourced | CS1-T
+- RULING: ON CREEP radius for Creep Tumor tokens | taken from the Source of Creep aura radius in data; mass-recall, creep-tumor-spawn and creep-removal distances are read from their hook text | no rules.json number exists | Unsourced | CS1-Z p.3, p.13-15
+- RULING: Round 2 initiative Roll-Off | asserted as 2D6 each (3 vs 2) | the narrative's 3 vs 1 cannot happen with the 2D6 of R 3.2 | Corrected | R p.14, R 3.2
+- RULING: Roach IMPACT and claws | IMPACT (2) 4+ and Claws hitting on 4+ from the card data | the narrative's printed rolls differ from the current cards | Corrected | R p.11-13, CS1-Z
+- RULING: spot verb with no legal spot | the verb is skipped (an active ability is cancelled and counts as used this Round) | legalActions must never be empty | Unsourced | spec 00 s3.1
+- RULING: Respawn | lost models return at full HP, placed linked to the Leading Model; a model with no legal spot stays dead | no placement rule is printed | Unsourced | CS1-Z
+- RULING: Morph | each model becomes a new one-model Unit where it stood, already activated; nothing changes if the Supply or base does not fit | no placement rule is printed | Unsourced | CS2-Z p.2
+- RULING: Batch declared before a Reaction | fired after the window if still legal, else not fired and not spent | resume needs a defined outcome | Unsourced | R 10
+- RULING: TPL-008 template sizes | Blast Template 3 in across, Flame Template 8 x 2 in, held in the one constant TEMPLATE_DIMS | R p.66 prints them only in a diagram and rules.json has no keys for them | Unsourced | R p.66
+- RULING: VP-002 Morph drop | a Morph removal records the Supply bracket drop like any other removal | VP-002, FAQ F-67/F-68 and F p.5 count every drop | Confirmed | F p.5
+- RULING: VIS-026 BURROWED Close Combat | a BURROWED unit attacks only after it Closes Ranks, which ends BURROWED; it cannot attack if Close Ranks is impossible | VIS-026 and the finding's fix | Confirmed | R VIS-026
+- RULING: Disengage penalty | no-Tactical-Mass penalty stays set at declaration, and a declared Disengage cannot become a Hold (the 'hold' option is removed; no legal path means the DIS-003 sacrifice) | no rule lets a declared Disengage turn into a Hold | settled | R DIS
+- RULING: ignoreDisengage | the penalty is skipped when the unit has a live ignoreDisengage effect (Tactical Retreat, Raynor's Orders) | the effect exists to waive the penalty | settled | cards
+- RULING: Size 2+ terrain threshold | one named constant, terrain.ts SOLID_TERRAIN_SIZE = 2 | rules.json has no key and data is frozen | DATA MISFIT: add a terrain-solid-size key | R p.39 4.6
+- RULING: Supply floor-only override | A supplyOverride with floor and no delta (Freedom Fighters) now raises Supply to the floor for its purposes | the floor stood on its own in the rules text, not only next to a delta | Unsourced | spec 16 SUP-007.
+- RULING: first roll scope | `first: round` and `first: activation` are tracked per rolling Unit and per Batch (a Batch asked twice stays first); an Activation is counted per active Unit within the Round | the card text gives no finer scope | Unsourced | CS2 Hydralisk, Praetor Guard.
+- RULING: Active default duration | canEvade and rollMod granted by an Active with no duration last to the End of the Round (damageReduce and removeDice keep thisAttack) | the card gives no duration and an Active's grants default to the Round (ABL-026) | Unsourced | spec 20 default.
+- RULING: queued loseHidden Reaction | Passives to a loss of HIDDEN run at once; the Reaction (Might of the Nerazim) is queued on the Unit and offered at the next suspendable hook point (move end, arrival, before/after action) | setStatus cannot suspend | Unsourced | spec 16 s7.
+- RULING: TER-001 map-roll size | mapCount() reads an optional rules.json scales[x].maps, falling back to 3 / 6 / 6 for skirmish / standard / grand-offensive | rules.json scales has no map-count field, so this is a data misfit (data is frozen) | Unsourced | R TER-001
+- RULING: ENG-OVER terminal turn.over option | apply() rejects every action with E_GAME_OVER once phase is 'over', so turn.over is listed but never accepted | apply.ts is not mine; spec 00 s3.1 needs a game-over exception line, or apply must accept turn.over as a no-op | Unsourced | spec 00 s3.1

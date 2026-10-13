@@ -48,11 +48,8 @@
       "type": "reaction",
       "phase": "any",
       "trigger": {
-        "event": "actionResolved",
-        "who": "friendly",
-        "filter": {
-          "code": "resolved-place-effect"
-        }
+        "event": "placeResolved",
+        "subject": "friendly"
       },
       "effects": [
         {

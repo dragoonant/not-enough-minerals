@@ -48,12 +48,9 @@
       },
       "effects": [
         {
-          "op": "code",
-          "code": "damage-reduce-min-one",
-          "args": {
-            "n": 2,
-            "min": 1
-          },
+          "op": "damageReduce",
+          "n": 2,
+          "min": 1,
           "to": "triggerUnit"
         }
       ],

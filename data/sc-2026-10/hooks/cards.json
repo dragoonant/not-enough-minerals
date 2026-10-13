@@ -10,20 +10,6 @@
     "source": "CS1-T p.8"
   },
   {
-    "id": "unit-slot-support",
-    "text": "Condition: the Unit using the ability fills a Support Army Slot.",
-    "source": "CS1-T p.8"
-  },
-  {
-    "id": "forward-deploy-clearance",
-    "text": "Check at placement: a unit deployed from a non-entry table edge has to finish farther than 10 inches from every enemy model.",
-    "source": [
-      "CS1-T p.10",
-      "CS1-Z p.15",
-      "CS1-P p.9"
-    ]
-  },
-  {
     "id": "forward-deploy-once-per-round",
     "text": "Check at nomination: refuse if a friendly Unit of the same kind already came in this way earlier in the current Round.",
     "source": [
@@ -72,26 +58,6 @@
   {
     "id": "mass-recall",
     "text": "Every friendly Protoss Unit within 6 inches of the placed Faction Indicator leaves the battlefield for Reserves.",
-    "source": "CS1-P p.9"
-  },
-  {
-    "id": "arrival-off-entry-edge",
-    "text": "Condition: the enemy Unit arrives from Reserves anywhere except its own Entry Edge (not a Pylon or Omega Worm base). Evaluate after the arriving Unit is set up on the battlefield (needs an onArrive event).",
-    "source": "CS1-P p.9"
-  },
-  {
-    "id": "resolved-place-effect",
-    "text": "Condition: a PLACE effect has just finished resolving on the friendly Unit, whoever caused it.",
-    "source": "CS1-P p.9"
-  },
-  {
-    "id": "lost-hidden-status",
-    "text": "Condition: the friendly Unit has just lost the Hidden Status from any cause (own action, enemy detection, or a card effect); who acted does not matter.",
-    "source": "CS2-P p.4"
-  },
-  {
-    "id": "damage-reduce-min-one",
-    "text": "Cut the incoming Total Damage by the stated amount, but never lower it below 1.",
     "source": "CS1-P p.9"
   }
 ]

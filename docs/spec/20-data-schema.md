@@ -7,6 +7,14 @@ one deployment card (section 10). The code is `src/data/types.ts` (types), `src/
 `tools/validate-data.ts` (CLI, prose guard). A change from now on needs an edit here, the matching edit in
 `types.ts` and `validate.ts` (`OP_FIELDS`, `OP_OPTIONAL`, enums), and a note in the agent's `issues`.
 
+**M2 additive changes (2026-10-13, M2 foundations; closes the open schema items of the M1 report):** Condition
+`slots`, `entryKinds`; trigger events `loseHidden`, `arrived`, `placeResolved`; `who` default convention (s2.3);
+`setToken`/`altEntry` `minEnemyDist`; `altEntry.kind` enum; `damageReduce.min`; `heal.x`/`nonLethal.x`/
+`damageReduce.n` take a ValueExpr; `coherency.axis`; `costMod`/`abilityMod` `optional`; the closed `abilityMod.field`
+list; TokenDef `terrain`, `removedBy`; ClaimRule `phase`, `controlled`; RulesDef `claimTiming`; cost `n: 0` means no
+exhaust. Six code hooks became plain data and left `hooks/cards.json`: unit-slot-support, forward-deploy-clearance,
+damage-reduce-min-one, lost-hidden-status, arrival-off-entry-edge, resolved-place-effect.
+
 All game content is declarative JSON. The engine never reads PDFs and holds no card number as a literal.
 Every record has `id` and `source`. `source` is a string or array in the spec 10 citation format (`"CS1-T p.1"`,
 `["CT p.2", "CL p.2"]`). Prose fields (`text`) are our own one-line mechanical summaries, never a paraphrase of
@@ -72,7 +80,12 @@ interface Condition {
   targetSelectedBy?, attackerSelectedBy?: Id              // the Unit picked by this card's ability (Target Lock, Sentenced to Death)
   targetWithinToken?: {token, d}                          // Psionic Presence: target within 4" of the Shade
   first?: 'activation' | 'round'                          // first roll of its kind in that scope
+  slots?: Slot[]                                          // M2: the Unit fills one of these Army Slots (Advanced Training)
+  entryKinds?: EntryKind[]                                // M2: the arriving Unit came in this way (Photon Overcharge)
   phase?: Phase[]; code?: Id }                            // code = hook escape hatch
+type EntryKind = 'edge' | 'friendlyEdge' | 'nonEntryEdge' | 'indicator' | 'place'
+// edge = own Deployment Card Entry Edge; friendlyEdge = Pylon / Omega Worm base; nonEntryEdge = another table edge
+// (Proxy Barracks, Warp Gate, Timing Push); indicator = End-of-Round drop at a Faction Indicator; place = PLACE from Reserves
 ```
 ### 2.2 Effects (`Effect[]`, one vocabulary for abilities, upgrades, cards and mission actions; applied in order)
 Base keys on every effect: `op`, `when?: Condition`, `duration?: Duration` (default `permanent` for passives and
@@ -83,6 +96,7 @@ event, e.g. CA-013 End-of-Round set-up at a token), `weapons?: WeaponSel` (which
 'engagedEnemies' | 'summoned' | WeaponSel`; default = the ability's target, else self.
 `WeaponSel = {ids?: Id[], phase?: 'assault'|'combat', all?: true, first?: true}`.
 `ValueExpr = {count: 'ownModelsWithinTarget'|'modelsInUnit'|'tokensWithin', d?, plus?, token?}` (Medpack HEAL (X)).
+`heal.x`, `nonLethal.x` and `damageReduce.n` are a number or a ValueExpr (M2; Life Support).
 
 | op | required | optional | used for |
 |---|---|---|---|
@@ -99,27 +113,27 @@ event, e.g. CA-013 End-of-Round set-up at a token), `weapons?: WeaponSel` (which
 | heal / nonLethal | x (number or ValueExpr) | | Medpack, Regeneration, Stimpack |
 | hits / impact | x, y | hits: token, radius, perToken | Shadow Strike, Corrosive Bile; Devastating Charge |
 | impactBonus | | dicePerModel, hitMod | My Life for Aiur |
-| damageReduce / damageCap | n / max | | Life Support, Transfusion, Zealous Round / Improved Barrier |
+| damageReduce / damageCap | n / max | damageReduce: min (Total Damage never below it, M2) | Life Support, Transfusion, Dae'uhl / Improved Barrier |
 | removeDice | n | upTo, pool | Point Defense Laser, Guardian Shield |
 | canEvade | vs (['all'] or 'ranged','closeCombat','enemyAbilityDamage') | | Combat Shield, Precognition, Hallucination |
 | place | x | from ('entryEdge','friendlyUnit','token'), token, minEnemyDist, notInEngagement, allowEngage, optional, wholly | PLACE (X), Burrow Ambush, Blink |
 | move | kind ('move','run') | x, towards ('attacker'), freeAction | Lunge, Leg Enhancements |
 | charge / chargeAgain | | dice ('best2D6'), plus / differentTarget, ignoreEngaged, noImpact | Metabolic Boost, Leap / Lightning Dash |
 | summon / morph / respawn | unit / unit, x / x | summon: anywhere, minEnemyDist | Roachling Infestation, Cocoon, Zergling Reconstitution |
-| setToken | token, range (null = anywhere) | wholly, perModel, unoccupied | Shade, Force Field, Creep Tumor, Corrosive Bile, Faction Indicator |
+| setToken | token, range (null = anywhere) | wholly, perModel, unoccupied, minEnemyDist (M2) | Shade, Force Field, Creep Tumor, Corrosive Bile, Faction Indicator (drops: more than 10" from enemies) |
 | removeToken | token | | Corrosive Bile clean-up |
 | aura | radius, centre ('self','token','indicator'), affects (Condition + side), effects | token, los | Source of Creep, Freedom Fighters, Guardian Shield, Void Prison |
 | detection | radius | centre, token | Omega Worm, Scanner Sweep, Nerazim Farsight |
-| altEntry | kind ('unitBase', ...) | supplyCapPerRound, filter | Omega Network, Warp Conduit |
+| altEntry | kind ('unitBase', 'indicator', 'nonEntryEdge', 'deployNow') | supplyCapPerRound, filter, minEnemyDist (M2) | Omega Network, Warp Conduit, Warp In, Armed and Ready, Timing Push |
 | returnToReserves / removeSelf | | | Phase Prism / Point Defense Laser |
 | activation | mode ('set','remove') | | Crushing Grip, Orders, Zealous Round |
 | ignoreDisengage | | | Orders |
-| costMod | res, delta | floor, ability | Raiders Roll!, Psionic Link, Khalai Ingenuity |
+| costMod | res, delta | floor, ability, optional (M2: the player may decline) | Raiders Roll!, Psionic Link, Khalai Ingenuity |
 | supplyOverride | purposes ⊂ pool, control, contest, objectives, disengage, vp, all | value, delta, floor | Commander, Advanced Medic Facilities, Freedom Fighters |
-| coherency | d | | Squadron |
+| coherency | d | axis ('horizontal' or 'all', default 'all'; M2) | Squadron (horizontal 4") |
 | moveThrough | what ('units','impassable') | maxSize, noAccessPoints | Raptor Strain, Tunneling Claws |
 | targetRestriction | cannotTarget: Condition | | Point Blank |
-| abilityMod | ability, field | value, delta | A-13 Flash Grenade Launcher, Stabilizer Medpacks, Bloated Bile Ducts |
+| abilityMod | ability, field (closed list, M2: usableInReserves, count.plus, radius, target.range) | value, delta, optional (M2) | A-13 Flash Grenade Launcher, Stabilizer Medpacks, Bloated Bile Ducts, Raiders Roll! |
 | gainVP | n | | mission actions |
 | code | code (hook id) | args | anything else; one hook each, listed in hooks/<area>.json |
 
@@ -129,9 +143,12 @@ Any key outside base + required + optional is a validation error (typo guard).
 `Trigger = {event, who?, subject?, within?, attack?: 'ranged'|'closeCombat'|'any', phase?, filter?: Condition}`.
 `event`: declareRangedAttack, declareCharge, targeted, attackResolved, beforeArmourRoll, beforeEvadeRoll,
 damageSuffered, debuffReceived, chargeDistance, chargeSucceeded, activated, actionResolved, nominatedToDeploy,
-leadingModelMoveEnd, usesAbility, startOfRound, endOfRound, endOfPhase, modelsRemoved. `who` = the Unit acting
-(self default, friendly, otherFriendly, enemy, any); `subject` = the Unit it happens to (attack/charge target,
-damaged or debuffed Unit); `within` = inches from this Unit to the subject (or to the actor without subject).
+leadingModelMoveEnd, usesAbility, startOfRound, endOfRound, endOfPhase, modelsRemoved, and (M2) loseHidden (the
+subject just lost HIDDEN, any cause), arrived (the actor was just set up from Reserves; filter `entryKinds`),
+placeResolved (a PLACE just finished on the subject). `who` = the Unit acting (friendly, otherFriendly, enemy, any;
+default `self` without `subject`, `any` with `subject`, M2 convention); `subject` = the Unit it happens to
+(attack/charge target, damaged or debuffed Unit); `within` = inches from this Unit to the subject (or to the actor
+without subject). A cost `{res, n: 0}` on a card ability means the card is not exhausted (Advanced Training).
 Example: Concussive Shells `{event:'declareCharge', who:'enemy', subject:'friendly', within:8}`.
 
 ## 3. UnitDef (`units/<race>/<unit>.json`)
@@ -157,7 +174,10 @@ interface AbilityDef { id; name; type: 'active'|'passive'|'reaction'; phase: Pha
 interface TargetSpec { kind: 'self'|'activeUnit'|'friendlyUnit'|'otherFriendlyUnit'|'enemyUnit'|'anyUnit'|'point'|'tableEdge';
   range?; los?: boolean (default true with a range); unoccupied?; filter?: Condition }
 interface UpgradeDef { id; name; phase: PhaseBand; specialist?; replaces?: Id; weapon?: WeaponProfile; ability?: AbilityDef; provenance? }
-interface TokenDef { id; name; baseMm: number|null; size: number|null; displacement?; blocks?: {maxSize, removedByLarger}; stayInPlay?; text }
+interface TokenDef { id; name; baseMm: number|null; size: number|null; displacement?; blocks?: {maxSize, removedByLarger}; stayInPlay?;
+  terrain?: boolean                            // M2: a terrain piece for movement and LoS (Force Field)
+  removedBy?: 'movement'|'place'|'any'         // M2: what removes it besides Cleanup (Force Field: movement, not PLACE)
+  text }
 ```
 - One UpgradeDef per CT upgrade row (one price each); exactly one of `weapon` / `ability`. `specialist` is true
   exactly when the weapon carries SPECIALIST. `replaces` (FOR [weapon]) names a default weapon of the card.
@@ -184,7 +204,8 @@ ScoringRule kinds: supplyDestroyed | perControlledMarker {fromRound, vp:{own,neu
   | activatedMarkerCash {fromRound} | quarters {fromRound, vp, controlBonus} | markerControlled {marker, vp, fromRound}
   | claimCarriedInZone {rounds, vp} | ownMarkersNotClaimed {rounds, vp} | code {code, args?}
 interface MissionAction { id; name; phase; requires: Condition & {markerWithin, markerSides, controlled?}; effects; text }
-interface ClaimRule { fromRound; within; markerSides; maxPerUnit; dropOn[]; dropWithin }
+interface ClaimRule { fromRound; within; markerSides; maxPerUnit; dropOn[]; dropWithin;
+  phase?: Phase; controlled?: boolean }          // M2: Artefact Hunt claims in Scoring, on a marker the claimer controls
 interface DeploymentDef { id; name; scale; size: {w, h}; entryEdges: {red: Segment[]; blue: Segment[]};
   markers: {n, x, y}[]; cardVersion; provenance?; source }
 type Segment = { edge: 'N'|'S'|'E'|'W'; from; to }    // inches from the edge's low end (W->E, S->N)
@@ -208,6 +229,7 @@ interface CostTableDef { id: 'ct-2026-10-<owner>'; table: 'ct-2026-10'; date: '2
 interface HookDef { id; text; source }           // hooks/<area>.json: the named engine hooks `code` may call
 interface RulesDef { id: 'rules'; engagementRange, coherency, contestRange, hiddenRange, zoiDepth, gapClearance, tnClamp,
   maxRerollsPerDie, closeRanksMax, eliminationVP, markerDiameterMm, baseSizesMm, scales, factionTags: Sourced<...>;
+  claimTiming?: Sourced<{phase, markerMustBeControlled, order}>   // M2: mirrors ClaimRule phase/controlled
   tokens: TokenDef[]; source }                   // Sourced<T> = {value: T, source}
 ```
 CL-changed rows cite `"CL p.2"` with the CT page. CT rows for Units with no card in our sheets (Nova, Raven,
@@ -234,7 +256,10 @@ Vileling, Defiler, Zagara, High Templar, Tassadar ...) are allowed and produce a
 9. Weapons: combat phase iff range `E`; `sDice` null iff no Surge types; `BT+N` RoA and `BT` S Dice need
    `template: 'BT'`; dice match `DICE_RE`.
 10. Effects: known op, `OP_FIELDS` present, no unknown keys, enum values (char, roll, status mode, subject,
-    purposes, trigger events).
+    purposes, trigger events). M2: number-or-ValueExpr fields, `damageReduce.min`, `minEnemyDist` > 0,
+    `altEntry.kind`, `coherency.axis`, `abilityMod.field` in the closed list, `optional` boolean, Condition `slots`
+    and `entryKinds`; TokenDef keys (typo guard), `terrain`, `removedBy`; ClaimRule `phase`/`controlled`;
+    rules.json `claimTiming`.
 11. Cards: faction tags known and include the race; slots valid; creep cards `resource: null`, others the race
     resource. Missions: game length, round lists inside it, markers legal for the scale. Deployments: segments on
     the table edges, markers on the table and unique.

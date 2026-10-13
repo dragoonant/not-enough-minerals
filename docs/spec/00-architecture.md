@@ -111,6 +111,9 @@ Spec 11 `activate` = `turn.activate`; `chooseFirstActivator` = `turn.first`; spe
 A step returns `{state}` with a new decision raised by `raiseDecision`, or `{state, done}`; `done` goes to
 `turnflow.afterAction`, which opens the after-action ability window, then the next turn (or ends the Phase when
 both seats have passed). Turnflow forwards a menu pick (`move.go`, `shoot.go`...) to `moduleFor(action.type)`.
+A sub-pipeline started by another module (the attack, a reaction window, a payment) hands control back through
+the starter's optional `ModuleDef.resume(state, bundle)`, called via `registry.resumeIn(namespace)`;
+`AttackState.returnTo` names it. `ModuleDef.options(state, bundle, unitId)` takes the active Unit id at M2.
 
 ## 4. One generic mechanism per concept
 | Concept | The one mechanism | Owner | Not allowed |
@@ -171,7 +174,8 @@ Every hook point is called from exactly one place. A test must show each hook fi
 | `onModelsRemoved` | damage.removeModels | supply ledger, Shielded, Destroyed, RESPAWN |
 | `onMoveEnd` | movement.reposition | STATIONARY loss, Grass removal, detection checks |
 | `onArrive` | reserves.arrive | arrival reactions that read the entry kind |
-| `onLoseHidden` | visibility.detect | effects that end with HIDDEN |
+| `onLoseHidden` | visibility.detect / effects.setStatus | effects that end with HIDDEN; Might of the Nerazim (`loseHidden`) |
+| `onPlaceResolved` | movement.reposition (kind place) | Veil of Shadows (`placeResolved`) |
 | `poolMods`, `supplyMods` | supply.poolFor, supply.supplyFor | card changes to Pool or per-purpose Supply |
 | `canContest` | control.contest | statuses that block or allow contesting |
 | `endOfRound` | scoring step 4 | end-of-round drops, End of Round effects |
@@ -230,3 +234,33 @@ Windows PC with 40 figures (two Founders armies) and 15 terrain pieces.
     deploymentId, armies, preset})`, preset `first-battle` = spec 17 s9; `maxRounds` = Mission Game Length.
   - `rng.ts`: `state.debug.forcedDice` (test-only, section 7).
   - `view.ts`: public fields of section 5; still no redaction.
+- M2 (foundations, 2026-10-13): the planned M0 (spec) additions above landed, with these details:
+  - `types.ts`: `UnitState {id, owner, profileId, modelIds, location, activation, leadingModelId, inCoherency,
+    damage, shielded, effects, upgrades, slot, usage, summoned, noShootChargeRound}`. The per-model loadout lives
+    on `ModelState.weapons` (not on UnitState) so there is one store; `ModelState.hp` (Shield folded into the first
+    model) and `ModelState.unitId` are required. `Effect {id, source, kind: buff|debuff|flat|status|keyword|deny|mod,
+    stat?, x?, status?, kw?, weapons?, expires, bySeat, round, data?}`, `EffectExpiry` (data Durations plus
+    `untilAction`, `whileCondition`, `burrowLinked`), `MarkerState` (world `pos`, `side`), `TokenState`,
+    `DetectorArea`, `ArrivalEntry {kind: EntryKind, ref?, segment?}`, `ArrivalRow`, `Die`, `DieGroup`,
+    `AttackBatch`, `AttackPools`, `AttackState {batch, pools, step, totalDamage, queue, returnTo}`, `DraftState`,
+    `CardState`, `DebugState`, `RoundPhase`, `Colour`, `SupplyPurpose`, `UnitId`. GameState adds `units`,
+    `roundPhase`, `firstPlayer` (null = Roll-Off pending), `firstPasser`, `passed`, `active`, `activeUnit`,
+    `missionId`, `deploymentId`, `markers`, `tokens`, `detectors`, `arrivals`, `attack`, `reactionsUsed: SeatId[]`,
+    `draft`, `cards`, `debug?`. SeatState adds `colour`, `vp`, `supplyLostThisRound`, `factionCardId`. PlayerView
+    adds the public fields. RejectionCode adds the ten M2 codes.
+  - `errors.ts` (new leaf): `reject`, `isRejection`, `TodoError`, `todo`, re-exported by `registry.ts`, so services
+    never import the module table.
+  - `registry.ts`: the module table holds all eleven namespace owners; `NAMESPACES` mirrors section 3.2 and
+    `modules()` throws when a module claims a namespace that is not its own; `ModuleDef.resume?`, `resumeIn()`,
+    `ActionDone.unitId?` and `endsActivation?`, `updateUnit()`.
+  - `rng.ts`: `roll()` consumes `state.debug.forcedDice` first without advancing `state.rng`.
+  - Services: `dice.ts` (complete: clampTN, finalTN, succeeds, rollDice, test, reroll, d3, parseDice, rollExpr,
+    rollOff, pSuccess, pAtLeast, binomial, convolve, exprDistribution, capAt, mean, atLeastP), `edition.ts`
+    (complete: rule(), record lookups, allWeapons/allAbilities, tokenDef, bracketSupply, cardToWorld/worldToCard,
+    tableOf, segmentToWorld, zoneRect, markerSide), `query.ts` (signatures of section 6; bodies TODO).
+  - Stubs with frozen signatures (bodies throw TodoError): effects, squads, engage, visibility, supply, control,
+    army, code-hooks, movement, reserves, shooting, charge, melee, attack, damage, abilities, missions, scoring, plus
+    M2 entry points added to turnflow (`eligible`, `startRound`, `startPhase`, `openActivation`) and setup
+    (`setupGame`, `setupModule`, CreateGameOpts `missionId`/`deploymentId`/`armies`/`preset`). `hooks.runHook` is a
+    neutral no-op until the interpreter lands; hook point `onPlaceResolved` added to section 4.3.
+  - `setup.ts` `modelDefaults`/`gameDefaults`/`seatDefaults` fill the new required fields (placeholder game only).

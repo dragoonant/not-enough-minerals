@@ -51,9 +51,10 @@ Build what the four rules owners code against so that they only fill bodies in d
 2. registry.ts ModuleDef/namespace protocol and apply.ts dispatch per 00 s3 (verify the skeleton's; extend additively).
 3. COMPLETE services: edition.ts (bundle lookups, card-frame to world conversion), dice.ts (test(), clamp, natural 1/6, rerolls, D3, exact odds helpers), rng helpers, query.ts SIGNATURES (bodies may throw TodoError) for every number in 00 s6.
 4. Stub files with exact exported names/signatures for every module in the four owners' lists below (bodies throw TodoError) so typecheck passes; one comment line atop each naming its checklist ID groups.
-5. tests/engine/helpers.ts: loadBundle from disk, fixtures (two-unit duel state Marine squad vs Zergling squad on an open table, a deterministic decider runner), and tests/engine/dice.test.ts.
+5. Schema gaps: tools/out/m1-data-report.md lists open schema items (setToken minEnemyDist, damageReduce min, coherency axis, TokenDef terrain/removedBy, ClaimRule phase, Army Slot condition, trigger events for losing HIDDEN / arrival / PLACE resolved, the usableInReserves abilityMod field, ValueExpr in damageReduce.n). Make these ADDITIVE edits to src/data/types.ts + validate.ts + spec 20 (and the few data files that need the new fields) NOW so the owners never touch the schema.
+6. tests/engine/helpers.ts: loadBundle from disk, fixtures (two-unit duel state Marine squad vs Zergling squad on an open table, a deterministic decider runner), and tests/engine/dice.test.ts.
 Owners: ${JSON.stringify(OWNERS.map(o => ({ key: o.key, files: o.files })))}
-typecheck + test green. You own ONLY: types.ts (additive), registry.ts, apply.ts, edition.ts, dice.ts, rng.ts, query.ts, index.ts, the stubs, tests/engine/{helpers,dice}.test.ts / helpers.ts, docs/spec/00-architecture.md. In issues give one line per owner (T, M, A, B) naming the interfaces they must implement and call. ${KEEP}`,
+typecheck + test green. You own ONLY: src/data/types.ts + validate.ts (additive), data/** (only the fields above), docs/spec/20-data-schema.md, types.ts (additive), registry.ts, apply.ts, edition.ts, dice.ts, rng.ts, query.ts, index.ts, the stubs, tests/engine/{helpers,dice}.test.ts / helpers.ts, docs/spec/00-architecture.md. In issues give one line per owner (T, M, A, B) naming the interfaces they must implement and call. ${KEEP}`,
   { label: 'foundations', phase: 'Foundations', schema: RESULT, effort: 'high' })
 if (!found || !found.ok) return { found, stopped: 'foundations not ok' }
 

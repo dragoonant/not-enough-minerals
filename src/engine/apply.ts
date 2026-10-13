@@ -4,6 +4,7 @@
 // 3. a step that reports `done` goes through the controller's afterAction() (reactions, next menu, end of activation).
 // 4. the accepted action is appended to state.log (modules never append it themselves).
 import type { EditionBundle } from '../data/types'
+import { setAnsweringId } from './pending'
 import { controller, isRejection, moduleFor, reject, TodoError } from './registry'
 import type { Action, GameState, Rejection } from './types'
 
@@ -42,6 +43,7 @@ export function apply(state: GameState, bundle: EditionBundle, action: Action): 
   if (!p.options.some((o) => matchesOption(action, o.action))) return no(reject('E_NOT_LEGAL', `${action.type} is not a legal choice here.`))
   const mod = moduleFor(p.kind)
   if (!mod) return no(reject('E_UNKNOWN_KIND', `No rules module owns decision kind "${p.kind}".`))
+  setAnsweringId(p.id)
   try {
     const r = mod.resolve(state, bundle, action)
     if (isRejection(r)) return no(r)
@@ -51,5 +53,7 @@ export function apply(state: GameState, bundle: EditionBundle, action: Action): 
   } catch (e) {
     if (e instanceof TodoError) return no(reject('E_TODO', e.message))
     throw e
+  } finally {
+    setAnsweringId(null)
   }
 }

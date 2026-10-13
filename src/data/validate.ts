@@ -1,7 +1,7 @@
 // Data validator core (spec 20 section 8). Pure: no fs, no Vite. tools/validate-data.ts wraps it for the CLI and adds
 // the IP prose guard. Every check here is listed in spec 20 s8; a new check needs a line there.
 import {
-  EFFECT_OPS, HOOK_AREAS, KINDS, RACES,
+  ABILITY_MOD_FIELDS, EFFECT_OPS, ENTRY_KINDS, HOOK_AREAS, KINDS, RACES, TRIGGER_EVENTS as TRIGGER_EVENT_LIST,
   type CardDef, type CostTableDef, type DeploymentDef, type EditionBundle, type EditionsFile,
   type KeywordDef, type Kind, type MissionDef, type Race, type Resource, type RulesDef, type TokenDef, type UnitDef,
 } from './types'
@@ -21,9 +21,12 @@ const CHARS = ['speed', 'armour', 'evade', 'hp', 'size', 'shield', 'supply', 'ro
 const RESOURCES: Resource[] = ['CP', 'BM', 'PE']
 export const RACE_RESOURCE: Record<Race, Resource> = { terran: 'CP', zerg: 'BM', protoss: 'PE' }
 const DURATIONS = ['endOfRound', 'endOfPhase', 'endOfActivation', 'untilNextAction', 'thisAttack', 'thisRoll', 'permanent']
-const TRIGGER_EVENTS = ['declareRangedAttack', 'declareCharge', 'targeted', 'attackResolved', 'beforeArmourRoll', 'beforeEvadeRoll',
-  'damageSuffered', 'debuffReceived', 'chargeDistance', 'chargeSucceeded', 'activated', 'actionResolved', 'nominatedToDeploy',
-  'leadingModelMoveEnd', 'usesAbility', 'startOfRound', 'endOfRound', 'endOfPhase', 'modelsRemoved']
+/** Trigger events come from types.ts (M2 added loseHidden, arrived, placeResolved). */
+const TRIGGER_EVENTS: readonly string[] = TRIGGER_EVENT_LIST
+/** M2: altEntry kinds (unitBase = a friendly Unit base used as an Entry Edge). */
+const ALT_ENTRY_KINDS = ['unitBase', 'indicator', 'nonEntryEdge', 'deployNow']
+/** M2: keys a TokenDef may carry (typo guard). */
+const TOKEN_KEYS = ['id', 'name', 'baseMm', 'size', 'displacement', 'blocks', 'stayInPlay', 'terrain', 'removedBy', 'text']
 const TARGET_KINDS = ['self', 'activeUnit', 'friendlyUnit', 'otherFriendlyUnit', 'enemyUnit', 'anyUnit', 'point', 'tableEdge']
 const SCALES = ['skirmish', 'standard', 'grand-offensive']
 const KW_KINDS = ['weapon', 'effect', 'defensive', 'status', 'ability', 'term']
@@ -52,14 +55,14 @@ const SUBJECTS = ['self', 'target', 'attacker', 'triggerUnit', 'tokenArea', 'all
 export const OP_OPTIONAL: Record<(typeof EFFECT_OPS)[number], string[]> = {
   grantKeyword: [], denyKeyword: [], buff: [], debuff: [], modify: [], setChar: ['value', 'min', 'max', 'unmodifiable'], rollMod: [],
   weaponMod: ['addSurgeTypes', 'sDice'], status: [], denyStatus: [], cleanse: [], heal: [], nonLethal: [],
-  hits: ['token', 'radius', 'perToken'], impact: [], impactBonus: ['dicePerModel', 'hitMod'], damageReduce: [], damageCap: [],
+  hits: ['token', 'radius', 'perToken'], impact: [], impactBonus: ['dicePerModel', 'hitMod'], damageReduce: ['min'], damageCap: [],
   removeDice: ['upTo', 'pool'], canEvade: [],
   place: ['from', 'token', 'minEnemyDist', 'notInEngagement', 'allowEngage', 'optional', 'wholly'], move: ['x', 'towards', 'freeAction'],
   charge: ['dice', 'plus'], chargeAgain: ['differentTarget', 'ignoreEngaged', 'noImpact'], summon: ['anywhere', 'minEnemyDist'], morph: [],
-  respawn: [], setToken: ['wholly', 'perModel', 'unoccupied'], aura: ['token', 'los'], detection: ['centre', 'token'],
-  altEntry: ['supplyCapPerRound', 'filter'], returnToReserves: [], removeSelf: [], removeToken: [], activation: [], ignoreDisengage: [],
-  costMod: ['floor', 'ability'], supplyOverride: ['value', 'delta', 'floor'], coherency: [], moveThrough: ['maxSize', 'noAccessPoints'],
-  targetRestriction: [], abilityMod: ['value', 'delta'], gainVP: [], code: ['args'],
+  respawn: [], setToken: ['wholly', 'perModel', 'unoccupied', 'minEnemyDist'], aura: ['token', 'los'], detection: ['centre', 'token'],
+  altEntry: ['supplyCapPerRound', 'filter', 'minEnemyDist'], returnToReserves: [], removeSelf: [], removeToken: [], activation: [], ignoreDisengage: [],
+  costMod: ['floor', 'ability', 'optional'], supplyOverride: ['value', 'delta', 'floor'], coherency: ['axis'], moveThrough: ['maxSize', 'noAccessPoints'],
+  targetRestriction: [], abilityMod: ['value', 'delta', 'optional'], gainVP: [], code: ['args'],
 }
 const EFFECT_BASE_KEYS = ['op', 'when', 'duration', 'to', 'at', 'weapons', 'unitFilter']
 const ROLLS = ['hit', 'armour', 'evade', 'impactHit', 'charge']
@@ -69,6 +72,11 @@ const isObj = (v: unknown): v is Record<string, unknown> => typeof v === 'object
 const nonEmpty = (v: unknown): v is string => typeof v === 'string' && v.trim() !== ''
 const isInt = (v: unknown, min = 0): v is number => typeof v === 'number' && Number.isInteger(v) && v >= min
 const isTN = (v: unknown) => isInt(v, 2) && (v as number) <= 6
+const VALUE_COUNTS = ['ownModelsWithinTarget', 'modelsInUnit', 'tokensWithin']
+/** M2: a number, or a ValueExpr {count, d?, plus?, token?}. */
+const isNumOrExpr = (v: unknown): boolean => (typeof v === 'number' && v >= 0)
+  || (isObj(v) && VALUE_COUNTS.includes(v.count as string) && Object.keys(v).every((k) => ['count', 'd', 'plus', 'token'].includes(k))
+    && [v.d, v.plus].every((n) => n === undefined || typeof n === 'number'))
 const str = (v: unknown) => JSON.stringify(v)
 
 type Err = (path: string, message: string, warning?: boolean) => void
@@ -134,6 +142,9 @@ function checkCondition(c: Ctx, err: Err, path: string, cond: unknown, owner?: O
   if (cond.attack !== undefined && !['ranged', 'closeCombat'].includes(cond.attack as string)) err(`${path}.attack`, 'must be ranged | closeCombat')
   if (cond.first !== undefined && !['activation', 'round'].includes(cond.first as string)) err(`${path}.first`, 'must be activation | round')
   if (cond.code !== undefined) checkCode(c, err, `${path}.code`, cond.code)
+  if (cond.slots !== undefined && (!Array.isArray(cond.slots) || cond.slots.some((x) => !SLOTS.includes(x)))) err(`${path}.slots`, `must be a subset of ${SLOTS.join(', ')}`)
+  if (cond.entryKinds !== undefined && (!Array.isArray(cond.entryKinds) || cond.entryKinds.some((x) => !(ENTRY_KINDS as readonly string[]).includes(x))))
+    err(`${path}.entryKinds`, `must be a subset of ${ENTRY_KINDS.join(', ')}`)
   if (Array.isArray(cond.units)) cond.units.forEach((u, i) => { if (!c.units.has(u as string)) err(`${path}.units[${i}]`, `unknown unit "${u}"`) })
   if (owner) {
     for (const k of ['targetSelectedBy', 'attackerSelectedBy', 'fromAbility'] as const)
@@ -203,6 +214,18 @@ function checkEffect(c: Ctx, err: Err, path: string, e: unknown, owner: Owner): 
   if (op === 'targetRestriction' && e.cannotTarget !== undefined) checkCondition(c, err, `${path}.cannotTarget`, e.cannotTarget, owner)
   if (op === 'abilityMod' && e.ability !== undefined && !owner.abilities.has(e.ability as string)) err(`${path}.ability`, `unknown ability "${e.ability}" on this card`)
   if (op === 'code') checkCode(c, err, `${path}.code`, e.code)
+  // M2 additions (spec 20 s2.2)
+  if ((op === 'heal' || op === 'nonLethal') && e.x !== undefined && !isNumOrExpr(e.x)) err(`${path}.x`, 'must be a number or a ValueExpr')
+  if (op === 'damageReduce' && e.n !== undefined && !isNumOrExpr(e.n)) err(`${path}.n`, 'must be a number or a ValueExpr')
+  if (op === 'damageReduce' && e.min !== undefined && !isInt(e.min)) err(`${path}.min`, 'must be an integer >= 0')
+  if ((op === 'setToken' || op === 'altEntry' || op === 'place' || op === 'summon') && e.minEnemyDist !== undefined
+    && !(typeof e.minEnemyDist === 'number' && e.minEnemyDist > 0)) err(`${path}.minEnemyDist`, 'must be inches > 0')
+  if (op === 'altEntry' && !ALT_ENTRY_KINDS.includes(e.kind as string)) err(`${path}.kind`, `must be one of ${ALT_ENTRY_KINDS.join(', ')}`)
+  if (op === 'altEntry' && e.filter !== undefined) checkCondition(c, err, `${path}.filter`, e.filter, owner)
+  if (op === 'coherency' && e.axis !== undefined && !['horizontal', 'all'].includes(e.axis as string)) err(`${path}.axis`, 'must be horizontal | all')
+  if (op === 'coherency' && !(typeof e.d === 'number' && e.d > 0)) err(`${path}.d`, 'must be inches > 0')
+  if (op === 'abilityMod' && !(ABILITY_MOD_FIELDS as readonly string[]).includes(e.field as string)) err(`${path}.field`, `must be one of ${ABILITY_MOD_FIELDS.join(', ')}`)
+  if ((op === 'abilityMod' || op === 'costMod') && e.optional !== undefined && typeof e.optional !== 'boolean') err(`${path}.optional`, 'must be a boolean')
 }
 
 function checkAbility(c: Ctx, err: Err, path: string, a: unknown, owner: Owner): void {
@@ -296,6 +319,9 @@ function checkTokens(err: Err, path: string, tokens: unknown, ids: Set<string>):
     if (t.baseMm !== null && !isInt(t.baseMm, 1)) err(`${p}.baseMm`, 'must be mm > 0 or null')
     if (t.size !== null && !isInt(t.size)) err(`${p}.size`, 'must be an integer or null')
     if (!nonEmpty(t.text)) err(`${p}.text`, 'is required')
+    for (const k of Object.keys(t)) if (!TOKEN_KEYS.includes(k)) err(`${p}.${k}`, `token has no field "${k}" (spec 20 s3)`)
+    if (t.terrain !== undefined && typeof t.terrain !== 'boolean') err(`${p}.terrain`, 'must be a boolean')
+    if (t.removedBy !== undefined && !['movement', 'place', 'any'].includes(t.removedBy as string)) err(`${p}.removedBy`, 'must be movement | place | any')
   })
 }
 
@@ -442,6 +468,14 @@ function checkMission(c: Ctx, err: Err, m: MissionDef & Record<string, unknown>)
     if (!nonEmpty(a.text)) err(`actions[${i}].text`, 'is required')
     checkEffects(c, err, `actions[${i}].effects`, a.effects, owner)
   })
+  if (m.claim !== undefined) {
+    const cl = m.claim as unknown
+    if (!isObj(cl)) err('claim', 'must be an object')
+    else {
+      if (cl.phase !== undefined && !PHASES.includes(cl.phase as string)) err('claim.phase', 'bad phase')
+      if (cl.controlled !== undefined && typeof cl.controlled !== 'boolean') err('claim.controlled', 'must be a boolean')
+    }
+  }
   if (!nonEmpty(m.text)) err('text', 'is required (our own summary)')
   if (!nonEmpty(m.cardVersion)) err('cardVersion', 'is required')
 }
@@ -500,6 +534,12 @@ function checkRules(err: Err, r: unknown): void {
   }
   const tokenIds = new Set<string>()
   checkTokens(err, 'tokens', r.tokens, tokenIds)
+  if (r.claimTiming !== undefined) {
+    const v = isObj(r.claimTiming) ? r.claimTiming.value : undefined
+    if (!isObj(v) || !PHASES.includes(v.phase as string) || typeof v.markerMustBeControlled !== 'boolean')
+      err('claimTiming', 'must be {value: {phase, markerMustBeControlled, order}, source}')
+    else checkSource(err, (r.claimTiming as Record<string, unknown>).source, 'claimTiming.source')
+  }
   const ft = isObj(r.factionTags) ? r.factionTags.value : undefined
   if (isObj(ft)) for (const k of Object.keys(ft)) if (!ID_RE.test(k)) err(`factionTags.${k}`, 'must be kebab-case')
 }

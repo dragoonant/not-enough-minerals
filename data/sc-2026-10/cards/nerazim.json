@@ -24,11 +24,8 @@
       "type": "reaction",
       "phase": "any",
       "trigger": {
-        "event": "actionResolved",
-        "who": "friendly",
-        "filter": {
-          "code": "lost-hidden-status"
-        }
+        "event": "loseHidden",
+        "subject": "friendly"
       },
       "effects": [
         {

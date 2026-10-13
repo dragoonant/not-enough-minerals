@@ -127,14 +127,16 @@
           "op": "abilityMod",
           "ability": "stimpack",
           "field": "usableInReserves",
-          "value": true
+          "value": true,
+          "optional": true
         },
         {
           "op": "costMod",
           "res": "CP",
           "delta": -1,
           "floor": 0,
-          "ability": "stimpack"
+          "ability": "stimpack",
+          "optional": true
         }
       ],
       "text": "May stim on the way in from Reserves for 1 CP less."

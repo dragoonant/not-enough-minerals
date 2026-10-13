@@ -54,14 +54,8 @@
       "effects": [
         {
           "op": "altEntry",
-          "kind": "nonEntryEdge"
-        },
-        {
-          "op": "code",
-          "code": "forward-deploy-clearance",
-          "args": {
-            "minEnemyDist": 10
-          }
+          "kind": "nonEntryEdge",
+          "minEnemyDist": 10
         },
         {
           "op": "code",

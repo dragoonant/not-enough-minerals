@@ -44,10 +44,10 @@
       "type": "reaction",
       "phase": "any",
       "trigger": {
-        "event": "nominatedToDeploy",
+        "event": "arrived",
         "who": "enemy",
         "filter": {
-          "code": "arrival-off-entry-edge"
+          "entryKinds": ["nonEntryEdge", "indicator", "place"]
         }
       },
       "effects": [

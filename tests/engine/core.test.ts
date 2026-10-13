@@ -22,8 +22,8 @@ describe('engine core (M0 skeleton)', () => {
   it('SETUP-001 the demo table is a 36 in square skirmish table with models on round bases', () => {
     const g = createDemoGame()
     expect(g.scenario.table).toEqual({ w: 36, d: 36 })
-    expect(TABLES.standard).toEqual({ w: 36, d: 54 })
-    expect(createGame(bundle, { table: 'standard' }).scenario.table).toEqual({ w: 36, d: 54 })
+    expect(TABLES.standard).toEqual({ w: 54, d: 36 })
+    expect(createGame(bundle, { table: 'standard' }).scenario.table).toEqual({ w: 54, d: 36 })
     expect(new Set(Object.values(g.models).map((m) => m.base))).toEqual(new Set([25, 32, 40, 50]))
     expect(legalActions(g).length).toBeGreaterThan(0)
   })

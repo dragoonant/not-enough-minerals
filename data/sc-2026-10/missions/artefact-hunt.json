@@ -43,7 +43,9 @@
     "outmassedEngaged",
     "leftTable"
    ],
-   "dropWithin": 2
+   "dropWithin": 2,
+   "phase": "scoring",
+   "controlled": true
   },
   "text": "From round 2 Units can lift held markers and carry them; in round 5 carriers inside their own zone score 4 VP and your uncarried colour markers score 2 VP each.",
   "cardVersion": "1.06.26",
@@ -93,7 +95,9 @@
     "outmassedEngaged",
     "leftTable"
    ],
-   "dropWithin": 2
+   "dropWithin": 2,
+   "phase": "scoring",
+   "controlled": true
   },
   "text": "From round 2 Units can lift held markers and carry them; in round 5 carriers inside their own zone score 3 VP and your uncarried colour markers score 1 VP each.",
   "cardVersion": "1.06.26",
