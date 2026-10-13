@@ -14,7 +14,8 @@
     "e2e": "playwright test",
     "sim": "tsx tools/sim.ts",
     "bench:ai": "tsx tools/ai-bench.ts",
-    "validate:data": "tsx tools/validate-data.ts"
+    "validate:data": "tsx tools/validate-data.ts",
+    "models:optimize": "node tools/models/optimize.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.8",

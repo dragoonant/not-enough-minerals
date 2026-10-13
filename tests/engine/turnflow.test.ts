@@ -10,9 +10,9 @@ import { legalActions } from '../../src/engine/pending'
 import { FIRST_PLAYER_LOCK } from '../../src/engine/code-hooks'
 import { hasStatus } from '../../src/engine/effects'
 import type { Action, GameState, RoundPhase } from '../../src/engine/types'
-import { bundle, duelState } from './helpers'
+import { bundle, duelState, squad } from './helpers'
 
-const ctl = vi.hoisted(() => ({ engaged: new Set<string>(), canArrive: true, scoringCalls: 0, log: [] as string[], windowRaises: false }))
+const ctl = vi.hoisted(() => ({ engaged: new Set<string>(), canArrive: true, scoringCalls: 0, log: [] as string[], windowRaises: false, stampUnit: false }))
 // Menu providers owned by other people are silenced: only the fake movement module offers an entry.
 const quiet = vi.hoisted(() => (name: string) => async (orig: () => Promise<Record<string, unknown>>) => {
   const m = await orig()
@@ -50,7 +50,7 @@ vi.mock('../../src/engine/movement', async (orig) => {
       ...m.movement,
       options: (s: GameState, _b: unknown, unitId: string) => {
         const u = s.units[unitId]
-        return u ? [{ id: 'go', label: 'Go', action: { type: 'move.go', decisionId: '', seat: u.owner } }] : []
+        return u ? [{ id: 'go', label: 'Go', action: { type: 'move.go', decisionId: '', seat: u.owner, ...(ctl.stampUnit ? { unitId } : {}) } }] : []
       },
       resolve: (s: GameState, _b: unknown, a: Action) => { ctl.log.push(`resolve:${a['unitId']}`); return { state: s, done: { modelId: a['unitId'], unitId: a['unitId'], type: 'move.go', triggers: [] } } },
     },
@@ -58,7 +58,7 @@ vi.mock('../../src/engine/movement', async (orig) => {
 })
 
 const b = bundle()
-beforeEach(() => { ctl.engaged.clear(); ctl.canArrive = true; ctl.scoringCalls = 0; ctl.log = [] })
+beforeEach(() => { ctl.engaged.clear(); ctl.canArrive = true; ctl.stampUnit = false; ctl.scoringCalls = 0; ctl.log = [] })
 
 /** The duel with every unit's marker set as given and the holder named; the caller starts the Phase. */
 function base(opts: { holder?: string; markers?: Record<string, 'movement' | 'assault' | null> } = {}): GameState {
@@ -245,5 +245,30 @@ describe('turnflow (Round, Phases, activation, Pass)', () => {
     let s = step(startPhase(locked, b, 'movement'), first('B'))
     s = step(s, pass)
     expect(s.firstPlayer).toBe('A')
+  })
+
+  it('ACT-002 every turn.activate option id is unique across squads, so choosing by id activates the squad it names', () => {
+    ctl.stampUnit = true // like the real modules: the entry already carries its unitId and a bare id ('go')
+    const two = base()
+    const extra = squad(b, { id: 'A-marines-2', owner: 'A', profileId: 'marine', models: 3, at: { x: 8, z: 6 } })
+    const s0: GameState = {
+      ...two,
+      units: { ...two.units, [extra.unit.id]: { ...extra.unit, activation: null } },
+      models: { ...two.models, ...Object.fromEntries(extra.models.map((m) => [m.id, m])) },
+    }
+    const s = step(startPhase(s0, b, 'movement'), first('A'))
+    expect(s.pending.kind).toBe('turn.activate')
+    const ids = s.pending.options.map((o) => o.id)
+    expect(new Set(ids).size).toBe(ids.length)
+    expect(ids).toEqual(expect.arrayContaining(['A-marines:go', 'A-marines-2:go', 'A-marines:hold', 'A-marines-2:hold']))
+    // Choosing by id answers for the named squad, not the first squad with that entry.
+    const opt = s.pending.options.find((o) => o.id === 'A-marines-2:go')!
+    expect(opt.action['unitId']).toBe('A-marines-2')
+    const r = apply(s, b, opt.action)
+    expect(r.ok).toBe(true)
+    if (r.ok) {
+      expect(r.state.units['A-marines-2']!.activation).toBe('movement')
+      expect(r.state.units['A-marines']!.activation).toBeNull()
+    }
   })
 })

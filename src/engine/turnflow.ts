@@ -91,8 +91,13 @@ export function eligible(state: GameState, bundle: EditionBundle, unitId: UnitId
 /** The unit's menu: every module's entries (stamped with the unit) plus Hold in Phases 1-2 for a unit on the table. */
 function unitMenu(state: GameState, bundle: EditionBundle, unitId: UnitId, phase: RoundPhase): DecisionOption[] {
   const u = state.units[unitId]!
-  const stamped = allOptions(state, bundle, unitId).map((o) =>
-    ('unitId' in o.action ? o : { ...o, id: `${unitId}:${o.id}`, action: { ...o.action, unitId } }))
+  // ACT-ID: every entry's id carries the unit id, so ids never repeat across squads (modules name their entries 'shoot',
+  // 'charge', 'deploy', ... per unit) and choosing by id answers for the right squad.
+  const prefix = `${unitId}:`
+  const stamped = allOptions(state, bundle, unitId).map((o) => {
+    const id = o.id.startsWith(prefix) ? o.id : prefix + o.id
+    return 'unitId' in o.action ? { ...o, id } : { ...o, id, action: { ...o.action, unitId } }
+  })
   if ((phase === 'movement' || phase === 'assault') && u.location === 'table') {
     stamped.push(option(`${unitId}:hold`, 'Hold', 'turn.hold', { unitId }, u.owner))
   }

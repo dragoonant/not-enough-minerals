@@ -10,8 +10,8 @@ import {
 import { confirmedAction } from './preview'
 import { draft, useDraft } from './store'
 
-/** Answer with an option's own action. Never by option id: turn.activate ids repeat across squads (every Hold is 'hold'), so
- *  game.choose(id) could activate the wrong one. */
+/** Answer with an option's own action (it carries every field the engine checks). turn.activate ids are unique per squad
+ *  (`<unitId>:<entry>`, engine ACT-002), so game.choose(id) is safe too, but parameterised options need the action. */
 export const answerOption = (o: DecisionOption): ClientRejection | null => {
   const { type, decisionId: _d, seat: _s, ...rest } = o.action
   void _d; void _s

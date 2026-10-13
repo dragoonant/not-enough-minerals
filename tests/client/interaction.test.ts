@@ -252,7 +252,7 @@ describe('I-FLOW a real game answered through the interaction helpers', () => {
     expect(useGameStore.getState().state!.pending.id).toBe(p.id)
   })
 
-  it('INT-042 turn.activate option ids repeat across squads, so answers go by action: the second squad really is the one activated', () => {
+  it('INT-042 turn.activate option ids are unique across squads, so choosing by id (or answering by action) activates the second squad', () => {
     useSettingsStore.getState().set({ speed: 0 }, false)
     expect(newGame({ seed: 'ix-dup' })).toBeNull()
     for (const seat of useGameStore.getState().seatOrder) setController(seat, 'human')
@@ -265,9 +265,10 @@ describe('I-FLOW a real game answered through the interaction helpers', () => {
     const menu = activationMenu(p)
     expect(menu.units.length).toBeGreaterThan(1)
     const ids = p.options.map((o) => o.id)
-    expect(new Set(ids).size, 'engine option ids are not unique here').toBeLessThan(ids.length)
+    expect(new Set(ids).size, 'engine option ids repeat').toBe(ids.length)
     const second = menu.units[1]!
-    expect(answerOption(second.options[0]!)).toBeNull()
+    expect(second.options.every((o) => o.id.startsWith(`${second.unitId}:`))).toBe(true)
+    expect(game.choose(second.options[0]!.id)).toBeNull()
     expect(useGameStore.getState().state!.events.some((e) => (e as { unitId?: string }).unitId === second.unitId)).toBe(true)
   })
 

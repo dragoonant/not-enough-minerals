@@ -1,14 +1,22 @@
 {
   "adept": { "file": "adept.glb", "height": 2.02, "yaw": 0 },
+  "artanis": { "file": "artanis.glb", "height": 2.32, "yaw": 0 },
   "goliath": { "file": "goliath.glb", "height": 3.12, "yaw": 0 },
+  "hydralisk": { "file": "hydralisk.glb", "height": 2.274, "yaw": 0 },
+  "immortal": { "file": "immortal.glb", "height": 2.79, "yaw": 0 },
   "jim-raynor": { "file": "jim-raynor.glb", "height": 1.82, "yaw": 0 },
   "kerrigan": { "file": "kerrigan.glb", "height": 2.02, "yaw": 0 },
   "marauder": { "file": "marauder.glb", "height": 2.02, "yaw": 0 },
   "marine": { "file": "marine.glb", "height": 1.62, "yaw": 0 },
-  "queen": { "file": "queen.glb", "height": 2.513, "yaw": 0 },
+  "praetor-guard": { "file": "praetor-guard.glb", "height": 2.12, "yaw": 0 },
+  "queen": { "file": "queen.glb", "height": 1.969, "yaw": 0 },
+  "ravager": { "file": "ravager.glb", "height": 2.52, "yaw": 0 },
+  "raynors-raider": { "file": "raynors-raider.glb", "height": 1.62, "yaw": 0 },
   "roach": { "file": "roach.glb", "height": 2.12, "yaw": 0 },
   "sentry": { "file": "sentry.glb", "height": 2.32, "yaw": 0 },
+  "siege-tank": { "file": "siege-tank.glb", "height": 2.62, "yaw": 0 },
   "stalker": { "file": "stalker.glb", "height": 1.818, "yaw": 0 },
   "zealot": { "file": "zealot.glb", "height": 2.02, "yaw": 0 },
+  "zeratul": { "file": "zeratul.glb", "height": 2.02, "yaw": 0 },
   "zergling": { "file": "zergling.glb", "height": 1.52, "yaw": 0 }
 }
