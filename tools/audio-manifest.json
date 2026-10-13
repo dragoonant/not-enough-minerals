@@ -1,0 +1,37 @@
+{
+  "_comment": "Audio manifest. All prompts are original wording describing mood and instrumentation only; no existing game, film, composer or track is named or imitated. Music: `npx tsx tools/gen-music.ts` writes public/audio/music/<id>.mp3 (idempotent: existing files are skipped). SFX/voice items are added later.",
+  "voice": { "voiceId": "SOYHLrjzK2X1ezoPC6cr", "voiceName": "Harry - Fierce Warrior", "modelId": "eleven_flash_v2_5" },
+  "music": { "endpoint": "/v1/music", "modelId": "music_v1", "forceInstrumental": true, "outputFormat": "mp3_44100_128" },
+  "items": [
+    {
+      "id": "title",
+      "kind": "music",
+      "group": "music",
+      "prompt": "Original instrumental score for a gritty industrial science-fiction war on a distant frontier colony world. No vocals, no choir, no singing. Title theme, about 90 BPM, minor key: opens with a lonely twangy baritone electric guitar with slide and spring reverb, like a frontier western at dusk, over a low organic pulsing bass that breathes like something alive underground; slowly builds with heavy industrial metal percussion, clanking machinery hits and distorted synth bass; cold shimmering ethereal synth pads float above; ends on a held dark chord. Cinematic, ominous, determined.",
+      "durationSeconds": 60,
+      "loop": true
+    },
+    {
+      "id": "battle-1",
+      "kind": "music",
+      "group": "music",
+      "prompt": "Original instrumental combat score for a gritty industrial science-fiction war on a frontier colony world. No vocals, no choir, no singing. Battle loop, steady 120 BPM, minor key, constant mid-high intensity from start to finish: driving gritty overdriven western-style electric guitar riff and palm-muted chugs, pounding industrial drums and metallic anvil hits, a low wet organic pulsing synth bass that throbs like a living swarm, and glassy ethereal synth pads and arpeggios shimmering on top. No intro build-up and no fade-out ending: starts and ends at the same energy so it loops seamlessly.",
+      "durationSeconds": 120,
+      "loop": true
+    },
+    {
+      "id": "victory",
+      "kind": "music",
+      "group": "music",
+      "prompt": "Original instrumental victory stinger for a gritty industrial science-fiction war game. No vocals, no choir. Short triumphant rising phrase: bold twangy western electric guitar and heavy industrial drum hits climbing to a big major resolution, bright shimmering synth pad swell, ending on one strong final chord and a decisive drum hit that rings out.",
+      "durationSeconds": 10
+    },
+    {
+      "id": "defeat",
+      "kind": "music",
+      "group": "music",
+      "prompt": "Original instrumental defeat stinger for a gritty industrial science-fiction war game. No vocals, no choir. Short somber falling phrase: a lonely detuned slide guitar descending in a minor key, a slow tolling metallic anvil, a low organic pulsing bass that slows down and dies away, cold dark synth drone fading to silence.",
+      "durationSeconds": 10
+    }
+  ]
+}

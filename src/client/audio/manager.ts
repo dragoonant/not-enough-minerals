@@ -1,7 +1,11 @@
 // Web Audio manager. Buses: sfx -> master; music -> master (MUSIC_DB under sfx at equal sliders). Unlocked on the first
 // click, tap or key. Volumes and mute persist in localStorage (try/catch). Throttling: retrigger gap and a concurrency cap
-// per sound id, plus a little random pitch jitter. All sounds are synthesized (synth.ts); no files are loaded.
-import { RECIPES, MoodPlayer, type Mood } from './synth'
+// per sound id, plus a little random pitch jitter. SFX are synthesized (synth.ts). Music plays the generated files
+// (music.ts: title, battle loop, victory/defeat stingers) with 1.8 s crossfades; a missing file falls back to the synth mood.
+import { RECIPES, MoodPlayer } from './synth'
+import { MUSIC_TRACKS, MusicTrack, type MusicScene } from './music'
+
+export type Mood = MusicScene
 
 export const MUSIC_DB = -14
 const dbToGain = (db: number): number => Math.pow(10, db / 20)
@@ -46,8 +50,13 @@ export class AudioManager {
   private mood: Mood | null = null
   private wantMood: Mood | null = null
   private players: MoodPlayer[] = []
+  private track: MusicTrack | null = null
+  private missingMusic = new Set<string>()
   private timer: ReturnType<typeof setInterval> | null = null
-  readonly stats = { played: {} as Record<string, number>, mood: '' as string }
+  readonly stats = { played: {} as Record<string, number>, mood: '' as string, track: '' as string }
+
+  /** False once the scene's music file failed to load (callers then use the synth jingle instead). */
+  hasMusicFile(m: Mood): boolean { return !this.missingMusic.has(MUSIC_TRACKS[m].id) }
 
   get isUnlocked(): boolean { return this.unlocked }
   get currentMood(): Mood | null { return this.mood }
@@ -123,15 +132,35 @@ export class AudioManager {
     setTimeout(() => { th.active = Math.max(0, th.active - 1) }, 400 + (opts.delayMs ?? 0))
   }
 
-  /** Crossfades to a mood (1.8 s). Remembered until audio unlocks. */
+  /** Crossfades to a music scene (1.8 s): calm = title theme, battle = battle loop, victory/defeat = one-shot
+   *  stingers. Remembered until audio unlocks. */
   setMood(m: Mood | null): void {
     this.wantMood = m
     if (!this.ctx || !this.musicBus || !this.unlocked || m === this.mood) return
     for (const old of this.players) old.fadeOut(CROSSFADE_S)
     this.players = []
+    this.track?.fadeOut(CROSSFADE_S)
+    this.track = null
     this.mood = m
     this.stats.mood = m ?? ''
+    this.stats.track = ''
     if (!m) return
+    const spec = MUSIC_TRACKS[m]
+    if (!this.missingMusic.has(spec.id)) {
+      const t = new MusicTrack(this.ctx, this.musicBus, spec.id, spec.loop, CROSSFADE_S, () => {
+        this.missingMusic.add(spec.id)
+        if (this.track === t) { this.track = null; this.stats.track = ''; this.startSynth(m) }
+      })
+      this.track = t
+      this.stats.track = spec.id
+      return
+    }
+    this.startSynth(m)
+  }
+
+  private startSynth(m: Mood): void {
+    if (!this.ctx || !this.musicBus || this.mood !== m) return
+    if (m !== 'calm' && m !== 'battle') return // stingers fall back to the synth jingle SFX instead
     this.players.push(new MoodPlayer(this.ctx, this.musicBus, m, CROSSFADE_S))
     if (!this.timer) this.timer = setInterval(() => this.pump(), 120)
   }

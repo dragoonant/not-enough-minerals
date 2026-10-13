@@ -1,4 +1,5 @@
-// Mount once inside GameScreen: unlocks audio on first click, plays sounds from presentation cues, sets the music mood,
+// Mount once inside GameScreen: unlocks audio on first click, plays sounds from presentation cues, sets the music scene
+// (battle loop in game, victory/defeat stinger on game over, title theme again on leaving),
 // and shows the sound toggle + volume popover (data-testid audio-toggle).
 import { useEffect, useState } from 'react'
 import { onCue } from '../presentation/director'
@@ -18,10 +19,14 @@ export function AudioHost() {
     audio.setMood('battle')
     const offSettings = audio.subscribe(setS)
     const offCue = onCue((cue, beat) => {
-      if (cue.kind === 'banner' && cue.tone === 'gameOver') audio.setMood('calm')
       let humanWon = false
-      if (cue.kind === 'banner' && cue.tone === 'gameOver' && cue.winner) humanWon = useGameStore.getState().controllers[cue.winner] === 'human'
-      for (const c of soundsForCue(cue, beat.durationMs, humanWon)) audio.play(c.id, { volume: c.volume, delayMs: c.delayMs })
+      const gameOver = cue.kind === 'banner' && cue.tone === 'gameOver'
+      if (gameOver && cue.winner) humanWon = useGameStore.getState().controllers[cue.winner] === 'human'
+      const sting = humanWon ? 'victory' : 'defeat'
+      // The music stinger replaces the synth jingle unless its file failed to load.
+      const fileSting = gameOver && audio.hasMusicFile(sting)
+      if (gameOver) audio.setMood(sting)
+      for (const c of soundsForCue(cue, beat.durationMs, humanWon)) if (!(fileSting && c.id === sting)) audio.play(c.id, { volume: c.volume, delayMs: c.delayMs })
     })
     return () => { offCue(); offSettings(); audio.setMood('calm') }
   }, [])
