@@ -151,3 +151,128 @@ the figure height ... short chunky stubby legs", then one in-chat edit; the edit
 - Extraction without a download: draw the `<img>` to a canvas, open a small local receiver page with
   `window.open` from a real click, and `postMessage` the data URLs to it (a direct `fetch` to localhost
   is blocked on gemini.google.com).
+
+---
+
+## Batch 2 (Gemini, 2026-10-13)
+
+The exact Gemini text for batch 2 was not logged at the time. The prompts below restate it in our own
+words from the kept images and the batch-1 lessons (fresh chat with "the head is the biggest part" up
+front, then subject-swap edits). Use them as the starting wording for any redo.
+
+| Slug | Base | Result | Measured on the image |
+|---|---|---|---|
+| raynor (redo) | 40mm | ship (borderline) | bare head ~37%, ~2.7 heads |
+| marauder | 40mm | ship | helmet ~33%, ~3 heads by the strict Terran ruler |
+| medic | 32mm | concept ok, mesh on the veto list | helmet ~37%, ~2.7 heads |
+| goliath | 60mm | ship | cockpit body ~45% (the SD "head") |
+| roach | 40mm | ship | carapace dominates, stubby legs |
+
+### raynor (redo, fresh Terran chat)
+> Generate an image: a super-deformed SD Gundam style model kit figure (Bandai MGSD line) of a veteran
+> hero commander in heavy powered armour with no helmet. The head is the biggest part of the figure: a big
+> bare head with short messy brown hair, stubble and a grim, confident look, as wide as the whole span
+> across both shoulder pads and as tall as the torso and legs combined. Copy the head-to-body ratio of the
+> FIRST image (style and proportion reference only, do not copy its subject or colours); use the SECOND
+> image only for armour and weapon shapes. Small torso, ornate oversized shoulder pads, tiny stubby legs
+> with big chunky boots, short arms with big fists holding one long oversized rifle with an under-barrel
+> bayonet, and a big revolver pistol. Steel blue armour plates and dark gunmetal joints. Crisp Master Grade
+> panel lines. No lettering or text on the model, no logos, no emblems. Full body, neutral standing pose,
+> front three-quarter view, on a plain round black base. Plain white background, even soft lighting.
+> Exactly ONE single figure, centred.
+
+### marauder (edit in the same chat)
+> Generate an image: start from the previous image and keep the exact same MGSD style, huge-head
+> proportions, steel blue and gunmetal palette, round black base and white background. Change the subject
+> to a heavy assault trooper in even bulkier armour with a huge rounded helmet and a narrow dark visor, a
+> large backpack with hoses, and one stubby oversized grenade launcher built onto each forearm instead of
+> a hand-held weapon. Use the attached image only for armour and launcher shapes. Rank-and-file trooper
+> for a 40mm base. No lettering or text, no logos, no emblems. Exactly ONE single figure, centred.
+
+### medic (edit in the same chat)
+> Generate an image: start from the previous image and keep the same MGSD style, huge rounded helmet with
+> a wide visor, tiny stubby legs and chunky boots, round black base and white background. Change the
+> subject to a field medic in lighter armour: a compact backpack with a hose, an injector built into one
+> wrist and a small hand-held injector in the other hand, no gun. Use the attached image only for the
+> armour and gear shapes. Small 32mm trooper. No lettering, crosses, text, logos or emblems. Exactly ONE
+> single figure, centred.
+
+### goliath (edit in the same chat)
+> Generate an image: start from the previous image and keep the same MGSD style, steel blue and gunmetal
+> palette, round black base and white background. Change the subject to a two-legged combat walker for a
+> 60mm base: an enormous boxy cockpit body with an amber glass canopy (the cockpit is the SD "head", about
+> 45% of the figure height), one twin autocannon on each arm, a missile pod on each shoulder, and short,
+> thick, stubby jointed legs with big flat feet. Use the attached image only for the walker's part shapes.
+> No lettering, numbers, text or logos. Exactly ONE single figure, centred.
+
+### roach (edit in the Zerg chat, from the zergling image)
+> Generate an image: start from the previous image (the SD swarm beast) and keep the same MGSD style,
+> chunky toy-like shapes, violet carapace and pale bone palette, round black base and white background.
+> Change the subject to a squat armoured burrowing beast for a 40mm base: a huge domed shell carapace that
+> makes up most of the figure, a low wide head with bone tusks, a row of bone spines along the back, two
+> short scythe forearms and short stubby clawed legs. Use the attached image only for anatomy. Fierce, not
+> cute. No lettering or text, no logos. Exactly ONE single creature, centred.
+
+---
+
+## Batch 3 (local SDXL fallback, 2026-10-13)
+
+Gemini was not usable (the Chrome tab reported `visibilityState=hidden`), so batch 3 used the local SDXL
+script (`concepts_sdxl.py` in the Hunyuan3D-2 folder; a copy with a custom negative prompt) with
+IP-Adapter style-only injection from a batch-1 anchor. Images are 1024x1024, not 1024x572.
+Settings: 30 steps, guidance 6.5, `--style 0.6`; Zerg anchor `kerrigan.png` with `--avoid "blue, gold"`;
+Protoss anchors `zealot.png` (adept) and `stalker.png` (sentry) with `--avoid purple`. 8 seeds per round,
+three rounds. CLIP reads only 77 tokens, so the framing words go first and the subject stays short.
+
+Prefix (all units; sentry without "huge head, tiny stubby legs"):
+> chibi super-deformed SD model kit figure, huge head, tiny stubby legs, standing on a round black base,
+> white background, single figure, full body,
+
+Negative:
+> funko pop, cute, kawaii, realistic proportions, tall, long legs, long neck, human, multiple figures, two
+> figures, collage, multiple views, grid, text, letters, watermark, logo, cropped, cut off, scenery, rocks,
+> grey background, blurry (+ queen: black background, wings, green; sentry: black background, legs, feet,
+> humanoid, walking)
+
+| Slug | Base | Seed | Result | Measured on the image |
+|---|---|---|---|---|
+| hydralisk | 50mm display (40x100 oval) | 20 | pass | head with hood crest ~45%, ~2.2 heads, stubby legs, tail, claw arms |
+| queen | 80mm | 35 | pass | head + crest ~50%, upright, talon arms, stubby legs |
+| adept | 40mm | 20 | pass | head ~45%, ~2.2 heads; glaive held in hand rather than an arm cannon |
+| sentry | 50mm | 37 | pass (borderline) | orb ~60%, crystal on top, two claw arms; hovers over a ring base |
+
+### hydralisk
+> fierce alien cobra serpent monster, enormous hooded head with wide fanged jaw, tiny upright coiled body,
+> two big bone scythe arms, back spines, violet carapace, bone
+
+### queen
+> alien insect queen standing upright on two legs, enormous head with tall bony crest crown, two big bone
+> talon arms, violet carapace, bone
+
+### adept
+> fierce alien warrior, enormous smooth grey alien head, glowing cyan eyes, swept-back head tendrils, gold
+> armour, big glowing cyan crescent cannon on forearm, stubby legs, gold and deep blue
+
+### sentry
+> hovering alien robot orb, big round gold sphere with a large glowing cyan crystal core, two small claw
+> arms, no legs, floating on a thin stem
+
+Notes: without "chibi ... huge head" first, SDXL drifted to realistic proportions; "photo of" lost the SD
+look; "MGSD" alone means nothing to SDXL. About 1 seed in 4 was a collage or had a grey/dark background:
+reject those. SDXL skips small details (the hydralisk got legs, the adept's arm cannon became a hand-held
+glaive); a Gemini edit pass can fix these later if the owner wants.
+
+### Gemini wording for batch 3 (when Gemini is available; first prompt of each faction chat as above)
+- hydralisk: "... of an upright alien serpent warrior: no legs, a thick coiled snake tail under the body,
+  an enormous hooded head (a wide bony cobra hood around a fanged jaw) that is the biggest part of the
+  figure, two long bone scythe arms, and a ridge of spines on the back that it fires like a launcher.
+  Violet carapace and pale bone. 50mm round base."
+- queen: "... of the swarm's broodmother: a crested creature standing upright on two short stubby legs,
+  an enormous head with a tall swept-back bony crest, two big hooked talon arms and two smaller arms under
+  them. Violet carapace and pale bone. 80mm base."
+- adept: "... of a light, agile alien warrior of the templar race: enormous smooth head with glowing eyes
+  and swept-back nerve-cord tendrils, light gold armour, and a crescent-shaped glaive cannon built onto one
+  forearm, glowing cyan. Gold and deep blue. 40mm base."
+- sentry: "... of a small hovering robot of the same race: a big round gold orb body with a glowing cyan
+  crystal core set in its front, two small jointed arms, no legs, floating on a thin clear stem above the
+  base. Gold and deep blue frame, cyan glow. 50mm base."
