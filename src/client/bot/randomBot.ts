@@ -11,6 +11,8 @@ export interface BotContext {
   accepts(action: Action): boolean
   /** Time budget for this decision (VITE_AI_MS). */
   budgetMs: number
+  /** True while the decision this answer is for is still the open one (a brain skips late work for a decision that moved on). */
+  isCurrent?: () => boolean
 }
 /** A bot brain answers one decision from the seat's view. */
 export type BotBrain = (view: PlayerView, pending: PendingDecision, legal: Action[], ctx: BotContext) => Promise<Action> | Action

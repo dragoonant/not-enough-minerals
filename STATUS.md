@@ -1,8 +1,8 @@
 # Status: what exists
 
-Milestone reached: **M3 playable slice** (generated snapshot, 2026-10-13; this file lists only what is real; plans live
+Milestone reached: **M4 AI opponent** (generated snapshot, 2026-10-13; this file lists only what is real; plans live
 in PLAN.md). Gate reports: `tools/out/m1-data-report.md` (M1), `tools/out/m2-followups.md` (M2 open items),
-`tools/out/m3-followups.md` (M3 open items). The specs
+`tools/out/m3-followups.md` (M3 open items), `tools/out/m4-bench.md` (M4 AI bench). The specs
 under `docs/spec/` (00 architecture, 10-19 rules, 20-21 data, 30 AI, 50 client, 60 testing) are not listed here.
 
 ## Repo and tooling
@@ -39,8 +39,18 @@ under `docs/spec/` (00 architecture, 10-19 rules, 20-21 data, 30 AI, 50 client, 
   42 cards, Cost Table and Changelog 10.2026, 12 Mission Cards, 12 Deployment Cards, 6 presets, 39 keywords,
   `rules.json`. Open data misfits (missing `rules.json` keys, creep grant shape) are listed in the M2 follow-ups.
 
-## AI (`src/ai/`)
-- Tier decider with an empty POLICIES table; every tier plays random (M4).
+## AI (`src/ai/`; spec `docs/spec/30-ai-bot.md`)
+- Tiers `random`, `easy`, `normal` (`types.ts` TIERS: weights for threat, cover, kills, objectives, tempo, survival;
+  easy adds noise and picks from its top three). Contracts frozen at M4: `types.ts`, `decider.ts`, `worker.ts`.
+- `decider.ts`: builds the context from `view(state, seat)` only (query shim in `world.ts`, seeded stream, work
+  meter), dispatches on `pending.kind` to `policies.ts`, checks the answer and falls back to `random.ts`.
+- `eval.ts` (position value from `query.*` numbers), `threat.ts` (enemy reach and expected Supply loss per spot),
+  `moves.ts` (scores the engine's move, deploy and charge paths). No rules are re-derived in `src/ai`.
+- Budget: `AI_MS` / `VITE_AI_MS` (default 150 ms) maps to a work cap, so answers are deterministic; a wall-clock
+  hard stop is the safety net. The client runs the AI in a Web Worker (`src/client/bot/aiWorkerClient.ts`, 3 s
+  timeout) driven by `botDriver.ts`.
+- Bench (`npm run bench:ai`, `tools/out/m4-bench.md`): normal beats random 99/100, easy 97/100, normal beats easy
+  37/40; normal won 42/42 across all 7 matchups; 32 ms mean per decision, 0 errors or fallbacks.
 
 ## Client (`src/client/`; spec `docs/spec/50-client.md`)
 - `contract.ts` is the only door to the engine: hooks over presented state, `query.ts` previews, `focus` UI state.
@@ -63,15 +73,17 @@ under `docs/spec/` (00 architecture, 10-19 rules, 20-21 data, 30 AI, 50 client, 
 - Test hooks `?test=1` (`window.__game`), `?seats=`, `?seed=`, `?tier=`, `?speed=`, `?matchup=`, `?mission=`,
   `?menu=1`, `?gallery`, `?fps`.
 
-## Verification (2026-10-13, M3 gate)
-- `npm run typecheck`: clean. `npm test`: 397 tests in 40 files, all pass (engine checklist IDs plus client UI-,
+## Verification (2026-10-13, M4 gate)
+- `npm run typecheck`: clean. `npm test`: 458 tests in 45 files, all pass (engine checklist IDs, AI, client UI-,
   INT-, DICE-, board and start-screen tests).
 - `npm run validate:data`: ok, 15 warnings. `npm run build`: ok. `npm run sim -- --games 30`: 30 finished, 0 errors,
-  avg 4.63 rounds, 8219 decisions, max step 134 ms (winners B 14, A 8, draws 8).
+  avg 4.63 rounds, 8219 decisions, max step 184 ms (winners B 14, A 8, draws 8).
 - `npm run e2e`: 11 pass (boot, human answer, a full Founders game vs bot from the menu, bot-vs-bot per matchup,
   screenshots). Screenshots: `screenshots/m3-{start,briefing,board,dice,gallery,gameover,rings}.png` at 1280x800.
+- `npm run bench:ai`: see the AI section and `tools/out/m4-bench.md`.
 
 ## Not yet
-The AI policies (M4; every bot tier plays random), most figure art, real terrain, query additions the client is
-waiting on (shoot options, contest radii, coherency links, placement-aware visibility). Open items:
-`tools/out/m2-followups.md`, `tools/out/m3-followups.md`.
+The owner playtest gate for the AI; AI tail latency (slowest move decisions reach 450 to 650 ms under load); bench
+coverage beyond one Mission and Deployment; most figure art, real terrain, query additions the client is waiting on
+(shoot options, contest radii, coherency links, placement-aware visibility). Open items: `tools/out/m2-followups.md`,
+`tools/out/m3-followups.md`, `tools/out/m4-bench.md` (known weaknesses).

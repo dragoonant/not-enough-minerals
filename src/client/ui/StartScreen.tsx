@@ -22,8 +22,8 @@ const MODES: { id: PlayMode; label: string; blurb: string }[] = [
 ]
 const TIERS: { id: string; label: string; blurb: string }[] = [
   { id: 'random', label: 'Random', blurb: 'Picks any legal move.' },
-  { id: 'easy', label: 'Easy', blurb: 'Plays at random for now.' },
-  { id: 'normal', label: 'Normal', blurb: 'Plays at random for now.' },
+  { id: 'easy', label: 'Easy', blurb: 'Goes for objectives, ignores enemy threats.' },
+  { id: 'normal', label: 'Normal', blurb: 'Weighs threats, cover and tempo.' },
 ]
 interface Prefs { mode: PlayMode; tier: string; matchup: MatchupId; mission: string; deployment: string; side: 0 | 1 }
 

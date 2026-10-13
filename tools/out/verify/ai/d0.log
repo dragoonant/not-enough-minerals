@@ -1,0 +1,435 @@
+r1 null B setup.firstPlayer [2:setup.firstPlayer] -> {"holder":"B","type":"setup.firstPlayer","decisionId":"d:1","seat":"B"}
+r1 movement B turn.first [2:turn.first] -> {"first":"B","type":"turn.first","decisionId":"d:2","seat":"B"}
+r1 movement B turn.activate [6:deploy.go,turn.pass] -> {"unitId":"B-1","type":"deploy.go","decisionId":"d:3","seat":"B"}
+r1 movement B deploy.entry [1:deploy.entry] -> {"unitId":"B-1","entry":{"kind":"edge","segment":0},"type":"deploy.entry","decisionId":"d:4","seat":"B"}
+r1 movement B deploy.path [7:deploy.path] -> {"unitId":"B-1","entry":{"kind":"edge","segment":0},"leaderId":"B-1.0","path":"path(1)->{\"x\":0,\"z\":-15.6}","type":"deploy.path","decisionId":"d:5","seat":"B"}
+r1 movement B ability.window [3:ability.use,ability.done] -> {"window":"after","type":"ability.done","decisionId":"d:6","seat":"B"}
+r1 movement A turn.activate [6:deploy.go,turn.pass] -> {"unitId":"A-1","type":"deploy.go","decisionId":"d:7","seat":"A"}
+r1 movement A deploy.entry [1:deploy.entry] -> {"unitId":"A-1","entry":{"kind":"edge","segment":0},"type":"deploy.entry","decisionId":"d:8","seat":"A"}
+r1 movement A deploy.path [7:deploy.path] -> {"unitId":"A-1","entry":{"kind":"edge","segment":0},"leaderId":"A-1.0","path":"path(1)->{\"x\":0,\"z\":15.6}","type":"deploy.path","decisionId":"d:9","seat":"A"}
+r1 movement A ability.window [6:ability.use,ability.done] -> {"source":"A-1","abilityId":"stimpack","window":"after","type":"ability.use","decisionId":"d:10","seat":"A"}
+r1 movement A ability.pay [4:ability.pay] -> {"cards":["barracks"],"type":"ability.pay","decisionId":"d:11","seat":"A"}
+r1 movement A ability.window [4:ability.use,ability.done] -> {"window":"after","type":"ability.done","decisionId":"d:12","seat":"A"}
+r1 movement B turn.activate [5:deploy.go,turn.pass] -> {"unitId":"B-2","type":"deploy.go","decisionId":"d:13","seat":"B"}
+r1 movement B deploy.entry [1:deploy.entry] -> {"unitId":"B-2","entry":{"kind":"edge","segment":0},"type":"deploy.entry","decisionId":"d:14","seat":"B"}
+r1 movement B deploy.path [7:deploy.path] -> {"unitId":"B-2","entry":{"kind":"edge","segment":0},"leaderId":"B-2.0","path":"path(1)->{\"x\":-14.4,\"z\":-15}","type":"deploy.path","decisionId":"d:15","seat":"B"}
+r1 movement B ability.window [3:ability.use,ability.done] -> {"window":"after","type":"ability.done","decisionId":"d:16","seat":"B"}
+r1 movement A turn.activate [5:deploy.go,turn.pass] -> {"unitId":"A-2","type":"deploy.go","decisionId":"d:17","seat":"A"}
+r1 movement A ability.window [2:ability.use,ability.done] -> {"source":"A-2","abilityId":"stimpack","window":"before","type":"ability.use","decisionId":"d:18","seat":"A"}
+r1 movement A ability.target [8:ability.target] -> {"mode":"point","point":{"x":-1.33,"z":12.91},"type":"ability.target","decisionId":"d:19","seat":"A"}
+r1 movement A ability.window [4:ability.use,ability.done] -> {"window":"after","type":"ability.done","decisionId":"d:20","seat":"A"}
+r1 movement B turn.activate [4:deploy.go,turn.pass] -> {"unitId":"B-3","type":"deploy.go","decisionId":"d:21","seat":"B"}
+r1 movement B deploy.entry [1:deploy.entry] -> {"unitId":"B-3","entry":{"kind":"edge","segment":0},"type":"deploy.entry","decisionId":"d:22","seat":"B"}
+r1 movement B deploy.path [5:deploy.path] -> {"unitId":"B-3","entry":{"kind":"edge","segment":0},"leaderId":"B-3.0","path":"path(1)->{\"x\":9,\"z\":-15.6}","type":"deploy.path","decisionId":"d:23","seat":"B"}
+r1 movement B ability.window [4:ability.use,ability.done] -> {"window":"after","type":"ability.done","decisionId":"d:24","seat":"B"}
+r1 movement A turn.activate [4:deploy.go,turn.pass] -> {"unitId":"A-3","type":"deploy.go","decisionId":"d:25","seat":"A"}
+r1 movement A deploy.entry [1:deploy.entry] -> {"unitId":"A-3","entry":{"kind":"edge","segment":0},"type":"deploy.entry","decisionId":"d:26","seat":"A"}
+r1 movement A deploy.path [7:deploy.path] -> {"unitId":"A-3","entry":{"kind":"edge","segment":0},"leaderId":"A-3.0","path":"path(1)->{\"x\":14.399999999999999,\"z\":15.6}","type":"deploy.path","decisionId":"d:27","seat":"A"}
+r1 movement A ability.window [5:ability.use,ability.done] -> {"source":"A-3","abilityId":"stimpack","window":"after","type":"ability.use","decisionId":"d:28","seat":"A"}
+r1 movement A ability.pay [3:ability.pay] -> {"cards":["academy"],"type":"ability.pay","decisionId":"d:29","seat":"A"}
+r1 movement A ability.window [4:ability.use,ability.done] -> {"window":"after","type":"ability.done","decisionId":"d:30","seat":"A"}
+r1 movement B turn.activate [1:turn.pass] -> {"type":"turn.pass","decisionId":"d:31","seat":"B"}
+r1 movement A turn.activate [1:turn.pass] -> {"type":"turn.pass","decisionId":"d:32","seat":"A"}
+r1 assault B turn.first [2:turn.first] -> {"first":"B","type":"turn.first","decisionId":"d:33","seat":"B"}
+r1 assault B turn.activate [10:move.run,charge.go,turn.hold,turn.pass] -> {"unitId":"B-1","type":"move.run","decisionId":"d:34","seat":"B"}
+r1 assault B ability.window [3:ability.use,ability.done] -> {"source":"evolution-chamber","abilityId":"extended-claws","window":"before","type":"ability.use","decisionId":"d:35","seat":"B"}
+r1 assault B ability.window [2:ability.use,ability.done] -> {"source":"B-1","abilityId":"metabolic-boost","window":"before","type":"ability.use","decisionId":"d:36","seat":"B"}
+r1 assault B ability.pay [3:ability.pay] -> {"cards":["spawning-pool"],"type":"ability.pay","decisionId":"d:37","seat":"B"}
+r1 assault B move.path [8:move.path,move.hold] -> {"unitId":"B-1","kind":"run","leaderId":"B-1.0","path":"path(1)->{\"x\":2.702082931376184,\"z\":-12.650636029248766}","type":"move.path","decisionId":"d:38","seat":"B"}
+r1 assault A turn.activate [10:move.run,charge.go,turn.hold,turn.pass] -> {"unitId":"A-1","type":"move.run","decisionId":"d:39","seat":"A"}
+r1 assault A move.path [8:move.path,move.hold] -> {"unitId":"A-1","kind":"run","leaderId":"A-1.0","path":"path(1)->{\"x\":6.801985046061059,\"z\":13.946821415224077}","type":"move.path","decisionId":"d:40","seat":"A"}
+r1 assault B turn.activate [7:move.run,charge.go,turn.hold,turn.pass] -> {"unitId":"B-2","type":"move.run","decisionId":"d:41","seat":"B"}
+r1 assault B ability.window [3:ability.use,ability.done] -> {"source":"B-2","abilityId":"adrenal-overload","window":"before","type":"ability.use","decisionId":"d:42","seat":"B"}
+r1 assault B ability.pay [2:ability.pay] -> {"cards":["overseer"],"type":"ability.pay","decisionId":"d:43","seat":"B"}
+r1 assault B ability.window [2:ability.use,ability.done] -> {"source":"B-2","abilityId":"leap","window":"before","type":"ability.use","decisionId":"d:44","seat":"B"}
+r1 assault B move.path [8:move.path,move.hold] -> {"unitId":"B-2","kind":"run","leaderId":"B-2.0","path":"path(1)->{\"x\":-14.288445573941512,\"z\":-10.001244593898722}","type":"move.path","decisionId":"d:45","seat":"B"}
+r1 assault A turn.activate [7:move.run,charge.go,turn.hold,turn.pass] -> {"unitId":"A-2","type":"move.run","decisionId":"d:46","seat":"A"}
+r1 assault A move.path [8:move.path,move.hold] -> {"unitId":"A-2","kind":"run","leaderId":"A-2.0","path":"path(1)->{\"x\":-0.7720147944906641,\"z\":5.932274546069277}","type":"move.path","decisionId":"d:47","seat":"A"}
+r1 assault B turn.activate [4:move.run,charge.go,turn.hold,turn.pass] -> {"unitId":"B-3","type":"move.run","decisionId":"d:48","seat":"B"}
+r1 assault B move.path [8:move.path,move.hold] -> {"unitId":"B-3","kind":"run","leaderId":"B-3.0","path":"path(1)->{\"x\":8.787034089989875,\"z\":-11.605673333191993}","type":"move.path","decisionId":"d:49","seat":"B"}
+r1 assault A turn.activate [4:move.run,charge.go,turn.hold,turn.pass] -> {"unitId":"A-3","type":"move.run","decisionId":"d:50","seat":"A"}
+r1 assault A move.path [8:move.path,move.hold] -> {"unitId":"A-3","kind":"run","leaderId":"A-3.0","path":"path(1)->{\"x\":12.641215955902213,\"z\":8.824553248218457}","type":"move.path","decisionId":"d:51","seat":"A"}
+r1 assault B turn.activate [1:turn.pass] -> {"type":"turn.pass","decisionId":"d:52","seat":"B"}
+r1 assault A turn.activate [1:turn.pass] -> {"type":"turn.pass","decisionId":"d:53","seat":"A"}
+   ev {"type":"vpScored","seat":"A","round":1,"vp":0,"lines":[{"rule":"supplyDestroyed","vp":0}]}
+   ev {"type":"vpScored","seat":"B","round":1,"vp":0,"lines":[{"rule":"supplyDestroyed","vp":0}]}
+r2 movement A turn.first [2:turn.first] -> {"first":"A","type":"turn.first","decisionId":"d:54","seat":"A"}
+r2 movement A turn.activate [9:move.go,turn.hold,deploy.go,turn.pass] -> {"unitId":"A-2","type":"move.go","decisionId":"d:55","seat":"A"}
+r2 movement A ability.window [6:ability.use,ability.done] -> {"source":"A-2","abilityId":"stimpack","window":"before","type":"ability.use","decisionId":"d:56","seat":"A"}
+r2 movement A ability.pay [4:ability.pay] -> {"cards":["barracks"],"type":"ability.pay","decisionId":"d:57","seat":"A"}
+r2 movement A ability.window [4:ability.use,ability.done] -> {"window":"before","type":"ability.done","decisionId":"d:58","seat":"A"}
+r2 movement A move.path [8:move.path,move.hold] -> {"unitId":"A-2","kind":"move","leaderId":"A-2.0","path":"path(1)->{\"x\":-0.21402958898132662,\"z\":-1.0454509078614453}","type":"move.path","decisionId":"d:59","seat":"A"}
+r2 movement A ability.window [4:ability.use,ability.done] -> {"window":"after","type":"ability.done","decisionId":"d:60","seat":"A"}
+r2 movement B turn.activate [9:move.go,turn.hold,deploy.go,turn.pass] -> {"unitId":"B-2","type":"move.go","decisionId":"d:61","seat":"B"}
+r2 movement B ability.window [3:ability.use,ability.done] -> {"window":"before","type":"ability.done","decisionId":"d:62","seat":"B"}
+r2 movement B move.path [8:move.path,move.hold] -> {"unitId":"B-2","kind":"move","leaderId":"B-2.0","path":"path(1)->{\"x\":-13.177036542049246,\"z\":-5.126332290705125}","type":"move.path","decisionId":"d:63","seat":"B"}
+r2 movement B ability.window [3:ability.use,ability.done] -> {"window":"after","type":"ability.done","decisionId":"d:64","seat":"B"}
+r2 movement A turn.activate [7:move.go,turn.hold,deploy.go,turn.pass] -> {"unitId":"A-4","type":"deploy.go","decisionId":"d:65","seat":"A"}
+r2 movement A deploy.entry [1:deploy.entry] -> {"unitId":"A-4","entry":{"kind":"edge","segment":0},"type":"deploy.entry","decisionId":"d:66","seat":"A"}
+r2 movement A deploy.path [7:deploy.path] -> {"unitId":"A-4","entry":{"kind":"edge","segment":0},"leaderId":"A-4.0","path":"path(1)->{\"x\":-14.4,\"z\":15.6}","type":"deploy.path","decisionId":"d:67","seat":"A"}
+r2 movement A ability.window [4:ability.use,ability.done] -> {"window":"after","type":"ability.done","decisionId":"d:68","seat":"A"}
+r2 movement B turn.activate [7:move.go,turn.hold,deploy.go,turn.pass] -> {"unitId":"B-4","type":"deploy.go","decisionId":"d:69","seat":"B"}
+r2 movement B deploy.entry [1:deploy.entry] -> {"unitId":"B-4","entry":{"kind":"edge","segment":0},"type":"deploy.entry","decisionId":"d:70","seat":"B"}
+r2 movement B deploy.path [3:deploy.path] -> {"unitId":"B-4","entry":{"kind":"edge","segment":0},"leaderId":"B-4.0","path":"path(1)->{\"x\":9,\"z\":-15.6}","type":"deploy.path","decisionId":"d:71","seat":"B"}
+r2 movement B ability.window [4:ability.use,ability.done] -> {"window":"after","type":"ability.done","decisionId":"d:72","seat":"B"}
+r2 movement A turn.activate [5:move.go,turn.hold,turn.pass] -> {"unitId":"A-3","type":"move.go","decisionId":"d:73","seat":"A"}
+r2 movement A ability.window [5:ability.use,ability.done] -> {"source":"A-3","abilityId":"stimpack","window":"before","type":"ability.use","decisionId":"d:74","seat":"A"}
+r2 movement A ability.pay [3:ability.pay] -> {"cards":["academy"],"type":"ability.pay","decisionId":"d:75","seat":"A"}
+r2 movement A ability.window [4:ability.use,ability.done] -> {"window":"before","type":"ability.done","decisionId":"d:76","seat":"A"}
+r2 movement A move.path [8:move.path,move.hold] -> {"unitId":"A-3","kind":"move","leaderId":"A-3.0","path":"path(1)->{\"x\":10.88243191180443,\"z\":2.0491064964369157}","type":"move.path","decisionId":"d:77","seat":"A"}
+r2 movement A ability.window [4:ability.use,ability.done] -> {"window":"after","type":"ability.done","decisionId":"d:78","seat":"A"}
+r2 movement B turn.activate [5:move.go,turn.hold,turn.pass] -> {"unitId":"B-3","type":"move.go","decisionId":"d:79","seat":"B"}
+r2 movement B ability.window [4:ability.use,ability.done] -> {"window":"before","type":"ability.done","decisionId":"d:80","seat":"B"}
+r2 movement B move.path [8:move.path,move.hold] -> {"unitId":"B-3","kind":"move","leaderId":"B-3.0","path":"path(1)->{\"x\":11.834812443141455,\"z\":-9.0151044555011}","type":"move.path","decisionId":"d:81","seat":"B"}
+r2 movement B ability.window [4:ability.use,ability.done] -> {"window":"after","type":"ability.done","decisionId":"d:82","seat":"B"}
+r2 movement A turn.activate [3:move.go,turn.hold,turn.pass] -> {"unitId":"A-1","type":"move.go","decisionId":"d:83","seat":"A"}
+r2 movement A ability.window [5:ability.use,ability.done] -> {"source":"A-1","abilityId":"stimpack","window":"before","type":"ability.use","decisionId":"d:84","seat":"A"}
+r2 movement A ability.pay [2:ability.pay] -> {"cards":["raynors-raiders"],"type":"ability.pay","decisionId":"d:85","seat":"A"}
+r2 movement A ability.window [3:ability.use,ability.done] -> {"window":"before","type":"ability.done","decisionId":"d:86","seat":"A"}
+r2 movement A move.path [8:move.path,move.hold] -> {"unitId":"A-1","kind":"move","leaderId":"A-1.0","path":"path(1)->{\"x\":3.0632321611981745,\"z\":8.028905661689777}","type":"move.path","decisionId":"d:87","seat":"A"}
+r2 movement A ability.window [3:ability.use,ability.done] -> {"window":"after","type":"ability.done","decisionId":"d:88","seat":"A"}
+r2 movement B turn.activate [3:move.go,turn.hold,turn.pass] -> {"unitId":"B-1","type":"move.go","decisionId":"d:89","seat":"B"}
+r2 movement B ability.window [3:ability.use,ability.done] -> {"window":"before","type":"ability.done","decisionId":"d:90","seat":"B"}
+r2 movement B move.path [8:move.path,move.hold] -> {"unitId":"B-1","kind":"move","leaderId":"B-1.0","path":"path(1)->{\"x\":1.6540469449911344,\"z\":-8.79037430609554}","type":"move.path","decisionId":"d:91","seat":"B"}
+r2 movement B ability.window [3:ability.use,ability.done] -> {"window":"after","type":"ability.done","decisionId":"d:92","seat":"B"}
+r2 movement A turn.activate [1:turn.pass] -> {"type":"turn.pass","decisionId":"d:93","seat":"A"}
+r2 movement B turn.activate [1:turn.pass] -> {"type":"turn.pass","decisionId":"d:94","seat":"B"}
+r2 assault A turn.first [2:turn.first] -> {"first":"A","type":"turn.first","decisionId":"d:95","seat":"A"}
+r2 assault A turn.activate [16:move.run,shoot.go,charge.go,turn.hold,turn.pass] -> {"unitId":"A-2","type":"shoot.go","decisionId":"d:96","seat":"A"}
+r2 assault A shoot.batch [4:shoot.batch] -> {"unitId":"A-2","weaponId":"c-14-rifle","targetUnitId":"B-2","type":"shoot.batch","decisionId":"d:97","seat":"A"}
+r2 assault B ability.react [2:ability.useReaction,ability.skipReaction] -> {"type":"ability.skipReaction","decisionId":"d:98","seat":"B"}
+   ev {"type":"atk.removed","unitId":"B-2","modelIds":["B-2.4"],"cause":"attack"}
+   ev {"type":"atk.removed","unitId":"B-2","modelIds":["B-2.3"],"cause":"attack"}
+   ev {"type":"atk.removed","unitId":"B-2","modelIds":["B-2.2"],"cause":"attack"}
+   ev {"type":"atk.removed","unitId":"B-2","modelIds":["B-2.1"],"cause":"attack"}
+r2 assault B turn.activate [14:move.run,charge.go,turn.hold,shoot.go,turn.pass] -> {"unitId":"B-3","type":"shoot.go","decisionId":"d:99","seat":"B"}
+r2 assault B ability.window [3:ability.use,ability.done] -> {"source":"evolution-chamber","abilityId":"extended-claws","window":"before","type":"ability.use","decisionId":"d:100","seat":"B"}
+r2 assault B ability.window [2:ability.use,ability.done] -> {"window":"before","type":"ability.done","decisionId":"d:101","seat":"B"}
+r2 assault B shoot.batch [2:shoot.batch] -> {"unitId":"B-3","weaponId":"acid-saliva","targetUnitId":"A-3","type":"shoot.batch","decisionId":"d:102","seat":"B"}
+   ev {"type":"atk.removed","unitId":"A-3","modelIds":["A-3.1"],"cause":"attack"}
+   ev {"type":"atk.removed","unitId":"A-3","modelIds":["A-3.0"],"cause":"attack"}
+   ev {"type":"unitDestroyed","unitId":"A-3"}
+r2 assault B ability.window [2:ability.use,ability.done] -> {"window":"after","type":"ability.done","decisionId":"d:103","seat":"B"}
+r2 assault A turn.activate [8:move.run,shoot.go,charge.go,turn.hold,turn.pass] -> {"unitId":"A-1","type":"shoot.go","decisionId":"d:104","seat":"A"}
+r2 assault A shoot.batch [5:shoot.batch] -> {"unitId":"A-1","weaponId":"agg-12","targetUnitId":"B-3","type":"shoot.batch","decisionId":"d:105","seat":"A"}
+r2 assault B ability.react [2:ability.useReaction,ability.skipReaction] -> {"type":"ability.skipReaction","decisionId":"d:106","seat":"B"}
+r2 assault A shoot.batch [3:shoot.batch] -> {"unitId":"A-1","weaponId":"rocket-launcher","targetUnitId":"B-3","type":"shoot.batch","decisionId":"d:107","seat":"A"}
+r2 assault B turn.activate [10:move.run,charge.go,turn.hold,turn.pass] -> {"unitId":"B-1","type":"charge.go","decisionId":"d:108","seat":"B"}
+r2 assault B ability.window [2:ability.use,ability.done] -> {"source":"B-1","abilityId":"metabolic-boost","window":"before","type":"ability.use","decisionId":"d:109","seat":"B"}
+r2 assault B ability.pay [3:ability.pay] -> {"cards":["spawning-pool"],"type":"ability.pay","decisionId":"d:110","seat":"B"}
+r2 assault B charge.targets [7:charge.targets] -> {"unitId":"B-1","targetIds":["A-2"],"type":"charge.targets","decisionId":"d:111","seat":"B"}
+   ev {"type":"charge.declared","unitId":"B-1","targets":["A-2"],"round":2}
+   ev {"type":"charge.rolled","unitId":"B-1","roll":4,"speed":4,"distance":8,"best2":true}
+r2 assault B ability.react [2:ability.useReaction,ability.skipReaction] -> {"type":"ability.skipReaction","decisionId":"d:112","seat":"B"}
+   ev {"type":"charge.distance","unitId":"B-1","distance":8}
+r2 assault B charge.path [6:charge.path] -> {"unitId":"B-1","leaderId":"B-1.7","path":"path(2)->{\"x\":-1.1256493101732725,\"z\":-3.144681812708696}","type":"charge.path","decisionId":"d:113","seat":"B"}
+   ev {"type":"charge.succeeded","unitId":"B-1","targets":["A-2"]}
+   ev {"type":"charge.impact","unitId":"B-1"}
+   ev {"type":"atk.removed","unitId":"A-2","modelIds":["A-2.5"],"cause":"attack"}
+   ev {"type":"atk.removed","unitId":"A-2","modelIds":["A-2.4"],"cause":"attack"}
+   ev {"type":"atk.removed","unitId":"A-2","modelIds":["A-2.3"],"cause":"attack"}
+r2 assault A turn.activate [4:move.run,charge.go,turn.hold,turn.pass] -> {"unitId":"A-4","type":"move.run","decisionId":"d:114","seat":"A"}
+r2 assault A move.path [8:move.path,move.hold] -> {"unitId":"A-4","kind":"run","leaderId":"A-4.0","path":"path(1)->{\"x\":-13.621696490884068,\"z\":11.676450121675803}","type":"move.path","decisionId":"d:115","seat":"A"}
+r2 assault B turn.activate [7:move.run,charge.go,turn.hold,turn.pass] -> {"unitId":"B-2","type":"move.run","decisionId":"d:116","seat":"B"}
+r2 assault B ability.window [3:ability.use,ability.done] -> {"source":"B-2","abilityId":"adrenal-overload","window":"before","type":"ability.use","decisionId":"d:117","seat":"B"}
+r2 assault B ability.pay [2:ability.pay] -> {"cards":["overseer"],"type":"ability.pay","decisionId":"d:118","seat":"B"}
+r2 assault B ability.window [2:ability.use,ability.done] -> {"source":"B-2","abilityId":"leap","window":"before","type":"ability.use","decisionId":"d:119","seat":"B"}
+r2 assault B move.path [8:move.path,move.hold] -> {"unitId":"B-2","kind":"run","leaderId":"B-2.0","path":"path(1)->{\"x\":-9.036299558388837,\"z\":-2.323780376440752}","type":"move.path","decisionId":"d:120","seat":"B"}
+r2 assault A turn.activate [1:turn.pass] -> {"type":"turn.pass","decisionId":"d:121","seat":"A"}
+r2 assault B turn.activate [4:move.run,charge.go,turn.hold,turn.pass] -> {"unitId":"B-4","type":"move.run","decisionId":"d:122","seat":"B"}
+r2 assault B move.path [8:move.path,move.hold] -> {"unitId":"B-4","kind":"run","leaderId":"B-4.0","path":"path(1)->{\"x\":8.16338694871083,\"z\":-11.688468509341561}","type":"move.path","decisionId":"d:123","seat":"B"}
+r2 assault B turn.activate [1:turn.pass] -> {"type":"turn.pass","decisionId":"d:124","seat":"B"}
+r2 combat A turn.first [2:turn.first] -> {"first":"A","type":"turn.first","decisionId":"d:125","seat":"A"}
+r2 combat A turn.activate [1:melee.go] -> {"unitId":"A-2","type":"melee.go","decisionId":"d:126","seat":"A"}
+r2 combat A melee.closeRanks [2:melee.closeRanks] -> {"unitId":"A-2","mode":"close","type":"melee.closeRanks","decisionId":"d:127","seat":"A"}
+   ev {"type":"atk.removed","unitId":"B-1","modelIds":["B-1.11"],"cause":"attack"}
+   ev {"type":"atk.removed","unitId":"B-1","modelIds":["B-1.10"],"cause":"attack"}
+   ev {"type":"atk.removed","unitId":"B-1","modelIds":["B-1.8"],"cause":"attack"}
+r2 combat B turn.activate [1:melee.go] -> {"unitId":"B-1","type":"melee.go","decisionId":"d:128","seat":"B"}
+r2 combat B melee.closeRanks [2:melee.closeRanks] -> {"unitId":"B-1","mode":"close","type":"melee.closeRanks","decisionId":"d:129","seat":"B"}
+   ev {"type":"atk.removed","unitId":"A-2","modelIds":["A-2.2"],"cause":"attack"}
+   ev {"type":"atk.removed","unitId":"A-2","modelIds":["A-2.0"],"cause":"attack"}
+   ev {"type":"atk.removed","unitId":"A-2","modelIds":["A-2.1"],"cause":"attack"}
+   ev {"type":"unitDestroyed","unitId":"A-2"}
+r2 combat A turn.activate [1:turn.pass] -> {"type":"turn.pass","decisionId":"d:130","seat":"A"}
+r2 combat B turn.activate [1:turn.pass] -> {"type":"turn.pass","decisionId":"d:131","seat":"B"}
+   ev {"type":"markerControl","n":1,"from":null,"to":"B","round":2,"totals":{"A":0,"B":0}}
+   ev {"type":"markerControl","n":5,"from":null,"to":"B","round":2,"totals":{"A":0,"B":1}}
+   ev {"type":"vpScored","seat":"A","round":2,"vp":1,"lines":[{"rule":"supplyDestroyed","vp":1},{"rule":"perControlledMarker","vp":0},{"rule":"retakeBonus","vp":0}]}
+   ev {"type":"vpScored","seat":"B","round":2,"vp":4,"lines":[{"rule":"supplyDestroyed","vp":2},{"rule":"perControlledMarker","vp":2},{"rule":"retakeBonus","vp":0}]}
+r3 movement A turn.first [2:turn.first] -> {"first":"A","type":"turn.first","decisionId":"d:132","seat":"A"}
+r3 movement A turn.activate [6:move.go,turn.hold,deploy.go,turn.pass] -> {"unitId":"A-1","type":"move.go","decisionId":"d:133","seat":"A"}
+r3 movement A ability.window [6:ability.use,ability.done] -> {"source":"A-1","abilityId":"stimpack","window":"before","type":"ability.use","decisionId":"d:134","seat":"A"}
+r3 movement A ability.pay [4:ability.pay] -> {"cards":["barracks"],"type":"ability.pay","decisionId":"d:135","seat":"A"}
+r3 movement A ability.window [4:ability.use,ability.done] -> {"window":"before","type":"ability.done","decisionId":"d:136","seat":"A"}
+r3 movement A move.path [8:move.path,move.hold] -> {"unitId":"A-1","kind":"move","leaderId":"A-1.0","path":"path(1)->{\"x\":2.8804324681226814,\"z\":1.0312929064559242}","type":"move.path","decisionId":"d:137","seat":"A"}
+r3 movement A ability.window [4:ability.use,ability.done] -> {"window":"after","type":"ability.done","decisionId":"d:138","seat":"A"}
+r3 movement B turn.activate [10:move.go,turn.hold,deploy.go,turn.pass] -> {"unitId":"B-3","type":"move.go","decisionId":"d:139","seat":"B"}
+r3 movement B ability.window [4:ability.use,ability.done] -> {"window":"before","type":"ability.done","decisionId":"d:140","seat":"B"}
+r3 movement B move.path [8:move.path,move.hold] -> {"unitId":"B-3","kind":"move","leaderId":"B-3.0","path":"path(1)->{\"x\":12.208734558559641,\"z\":-5.032620023440984}","type":"move.path","decisionId":"d:141","seat":"B"}
+r3 movement B ability.window [4:ability.use,ability.done] -> {"window":"after","type":"ability.done","decisionId":"d:142","seat":"B"}
+r3 movement A turn.activate [4:move.go,turn.hold,deploy.go,turn.pass] -> {"unitId":"A-5","type":"deploy.go","decisionId":"d:143","seat":"A"}
+r3 movement A deploy.entry [1:deploy.entry] -> {"unitId":"A-5","entry":{"kind":"edge","segment":0},"type":"deploy.entry","decisionId":"d:144","seat":"A"}
+r3 movement A deploy.path [7:deploy.path] -> {"unitId":"A-5","entry":{"kind":"edge","segment":0},"leaderId":"A-5.0","path":"path(1)->{\"x\":-9,\"z\":13.8}","type":"deploy.path","decisionId":"d:145","seat":"A"}
+r3 movement A ability.window [5:ability.use,ability.done] -> {"window":"after","type":"ability.done","decisionId":"d:146","seat":"A"}
+r3 movement B turn.activate [8:move.go,turn.hold,deploy.go,turn.pass] -> {"unitId":"B-5","type":"deploy.go","decisionId":"d:147","seat":"B"}
+r3 movement B deploy.entry [1:deploy.entry] -> {"unitId":"B-5","entry":{"kind":"edge","segment":0},"type":"deploy.entry","decisionId":"d:148","seat":"B"}
+r3 movement B deploy.path [6:deploy.path] -> {"unitId":"B-5","entry":{"kind":"edge","segment":0},"leaderId":"B-5.0","path":"path(1)->{\"x\":-14.4,\"z\":-13.8}","type":"deploy.path","decisionId":"d:149","seat":"B"}
+r3 movement B ability.window [3:ability.use,ability.done] -> {"window":"after","type":"ability.done","decisionId":"d:150","seat":"B"}
+r3 movement A turn.activate [3:move.go,turn.hold,turn.pass] -> {"unitId":"A-4","type":"move.go","decisionId":"d:151","seat":"A"}
+r3 movement A ability.window [5:ability.use,ability.done] -> {"window":"before","type":"ability.done","decisionId":"d:152","seat":"A"}
+r3 movement A move.path [8:move.path,move.hold] -> {"unitId":"A-4","kind":"move","leaderId":"A-4.0","path":"path(1)->{\"x\":-12.376681094990168,\"z\":7.875142890737062}","type":"move.path","decisionId":"d:153","seat":"A"}
+r3 movement A ability.window [5:ability.use,ability.done] -> {"window":"after","type":"ability.done","decisionId":"d:154","seat":"A"}
+r3 movement B turn.activate [7:move.go,turn.hold,turn.pass] -> {"unitId":"B-1","type":"move.go","decisionId":"d:155","seat":"B"}
+r3 movement B ability.window [3:ability.use,ability.done] -> {"window":"before","type":"ability.done","decisionId":"d:156","seat":"B"}
+r3 movement B move.path [8:move.path,move.hold] -> {"unitId":"B-1","kind":"move","leaderId":"B-1.7","path":"path(1)->{\"x\":2.777345431306184,\"z\":-4.014070440166593}","type":"move.path","decisionId":"d:157","seat":"B"}
+r3 movement B ability.window [3:ability.use,ability.done] -> {"window":"after","type":"ability.done","decisionId":"d:158","seat":"B"}
+r3 movement A turn.activate [1:turn.pass] -> {"type":"turn.pass","decisionId":"d:159","seat":"A"}
+r3 movement B turn.activate [5:move.go,turn.hold,turn.pass] -> {"unitId":"B-2","type":"move.go","decisionId":"d:160","seat":"B"}
+r3 movement B ability.window [3:ability.use,ability.done] -> {"window":"before","type":"ability.done","decisionId":"d:161","seat":"B"}
+r3 movement B move.path [8:move.path,move.hold] -> {"unitId":"B-2","kind":"move","leaderId":"B-2.0","path":"path(1)->{\"x\":-10.022553647669211,\"z\":2.5779849046980483}","type":"move.path","decisionId":"d:162","seat":"B"}
+r3 movement B ability.window [3:ability.use,ability.done] -> {"window":"after","type":"ability.done","decisionId":"d:163","seat":"B"}
+r3 movement B turn.activate [3:move.go,turn.hold,turn.pass] -> {"unitId":"B-4","type":"move.go","decisionId":"d:164","seat":"B"}
+r3 movement B ability.window [4:ability.use,ability.done] -> {"window":"before","type":"ability.done","decisionId":"d:165","seat":"B"}
+r3 movement B move.path [8:move.path,move.hold] -> {"unitId":"B-4","kind":"move","leaderId":"B-4.0","path":"path(1)->{\"x\":5.228453213332511,\"z\":-8.97071871053037}","type":"move.path","decisionId":"d:166","seat":"B"}
+r3 movement B ability.window [4:ability.use,ability.done] -> {"window":"after","type":"ability.done","decisionId":"d:167","seat":"B"}
+r3 movement B turn.activate [1:turn.pass] -> {"type":"turn.pass","decisionId":"d:168","seat":"B"}
+r3 assault A turn.first [2:turn.first] -> {"first":"A","type":"turn.first","decisionId":"d:169","seat":"A"}
+r3 assault A turn.activate [12:move.run,shoot.go,charge.go,turn.hold,turn.pass] -> {"unitId":"A-1","type":"shoot.go","decisionId":"d:170","seat":"A"}
+r3 assault A shoot.batch [13:shoot.batch] -> {"unitId":"A-1","weaponId":"c-14-rifle","targetUnitId":"B-1","type":"shoot.batch","decisionId":"d:171","seat":"A"}
+r3 assault B ability.react [2:ability.useReaction,ability.skipReaction] -> {"type":"ability.skipReaction","decisionId":"d:172","seat":"B"}
+r3 assault B ability.react [2:ability.useReaction,ability.skipReaction] -> {"type":"ability.skipReaction","decisionId":"d:173","seat":"B"}
+   ev {"type":"atk.removed","unitId":"B-1","modelIds":["B-1.9"],"cause":"attack"}
+   ev {"type":"atk.removed","unitId":"B-1","modelIds":["B-1.7"],"cause":"attack"}
+   ev {"type":"atk.removed","unitId":"B-1","modelIds":["B-1.6"],"cause":"attack"}
+   ev {"type":"atk.removed","unitId":"B-1","modelIds":["B-1.5"],"cause":"attack"}
+   ev {"type":"atk.removed","unitId":"B-1","modelIds":["B-1.4"],"cause":"attack"}
+   ev {"type":"atk.removed","unitId":"B-1","modelIds":["B-1.3"],"cause":"attack"}
+r3 assault A shoot.batch [9:shoot.batch] -> {"unitId":"A-1","weaponId":"agg-12","targetUnitId":"B-3","type":"shoot.batch","decisionId":"d:174","seat":"A"}
+r3 assault B ability.react [2:ability.useReaction,ability.skipReaction] -> {"type":"ability.skipReaction","decisionId":"d:175","seat":"B"}
+r3 assault B ability.react [2:ability.useReaction,ability.skipReaction] -> {"type":"ability.skipReaction","decisionId":"d:176","seat":"B"}
+r3 assault A shoot.batch [5:shoot.batch] -> {"unitId":"A-1","weaponId":"rocket-launcher","targetUnitId":"B-3","type":"shoot.batch","decisionId":"d:177","seat":"A"}
+r3 assault B ability.react [2:ability.useReaction,ability.skipReaction] -> {"type":"ability.skipReaction","decisionId":"d:178","seat":"B"}
+r3 assault B ability.react [2:ability.useReaction,ability.skipReaction] -> {"type":"ability.skipReaction","decisionId":"d:179","seat":"B"}
+   ev {"type":"atk.removed","unitId":"B-3","modelIds":["B-3.2"],"cause":"attack"}
+r3 assault B turn.activate [17:move.run,charge.go,turn.hold,shoot.go,turn.pass] -> {"unitId":"B-1","type":"charge.go","decisionId":"d:180","seat":"B"}
+r3 assault B ability.window [3:ability.use,ability.done] -> {"source":"evolution-chamber","abilityId":"extended-claws","window":"before","type":"ability.use","decisionId":"d:181","seat":"B"}
+r3 assault B ability.window [2:ability.use,ability.done] -> {"source":"B-1","abilityId":"metabolic-boost","window":"before","type":"ability.use","decisionId":"d:182","seat":"B"}
+r3 assault B ability.pay [3:ability.pay] -> {"cards":["spawning-pool"],"type":"ability.pay","decisionId":"d:183","seat":"B"}
+r3 assault B charge.targets [7:charge.targets] -> {"unitId":"B-1","targetIds":["A-1"],"type":"charge.targets","decisionId":"d:184","seat":"B"}
+   ev {"type":"charge.declared","unitId":"B-1","targets":["A-1"],"round":3}
+   ev {"type":"charge.rolled","unitId":"B-1","roll":5,"speed":4,"distance":9,"best2":true}
+r3 assault B ability.react [2:ability.useReaction,ability.skipReaction] -> {"type":"ability.skipReaction","decisionId":"d:185","seat":"B"}
+   ev {"type":"charge.distance","unitId":"B-1","distance":9}
+r3 assault B charge.path [6:charge.path] -> {"unitId":"B-1","leaderId":"B-1.2","path":"path(2)->{\"x\":1.8882871566981898,\"z\":0.06217097776172198}","type":"charge.path","decisionId":"d:186","seat":"B"}
+   ev {"type":"charge.succeeded","unitId":"B-1","targets":["A-1"]}
+   ev {"type":"charge.impact","unitId":"B-1"}
+   ev {"type":"atk.removed","unitId":"A-1","modelIds":["A-1.4"],"cause":"attack"}
+   ev {"type":"atk.removed","unitId":"A-1","modelIds":["A-1.3"],"cause":"attack"}
+r3 assault A atk.casualty [4:atk.casualty] -> {"modelId":"A-1.5","type":"atk.casualty","decisionId":"d:187","seat":"A"}
+   ev {"type":"atk.removed","unitId":"A-1","modelIds":["A-1.5"],"cause":"attack"}
+r3 assault A atk.casualty [3:atk.casualty] -> {"modelId":"A-1.2","type":"atk.casualty","decisionId":"d:188","seat":"A"}
+   ev {"type":"atk.removed","unitId":"A-1","modelIds":["A-1.2"],"cause":"attack"}
+r3 assault A turn.activate [8:move.run,charge.go,turn.hold,shoot.go,turn.pass] -> {"unitId":"A-4","type":"charge.go","decisionId":"d:189","seat":"A"}
+r3 assault A charge.targets [16:charge.targets] -> {"unitId":"A-4","targetIds":["B-2"],"type":"charge.targets","decisionId":"d:190","seat":"A"}
+   ev {"type":"charge.declared","unitId":"A-4","targets":["B-2"],"round":3}
+   ev {"type":"charge.rolled","unitId":"A-4","roll":1,"speed":4,"distance":5,"best2":false}
+   ev {"type":"charge.distance","unitId":"A-4","distance":5}
+r3 assault A charge.path [6:charge.path] -> {"unitId":"A-4","leaderId":"A-4.0","path":"path(1)->{\"x\":-10.53825535899218,\"z\":3.738395077756959}","type":"charge.path","decisionId":"d:191","seat":"A"}
+   ev {"type":"charge.succeeded","unitId":"A-4","targets":["B-2"]}
+r3 assault B turn.activate [11:turn.hold,move.run,charge.go,turn.pass] -> {"unitId":"B-3","type":"charge.go","decisionId":"d:192","seat":"B"}
+r3 assault B ability.window [2:ability.use,ability.done] -> {"window":"before","type":"ability.done","decisionId":"d:193","seat":"B"}
+r3 assault B charge.targets [7:charge.targets] -> {"unitId":"B-3","targetIds":["A-1"],"type":"charge.targets","decisionId":"d:194","seat":"B"}
+   ev {"type":"charge.declared","unitId":"B-3","targets":["A-1"],"round":3}
+   ev {"type":"charge.rolled","unitId":"B-3","roll":4,"speed":4,"distance":8,"best2":false}
+r3 assault B ability.react [2:ability.useReaction,ability.skipReaction] -> {"type":"ability.skipReaction","decisionId":"d:195","seat":"B"}
+   ev {"type":"charge.distance","unitId":"B-3","distance":8}
+r3 assault B charge.path [4:charge.path] -> {"unitId":"B-3","leaderId":"B-3.0","path":"path(1)->{\"x\":5.031282318154288,\"z\":-1.4993242055536422}","type":"charge.path","decisionId":"d:196","seat":"B"}
+   ev {"type":"charge.succeeded","unitId":"B-3","targets":["A-1"]}
+   ev {"type":"charge.impact","unitId":"B-3"}
+r3 assault A atk.casualty [2:atk.casualty] -> {"modelId":"A-1.1","type":"atk.casualty","decisionId":"d:197","seat":"A"}
+   ev {"type":"atk.removed","unitId":"A-1","modelIds":["A-1.1"],"cause":"attack"}
+r3 assault A turn.activate [4:move.run,charge.go,turn.hold,turn.pass] -> {"unitId":"A-5","type":"charge.go","decisionId":"d:198","seat":"A"}
+r3 assault A charge.targets [16:charge.targets] -> {"unitId":"A-5","targetIds":["B-2"],"type":"charge.targets","decisionId":"d:199","seat":"A"}
+   ev {"type":"charge.declared","unitId":"A-5","targets":["B-2"],"round":3}
+   ev {"type":"charge.rolled","unitId":"A-5","roll":6,"speed":7,"distance":13,"best2":false}
+   ev {"type":"charge.distance","unitId":"A-5","distance":13}
+r3 assault A charge.path [2:charge.path] -> {"unitId":"A-5","leaderId":"A-5.0","path":"path(2)->{\"x\":-7.8844283324973885,\"z\":3.319363552415164}","type":"charge.path","decisionId":"d:200","seat":"A"}
+   ev {"type":"charge.succeeded","unitId":"A-5","targets":["B-2"]}
+r3 assault B turn.activate [8:turn.hold,move.run,charge.go,turn.pass] -> {"unitId":"B-4","type":"move.run","decisionId":"d:201","seat":"B"}
+r3 assault B ability.window [2:ability.use,ability.done] -> {"window":"before","type":"ability.done","decisionId":"d:202","seat":"B"}
+r3 assault B move.path [8:move.path,move.hold] -> {"unitId":"B-4","kind":"run","leaderId":"B-4.0","path":"path(1)->{\"x\":4.314285813749547,\"z\":-5.076582353706213}","type":"move.path","decisionId":"d:203","seat":"B"}
+r3 assault B ability.window [2:ability.use,ability.done] -> {"window":"after","type":"ability.done","decisionId":"d:204","seat":"B"}
+r3 assault A turn.activate [1:turn.pass] -> {"type":"turn.pass","decisionId":"d:205","seat":"A"}
+r3 assault B turn.activate [5:turn.hold,move.run,charge.go,turn.pass] -> {"unitId":"B-5","type":"move.run","decisionId":"d:206","seat":"B"}
+r3 assault B ability.window [2:ability.use,ability.done] -> {"window":"before","type":"ability.done","decisionId":"d:207","seat":"B"}
+r3 assault B move.path [8:move.path,move.hold] -> {"unitId":"B-5","kind":"run","leaderId":"B-5.0","path":"path(1)->{\"x\":-12.48738778026488,\"z\":-7.066359491558828}","type":"move.path","decisionId":"d:208","seat":"B"}
+r3 assault B ability.window [2:ability.use,ability.done] -> {"window":"after","type":"ability.done","decisionId":"d:209","seat":"B"}
+r3 assault B turn.activate [2:turn.hold,turn.pass] -> {"type":"turn.pass","decisionId":"d:210","seat":"B"}
+r3 combat A turn.first [2:turn.first] -> {"first":"A","type":"turn.first","decisionId":"d:211","seat":"A"}
+r3 combat A turn.activate [3:melee.go] -> {"unitId":"A-5","type":"melee.go","decisionId":"d:212","seat":"A"}
+r3 combat A melee.closeRanks [2:melee.closeRanks] -> {"unitId":"A-5","mode":"close","type":"melee.closeRanks","decisionId":"d:213","seat":"A"}
+   ev {"type":"atk.removed","unitId":"B-2","modelIds":["B-2.0"],"cause":"attack"}
+r3 combat B turn.activate [3:melee.go] -> {"unitId":"B-2","type":"melee.go","decisionId":"d:214","seat":"B"}
+r3 combat B melee.split [2:melee.split] -> {"unitId":"B-2","surgeTarget":"A-5","type":"melee.split","decisionId":"d:215","seat":"B"}
+r3 combat A turn.activate [2:melee.go] -> {"unitId":"A-1","type":"melee.go","decisionId":"d:216","seat":"A"}
+r3 combat A melee.closeRanks [2:melee.closeRanks] -> {"unitId":"A-1","mode":"close","type":"melee.closeRanks","decisionId":"d:217","seat":"A"}
+r3 combat A melee.split [2:melee.split] -> {"unitId":"A-1","surgeTarget":"B-3","type":"melee.split","decisionId":"d:218","seat":"A"}
+r3 combat B ability.react [2:ability.useReaction,ability.skipReaction] -> {"type":"ability.skipReaction","decisionId":"d:219","seat":"B"}
+r3 combat B turn.activate [2:melee.go] -> {"unitId":"B-1","type":"melee.go","decisionId":"d:220","seat":"B"}
+r3 combat B melee.closeRanks [2:melee.closeRanks] -> {"unitId":"B-1","mode":"close","type":"melee.closeRanks","decisionId":"d:221","seat":"B"}
+   ev {"type":"atk.removed","unitId":"A-1","modelIds":["A-1.0"],"cause":"attack"}
+   ev {"type":"unitDestroyed","unitId":"A-1"}
+r3 combat A turn.activate [1:melee.go] -> {"unitId":"A-4","type":"melee.go","decisionId":"d:222","seat":"A"}
+r3 combat A melee.closeRanks [2:melee.closeRanks] -> {"unitId":"A-4","mode":"close","type":"melee.closeRanks","decisionId":"d:223","seat":"A"}
+r3 combat B turn.activate [1:turn.pass] -> {"type":"turn.pass","decisionId":"d:224","seat":"B"}
+r3 combat A turn.activate [1:turn.pass] -> {"type":"turn.pass","decisionId":"d:225","seat":"A"}
+   ev {"type":"markerControl","n":1,"from":"B","to":"A","round":3,"totals":{"A":1,"B":0}}
+   ev {"type":"vpScored","seat":"A","round":3,"vp":4,"lines":[{"rule":"supplyDestroyed","vp":1},{"rule":"perControlledMarker","vp":1},{"rule":"retakeBonus","vp":2}]}
+   ev {"type":"vpScored","seat":"B","round":3,"vp":2,"lines":[{"rule":"supplyDestroyed","vp":1},{"rule":"perControlledMarker","vp":1},{"rule":"retakeBonus","vp":0}]}
+r4 movement A turn.first [2:turn.first] -> {"first":"A","type":"turn.first","decisionId":"d:226","seat":"A"}
+r4 movement A turn.activate [5:move.disengage,turn.hold,turn.pass] -> {"type":"turn.pass","decisionId":"d:227","seat":"A"}
+r4 movement B turn.activate [11:move.go,turn.hold,move.disengage,turn.pass] -> {"unitId":"B-3","type":"move.go","decisionId":"d:228","seat":"B"}
+r4 movement B ability.window [4:ability.use,ability.done] -> {"window":"before","type":"ability.done","decisionId":"d:229","seat":"B"}
+r4 movement B move.path [8:move.path,move.hold] -> {"unitId":"B-3","kind":"move","leaderId":"B-3.0","path":"path(1)->{\"x\":8.28673254608412,\"z\":0.8249055192092944}","type":"move.path","decisionId":"d:230","seat":"B"}
+r4 movement B ability.window [4:ability.use,ability.done] -> {"window":"after","type":"ability.done","decisionId":"d:231","seat":"B"}
+r4 movement B turn.activate [9:move.go,turn.hold,move.disengage,turn.pass] -> {"unitId":"B-5","type":"move.go","decisionId":"d:232","seat":"B"}
+r4 movement B ability.window [5:ability.use,ability.done] -> {"source":"B-5","abilityId":"mutating-carapace","window":"before","type":"ability.use","decisionId":"d:233","seat":"B"}
+r4 movement B ability.target [2:ability.target] -> {"mode":"unit","unitId":"A-5","type":"ability.target","decisionId":"d:234","seat":"B"}
+r4 movement B ability.pay [4:ability.pay] -> {"cards":["spawning-pool"],"type":"ability.pay","decisionId":"d:235","seat":"B"}
+r4 movement B ability.window [4:ability.use,ability.done] -> {"window":"before","type":"ability.done","decisionId":"d:236","seat":"B"}
+r4 movement B move.path [8:move.path,move.hold] -> {"unitId":"B-5","kind":"move","leaderId":"B-5.0","path":"path(1)->{\"x\":-11.918898239506664,\"z\":-0.08948199212912122}","type":"move.path","decisionId":"d:237","seat":"B"}
+r4 movement B ability.window [4:ability.use,ability.done] -> {"window":"after","type":"ability.done","decisionId":"d:238","seat":"B"}
+r4 movement B turn.activate [7:move.go,turn.hold,move.disengage,turn.pass] -> {"unitId":"B-4","type":"move.go","decisionId":"d:239","seat":"B"}
+r4 movement B ability.window [4:ability.use,ability.done] -> {"window":"before","type":"ability.done","decisionId":"d:240","seat":"B"}
+r4 movement B move.path [8:move.path,move.hold] -> {"unitId":"B-4","kind":"move","leaderId":"B-4.0","path":"path(1)->{\"x\":0.6747588531560127,\"z\":-3.4171115033708443}","type":"move.path","decisionId":"d:241","seat":"B"}
+r4 movement B ability.window [4:ability.use,ability.done] -> {"window":"after","type":"ability.done","decisionId":"d:242","seat":"B"}
+r4 movement B turn.activate [5:move.go,turn.hold,move.disengage,turn.pass] -> {"unitId":"B-1","type":"move.go","decisionId":"d:243","seat":"B"}
+r4 movement B ability.window [3:ability.use,ability.done] -> {"window":"before","type":"ability.done","decisionId":"d:244","seat":"B"}
+r4 movement B move.path [8:move.path,move.hold] -> {"unitId":"B-1","kind":"move","leaderId":"B-1.2","path":"path(1)->{\"x\":-1.828582416001889,\"z\":1.3712845182625368}","type":"move.path","decisionId":"d:245","seat":"B"}
+r4 movement B ability.window [3:ability.use,ability.done] -> {"window":"after","type":"ability.done","decisionId":"d:246","seat":"B"}
+r4 movement B turn.activate [3:move.disengage,turn.hold,turn.pass] -> {"type":"turn.pass","decisionId":"d:247","seat":"B"}
+r4 assault A turn.first [2:turn.first] -> {"first":"A","type":"turn.first","decisionId":"d:248","seat":"A"}
+r4 assault A turn.activate [4:turn.hold,shoot.go,turn.pass] -> {"unitId":"A-5","type":"shoot.go","decisionId":"d:249","seat":"A"}
+r4 assault A shoot.batch [2:shoot.batch] -> {"unitId":"A-5","weaponId":"justice-revolver","targetUnitId":"B-2","type":"shoot.batch","decisionId":"d:250","seat":"A"}
+r4 assault B ability.react [2:ability.useReaction,ability.skipReaction] -> {"type":"ability.skipReaction","decisionId":"d:251","seat":"B"}
+r4 assault B turn.activate [14:move.run,charge.go,turn.hold,turn.pass] -> {"unitId":"B-5","type":"charge.go","decisionId":"d:252","seat":"B"}
+r4 assault B ability.window [3:ability.use,ability.done] -> {"source":"evolution-chamber","abilityId":"extended-claws","window":"before","type":"ability.use","decisionId":"d:253","seat":"B"}
+r4 assault B ability.window [2:ability.use,ability.done] -> {"window":"before","type":"ability.done","decisionId":"d:254","seat":"B"}
+r4 assault B charge.targets [3:charge.targets] -> {"unitId":"B-5","targetIds":["A-4"],"type":"charge.targets","decisionId":"d:255","seat":"B"}
+   ev {"type":"charge.declared","unitId":"B-5","targets":["A-4"],"round":4}
+   ev {"type":"charge.rolled","unitId":"B-5","roll":5,"speed":7,"distance":12,"best2":false}
+r4 assault B ability.react [2:ability.useReaction,ability.skipReaction] -> {"type":"ability.skipReaction","decisionId":"d:256","seat":"B"}
+   ev {"type":"charge.distance","unitId":"B-5","distance":12}
+r4 assault B charge.path [5:charge.path] -> {"unitId":"B-5","leaderId":"B-5.0","path":"path(2)->{\"x\":-10.869409633614534,\"z\":2.2316927464105953}","type":"charge.path","decisionId":"d:257","seat":"B"}
+   ev {"type":"charge.succeeded","unitId":"B-5","targets":["A-4"]}
+   ev {"type":"charge.impact","unitId":"B-5"}
+   ev {"type":"atk.removed","unitId":"A-4","modelIds":["A-4.2"],"cause":"attack"}
+r4 assault A turn.activate [2:turn.hold,turn.pass] -> {"type":"turn.pass","decisionId":"d:258","seat":"A"}
+r4 assault B turn.activate [11:move.run,charge.go,turn.hold,turn.pass] -> {"unitId":"B-1","type":"charge.go","decisionId":"d:259","seat":"B"}
+r4 assault B ability.window [2:ability.use,ability.done] -> {"source":"B-1","abilityId":"metabolic-boost","window":"before","type":"ability.use","decisionId":"d:260","seat":"B"}
+r4 assault B ability.pay [2:ability.pay] -> {"cards":["overseer"],"type":"ability.pay","decisionId":"d:261","seat":"B"}
+r4 assault B charge.targets [3:charge.targets] -> {"unitId":"B-1","targetIds":["A-4","A-5"],"type":"charge.targets","decisionId":"d:262","seat":"B"}
+   ev {"type":"charge.declared","unitId":"B-1","targets":["A-4","A-5"],"round":4}
+   ev {"type":"charge.rolled","unitId":"B-1","roll":3,"speed":4,"distance":7,"best2":true}
+   ev {"type":"charge.distance","unitId":"B-1","distance":7}
+r4 assault B charge.path [6:charge.path] -> {"unitId":"B-1","leaderId":"B-1.1","path":"path(1)->{\"x\":-7.28265258832533,\"z\":1.1915014484768167}","type":"charge.path","decisionId":"d:263","seat":"B"}
+   ev {"type":"charge.succeeded","unitId":"B-1","targets":["A-4","A-5"]}
+r4 assault B charge.impact [3:charge.impact] -> {"unitId":"B-1","even":true,"type":"charge.impact","decisionId":"d:264","seat":"B"}
+   ev {"type":"charge.impact","unitId":"B-1"}
+r4 assault B turn.activate [8:turn.hold,move.run,charge.go,turn.pass] -> {"unitId":"B-4","type":"move.run","decisionId":"d:265","seat":"B"}
+r4 assault B ability.window [2:ability.use,ability.done] -> {"window":"before","type":"ability.done","decisionId":"d:266","seat":"B"}
+r4 assault B move.path [8:move.path,move.hold] -> {"unitId":"B-4","kind":"run","leaderId":"B-4.0","path":"path(1)->{\"x\":-2.9647681074375223,\"z\":-1.7576406530354773}","type":"move.path","decisionId":"d:267","seat":"B"}
+r4 assault B ability.window [2:ability.use,ability.done] -> {"window":"after","type":"ability.done","decisionId":"d:268","seat":"B"}
+r4 assault B turn.activate [5:turn.hold,move.run,charge.go,turn.pass] -> {"unitId":"B-3","type":"move.run","decisionId":"d:269","seat":"B"}
+r4 assault B move.path [8:move.path,move.hold] -> {"unitId":"B-3","type":"move.hold","decisionId":"d:270","seat":"B"}
+r4 assault B turn.activate [2:turn.hold,turn.pass] -> {"type":"turn.pass","decisionId":"d:271","seat":"B"}
+r4 combat A turn.first [2:turn.first] -> {"first":"A","type":"turn.first","decisionId":"d:272","seat":"A"}
+r4 combat A turn.activate [2:melee.go] -> {"unitId":"A-5","type":"melee.go","decisionId":"d:273","seat":"A"}
+r4 combat A melee.split [2:melee.split] -> {"unitId":"A-5","surgeTarget":"B-2","type":"melee.split","decisionId":"d:274","seat":"A"}
+r4 combat B turn.activate [3:melee.go] -> {"unitId":"B-5","type":"melee.go","decisionId":"d:275","seat":"B"}
+r4 combat B melee.closeRanks [2:melee.closeRanks] -> {"unitId":"B-5","mode":"close","type":"melee.closeRanks","decisionId":"d:276","seat":"B"}
+r4 combat A turn.activate [1:melee.go] -> {"unitId":"A-4","type":"melee.go","decisionId":"d:277","seat":"A"}
+r4 combat A melee.closeRanks [2:melee.closeRanks] -> {"unitId":"A-4","mode":"close","type":"melee.closeRanks","decisionId":"d:278","seat":"A"}
+r4 combat A melee.split [3:melee.split] -> {"unitId":"A-4","surgeTarget":"B-2","type":"melee.split","decisionId":"d:279","seat":"A"}
+r4 combat B turn.activate [2:melee.go] -> {"unitId":"B-1","type":"melee.go","decisionId":"d:280","seat":"B"}
+r4 combat B melee.closeRanks [2:melee.closeRanks] -> {"unitId":"B-1","mode":"close","type":"melee.closeRanks","decisionId":"d:281","seat":"B"}
+   ev {"type":"atk.removed","unitId":"A-4","modelIds":["A-4.0"],"cause":"attack"}
+r4 combat A turn.activate [1:turn.pass] -> {"type":"turn.pass","decisionId":"d:282","seat":"A"}
+r4 combat B turn.activate [1:melee.go] -> {"unitId":"B-2","type":"melee.go","decisionId":"d:283","seat":"B"}
+r4 combat B melee.split [2:melee.split] -> {"unitId":"B-2","surgeTarget":"A-5","type":"melee.split","decisionId":"d:284","seat":"B"}
+r4 combat B turn.activate [1:turn.pass] -> {"type":"turn.pass","decisionId":"d:285","seat":"B"}
+   ev {"type":"markerControl","n":1,"from":"A","to":"B","round":4,"totals":{"A":1,"B":2}}
+   ev {"type":"markerControl","n":2,"from":null,"to":"B","round":4,"totals":{"A":0,"B":1}}
+   ev {"type":"vpScored","seat":"A","round":4,"vp":0,"lines":[{"rule":"supplyDestroyed","vp":0},{"rule":"perControlledMarker","vp":0},{"rule":"retakeBonus","vp":0}]}
+   ev {"type":"vpScored","seat":"B","round":4,"vp":6,"lines":[{"rule":"supplyDestroyed","vp":1},{"rule":"perControlledMarker","vp":3},{"rule":"retakeBonus","vp":2}]}
+r5 movement A turn.first [2:turn.first] -> {"first":"A","type":"turn.first","decisionId":"d:286","seat":"A"}
+r5 movement A turn.activate [5:move.disengage,turn.hold,turn.pass] -> {"type":"turn.pass","decisionId":"d:287","seat":"A"}
+r5 movement B turn.activate [11:move.disengage,turn.hold,move.go,turn.pass] -> {"unitId":"B-3","type":"move.go","decisionId":"d:288","seat":"B"}
+r5 movement B ability.window [4:ability.use,ability.done] -> {"window":"before","type":"ability.done","decisionId":"d:289","seat":"B"}
+r5 movement B move.path [8:move.path,move.hold] -> {"unitId":"B-3","kind":"move","leaderId":"B-3.0","path":"path(1)->{\"x\":4.333129944753212,\"z\":1.4323810090436386}","type":"move.path","decisionId":"d:290","seat":"B"}
+r5 movement B ability.window [4:ability.use,ability.done] -> {"window":"after","type":"ability.done","decisionId":"d:291","seat":"B"}
+r5 movement B turn.activate [9:move.disengage,turn.hold,move.go,turn.pass] -> {"unitId":"B-4","type":"move.go","decisionId":"d:292","seat":"B"}
+r5 movement B ability.window [4:ability.use,ability.done] -> {"window":"before","type":"ability.done","decisionId":"d:293","seat":"B"}
+r5 movement B move.path [8:move.path,move.hold] -> {"unitId":"B-4","kind":"move","leaderId":"B-4.0","path":"path(1)->{\"x\":-2.9070841827903453,\"z\":2.241943395942278}","type":"move.path","decisionId":"d:294","seat":"B"}
+r5 movement B ability.window [4:ability.use,ability.done] -> {"window":"after","type":"ability.done","decisionId":"d:295","seat":"B"}
+r5 movement B turn.activate [7:move.disengage,turn.hold,turn.pass] -> {"type":"turn.pass","decisionId":"d:296","seat":"B"}
+r5 assault A turn.first [2:turn.first] -> {"first":"A","type":"turn.first","decisionId":"d:297","seat":"A"}
+r5 assault A turn.activate [4:turn.hold,shoot.go,turn.pass] -> {"unitId":"A-5","type":"shoot.go","decisionId":"d:298","seat":"A"}
+r5 assault A shoot.batch [2:shoot.batch] -> {"unitId":"A-5","weaponId":"justice-revolver","targetUnitId":"B-2","type":"shoot.batch","decisionId":"d:299","seat":"A"}
+r5 assault B ability.react [2:ability.useReaction,ability.skipReaction] -> {"type":"ability.skipReaction","decisionId":"d:300","seat":"B"}
+r5 assault B turn.activate [11:turn.hold,move.run,charge.go,shoot.go,turn.pass] -> {"unitId":"B-4","type":"charge.go","decisionId":"d:301","seat":"B"}
+r5 assault B ability.window [3:ability.use,ability.done] -> {"source":"evolution-chamber","abilityId":"extended-claws","window":"before","type":"ability.use","decisionId":"d:302","seat":"B"}
+r5 assault B ability.window [2:ability.use,ability.done] -> {"window":"before","type":"ability.done","decisionId":"d:303","seat":"B"}
+r5 assault B charge.targets [3:charge.targets] -> {"unitId":"B-4","targetIds":["A-5"],"type":"charge.targets","decisionId":"d:304","seat":"B"}
+   ev {"type":"charge.declared","unitId":"B-4","targets":["A-5"],"round":5}
+   ev {"type":"charge.rolled","unitId":"B-4","roll":2,"speed":4,"distance":6,"best2":false}
+r5 assault B ability.react [2:ability.useReaction,ability.skipReaction] -> {"type":"ability.skipReaction","decisionId":"d:305","seat":"B"}
+   ev {"type":"charge.distance","unitId":"B-4","distance":6}
+r5 assault B charge.path [4:charge.path] -> {"unitId":"B-4","leaderId":"B-4.0","path":"path(1)->{\"x\":-5.569095495519837,\"z\":2.8128312024285074}","type":"charge.path","decisionId":"d:306","seat":"B"}
+   ev {"type":"charge.succeeded","unitId":"B-4","targets":["A-5"]}
+   ev {"type":"charge.impact","unitId":"B-4"}
+r5 assault A ability.react [2:ability.useReaction,ability.skipReaction] -> {"type":"ability.skipReaction","decisionId":"d:307","seat":"A"}
+r5 assault B ability.window [2:ability.use,ability.done] -> {"window":"after","type":"ability.done","decisionId":"d:308","seat":"B"}
+r5 assault A turn.activate [2:turn.hold,turn.pass] -> {"type":"turn.pass","decisionId":"d:309","seat":"A"}
+r5 assault B turn.activate [8:turn.hold,move.run,charge.go,shoot.go,turn.pass] -> {"unitId":"B-5","type":"shoot.go","decisionId":"d:310","seat":"B"}
+r5 assault B shoot.batch [2:shoot.batch] -> {"unitId":"B-5","weaponId":"energy-blast","targetUnitId":"A-4","type":"shoot.batch","decisionId":"d:311","seat":"B"}
+r5 assault B turn.activate [6:turn.hold,move.run,charge.go,turn.pass] -> {"unitId":"B-3","type":"move.run","decisionId":"d:312","seat":"B"}
+r5 assault B ability.window [2:ability.use,ability.done] -> {"window":"before","type":"ability.done","decisionId":"d:313","seat":"B"}
+r5 assault B move.path [8:move.path,move.hold] -> {"unitId":"B-3","kind":"run","leaderId":"B-3.0","path":"path(1)->{\"x\":0.3795273434223039,\"z\":2.039856498877983}","type":"move.path","decisionId":"d:314","seat":"B"}
+r5 assault B ability.window [2:ability.use,ability.done] -> {"window":"after","type":"ability.done","decisionId":"d:315","seat":"B"}
+r5 assault B turn.activate [3:turn.hold,turn.pass] -> {"type":"turn.pass","decisionId":"d:316","seat":"B"}
+r5 combat A turn.first [2:turn.first] -> {"first":"A","type":"turn.first","decisionId":"d:317","seat":"A"}
+r5 combat A turn.activate [2:melee.go] -> {"unitId":"A-5","type":"melee.go","decisionId":"d:318","seat":"A"}
+r5 combat A melee.split [2:melee.split] -> {"unitId":"A-5","surgeTarget":"B-2","type":"melee.split","decisionId":"d:319","seat":"A"}
+r5 combat B ability.react [2:ability.useReaction,ability.skipReaction] -> {"type":"ability.skipReaction","decisionId":"d:320","seat":"B"}
+   ev {"type":"atk.removed","unitId":"B-2","modelIds":["B-2.5"],"cause":"attack"}
+   ev {"type":"unitDestroyed","unitId":"B-2"}
+r5 combat B turn.activate [3:melee.go] -> {"unitId":"B-4","type":"melee.go","decisionId":"d:321","seat":"B"}
+r5 combat B ability.window [3:ability.use,ability.done] -> {"source":"spawning-pool","abilityId":"feral-rage","window":"before","type":"ability.use","decisionId":"d:322","seat":"B"}
+r5 combat B ability.window [2:ability.use,ability.done] -> {"window":"before","type":"ability.done","decisionId":"d:323","seat":"B"}
+r5 combat B melee.closeRanks [2:melee.closeRanks] -> {"unitId":"B-4","mode":"close","type":"melee.closeRanks","decisionId":"d:324","seat":"B"}
+r5 combat A ability.react [2:ability.useReaction,ability.skipReaction] -> {"type":"ability.skipReaction","decisionId":"d:325","seat":"A"}
+r5 combat B ability.window [2:ability.use,ability.done] -> {"window":"after","type":"ability.done","decisionId":"d:326","seat":"B"}
+r5 combat A turn.activate [1:melee.go] -> {"unitId":"A-4","type":"melee.go","decisionId":"d:327","seat":"A"}
+r5 combat A melee.closeRanks [2:melee.closeRanks] -> {"unitId":"A-4","mode":"close","type":"melee.closeRanks","decisionId":"d:328","seat":"A"}
+r5 combat A melee.split [2:melee.split] -> {"unitId":"A-4","surgeTarget":"B-5","type":"melee.split","decisionId":"d:329","seat":"A"}
+r5 combat B turn.activate [2:melee.go] -> {"unitId":"B-1","type":"melee.go","decisionId":"d:330","seat":"B"}
+r5 combat B melee.closeRanks [2:melee.closeRanks] -> {"unitId":"B-1","mode":"close","type":"melee.closeRanks","decisionId":"d:331","seat":"B"}
+   ev {"type":"atk.removed","unitId":"A-4","modelIds":["A-4.1"],"cause":"attack"}
+   ev {"type":"unitDestroyed","unitId":"A-4"}
+r5 combat A turn.activate [1:turn.pass] -> {"type":"turn.pass","decisionId":"d:332","seat":"A"}
+r5 combat B turn.activate [1:turn.pass] -> {"type":"turn.pass","decisionId":"d:333","seat":"B"}
+   ev {"type":"vpScored","seat":"A","round":5,"vp":0,"lines":[{"rule":"supplyDestroyed","vp":0},{"rule":"perControlledMarker","vp":0},{"rule":"retakeBonus","vp":0}]}
+   ev {"type":"vpScored","seat":"B","round":5,"vp":3,"lines":[{"rule":"supplyDestroyed","vp":0},{"rule":"perControlledMarker","vp":3},{"rule":"retakeBonus","vp":0}]}
+END over {"winner":"B","reason":"B led by 8 VP or more, which ends the game at once.","kind":"special","vp":{"A":5,"B":15}} {"A":5,"B":15}
+unit A A-1 destroyed 0
+unit A A-2 destroyed 0
+unit A A-3 destroyed 0
+unit A A-4 destroyed 0
+unit A A-5 table 5
+unit B B-1 table 0
+unit B B-2 destroyed 0
+unit B B-3 table 1
+unit B B-4 table 0
+unit B B-5 table 0

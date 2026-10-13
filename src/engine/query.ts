@@ -4,7 +4,7 @@
 // Pure: hooks are read with noPrompt and their state changes are thrown away.
 import type { EditionBundle, Id } from '../data/types'
 import { buildBatch, evadeReasons, hasKw, kwX, modelRoa, weaponKeywords } from './attack'
-import { chargeNeeded, chargeTargets } from './charge'
+import { chargeNeeded, chargeTargets, impactOf } from './charge'
 import { contest } from './control'
 import { atLeastP, binomial, convolve, exprDistribution, finalTN, mean, pAtLeast, pSuccess } from './dice'
 import { keywordOf, rollModOf, statOf, weaponProfile, type StatCtx } from './effects'
@@ -15,7 +15,7 @@ import { highGroundCover, losBetween } from './los'
 import { missionOf, scoreRules, sideFor } from './missions'
 import { moveReach } from './movement'
 import { isRejection } from './errors'
-import { meleeTargets } from './melee'
+import { fightingRank, meleeTargets, supportingRank } from './melee'
 import { previewBatch } from './shooting'
 import { coherencyDistance, coherencyState, linkValid, squadCtx, tableModels, unitModels } from './squads'
 import { planBatches } from './shooting'
@@ -434,3 +434,38 @@ export function shootOptions(state: GameState, bundle: EditionBundle, unitId: Un
   return out(true, undefined, weapons)
 }
 void hasKw
+
+// ---------------------------------------------------------------- AI additions (spec 00 s10)
+export interface ImpactPreview { x: number; y: number; dice: number; expectedHits: number; expectedDamage: number; expectedSupplyRemoved: number; killChance: number }
+/** IMPACT of `chargerUnitId` against `targetUnitId` as the unit stands in `state` (ask a shim with the charger beside the
+ *  target): X dice per ranked model that reaches the target, hit at Y+ (a Test), then Armour and Evade-free damage of 1.
+ *  Null when the unit has no IMPACT, no ranked model reaches the target, or the target is HIDDEN. */
+export function impactPreview(state: GameState, bundle: EditionBundle, chargerUnitId: UnitId, targetUnitId: UnitId): ImpactPreview | null {
+  const imp = impactOf(state, bundle, chargerUnitId)
+  const target = state.units[targetUnitId]
+  if (!imp || !target || hasStatus(state, targetUnitId, 'HIDDEN')) return null
+  const ranked = [...fightingRank(state, bundle, chargerUnitId), ...supportingRank(state, bundle, chargerUnitId)]
+    .filter((id) => meleeTargets(state, bundle, id).includes(targetUnitId))
+  const dice = imp.x * ranked.length
+  if (dice <= 0) return null
+  const hits = binomial(dice, pSuccess(finalTN(bundle, imp.y, [])))
+  const armourTN = finalTN(bundle, statOf(state, bundle, targetUnitId, 'armour', { targetUnitId, attack: 'closeCombat' }), [])
+  const pFail = 1 - pSuccess(armourTN)
+  const eligible = tableModels(state, targetUnitId)
+  const alive = eligible.length
+  const def = unitDef(bundle, target.profileId)
+  let expectedHits = 0, expectedDamage = 0, expectedSupplyRemoved = 0, killChance = 0
+  const dmgDist: number[] = []
+  hits.forEach((ph, h) => {
+    expectedHits += ph * h
+    binomial(h, pFail).forEach((pf, f) => { dmgDist[f] = (dmgDist[f] ?? 0) + ph * pf })
+  })
+  dmgDist.forEach((p, k) => {
+    if (!p) return
+    expectedDamage += p * k
+    const gone = k === 0 ? 0 : removedFor(eligible, k + target.damage, null).length
+    if (def) expectedSupplyRemoved += p * (bracketSupply(def, alive) - bracketSupply(def, alive - gone))
+    if (gone >= alive) killChance += p
+  })
+  return { x: imp.x, y: imp.y, dice, expectedHits, expectedDamage, expectedSupplyRemoved, killChance }
+}

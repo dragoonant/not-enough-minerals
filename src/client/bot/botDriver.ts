@@ -2,9 +2,9 @@
 // is idle AND the figures of the game have loaded (uiStore.figuresReady), so a bot never acts over an animation the
 // player has not seen or before the table is drawn. A watchdog force-answers when a bot decision has made no progress
 // for WATCHDOG_MS (5 s), whatever the presentation or the figures are doing. Per-decision AI time budget: VITE_AI_MS.
-// M3: every tier plays the seeded random bot. M4 installs the tier brains with setTierBrains(createAiBrain).
+// The tier brains (createAiBrain: Web Worker, in-thread fallback) are installed by default; setTierBrains(null) = random.
 import type { Action } from '../../engine/types'
-import { aiBudgetMs, TIER_IDS, type Tier } from '../../ai/types'
+import { AI_WORKER_TIMEOUT_MS, aiBudgetMs, TIER_IDS, type Tier } from '../../ai/types'
 import { view as aiViewOf } from '../../engine/view'
 import { readParams } from '../params'
 import { isFiguresReady, useFocusStore } from '../store/uiStore'
@@ -12,16 +12,14 @@ import { skipAll } from '../presentation/director'
 import { isPresentationIdle, usePresentedStore } from '../presentation/presentedStore'
 import { dispatch, isBotDecision, legalFor, ownerSeat, preview, useGameStore } from '../store/gameStore'
 import { scaled } from '../store/settingsStore'
+import { createAiBrain } from './aiWorkerClient'
 import { completeAction, PARAMETERISED, randomBrain, type BotBrain, type BotContext } from './randomBot'
 
 export const WATCHDOG_MS = 5000
 /** Pause before a bot answers at speed 1 so a human can follow along (scaled by speed; 0 when instant). */
 export const BOT_THINK_MS = 350
-/** Per-decision AI budget (CI runners are slow): VITE_AI_MS, default 2000 ms. */
-export const AI_MS: number = (() => {
-  const v = Number((import.meta as { env?: Record<string, unknown> }).env?.VITE_AI_MS)
-  return Number.isFinite(v) && v > 0 ? v : 2000
-})()
+/** Per-decision AI budget (CI runners are slow): AI_MS / VITE_AI_MS, default 150 ms (ai/types aiBudgetMs). */
+export const AI_MS: number = aiBudgetMs()
 
 let override: BotBrain | null = null
 /** Install a fixed bot brain (tests, tooling). null restores the tier-driven brain. */
@@ -36,7 +34,7 @@ export function launchTier(): Tier {
 
 /** M4 seam: a factory that builds the brain for a tier (e.g. aiWorkerClient.createAiBrain). Null = random for every tier. */
 export type TierBrainFactory = (tier: Tier) => BotBrain & { dispose?(): void }
-let tierFactory: TierBrainFactory | null = null
+let tierFactory: TierBrainFactory | null = (tier) => createAiBrain(tier)
 export function setTierBrains(f: TierBrainFactory | null): void { tierFactory = f; tiered?.dispose?.(); tiered = null }
 
 let tiered: { key: string; brain: BotBrain; dispose?: () => void } | null = null
@@ -55,6 +53,13 @@ function brainFor(tier: Tier): BotBrain {
 /** Brain for a bot seat: the tier brain (every bot seat plays the launch tier). */
 function brainForSeat(_controller: string | undefined): BotBrain {
   return brainFor(launchTier())
+}
+
+/** How long the driver waits for the brain before force-answering. The brain's own worker timeout plus its main-thread
+ *  search (up to 4x the budget) must fit inside it, or a slow worker always loses to force() and the main-thread answer
+ *  never runs; it stays under the watchdog. */
+export function botRaceMs(budgetMs: number, watchdogMs: number = WATCHDOG_MS): number {
+  return Math.max(budgetMs, Math.min(AI_WORKER_TIMEOUT_MS + 4 * aiBudgetMs() + 250, watchdogMs - 150))
 }
 
 export interface BotDriverOptions {
@@ -147,9 +152,8 @@ export function createBotDriver(opts: BotDriverOptions = {}): BotDriver {
     const seat = ownerSeat(p, s)!
     const legal = legalFor(s.state)
     inflight = key
-    const ctx = contextFor(s.seed, budgetMs)
-    // Headroom over the AI's own budget (worker start-up, clone, edition load): the search ends well before this gives up.
-    const raceMs = Math.max(budgetMs, aiBudgetMs() * 3 + 1000)
+    const ctx: BotContext = { ...contextFor(s.seed, budgetMs), isCurrent: () => running && decisionKey() === key }
+    const raceMs = botRaceMs(budgetMs, watchdogMs)
     const timeout = new Promise<null>((res) => { setT(() => res(null), raceMs) })
     Promise.race([Promise.resolve().then(() => brainForSeat(s.controllers[seat])(aiViewOf(s.state!, seat), p, legal, ctx)), timeout])
       .catch(() => null)

@@ -275,3 +275,7 @@ Windows PC with 40 figures (two Founders armies) and 15 terrain pieces.
   (pairs with base edges within the coherency distance and a valid link). `ObjectiveStatus` gains `markerRadius`,
   `contestRadius` (inches) and `contested` (two or more seats have a Unit that can contest the marker); the client
   reads these instead of computing the ring.
+- M4 (AI, 2026-10-13): additive `query.ts` helper `impactPreview(state, bundle, chargerUnitId, targetUnitId)` ->
+  `{x, y, dice, expectedHits, expectedDamage, expectedSupplyRemoved, killChance} | null`: IMPACT dice (charge.impactOf
+  X per fighting/supporting-rank model that reaches the target) hit at Y+, then Armour, damage 1 per die. Ask it on a
+  shim with the charger beside the target; the AI adds `chargeOdds.chance x expectedSupplyRemoved` to a charge's value.

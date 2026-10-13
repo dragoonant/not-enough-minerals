@@ -1,12 +1,15 @@
-// AI Web Worker host (spec 40). The edition bundle loads inside the worker once; the main thread posts the seat's
+// AI Web Worker host (FROZEN at M4; spec 30 s11). The edition bundle loads inside the worker once; the main thread posts the seat's
 // view, the open decision and the legal answers, and gets an action back, so a slow decision never blocks rendering.
 // Messages: init -> ready; decide {id, view, pending, legal, tier, seed, memoryKey, budgetMs?} ->
 // action {id, action, ms, fallback} | error {id, message}. handleRequest is the pure core (node tests call it).
-// Client wiring (owner W): src/client/bot/aiWorkerClient.ts posts here and installs the result with setBotBrain.
+// Client wiring (owner W): src/client/bot/aiWorkerClient.ts posts here, gives up after AI_WORKER_TIMEOUT_MS (3 s) and
+// answers on the main thread instead; parameterised answers are re-checked on the real state there.
+// Parameterised answers are dry-run in the worker with shimAccepts(view) (world.ts); the host re-validates.
 import type { EditionBundle } from '../data/types'
 import type { Action, PendingDecision, PlayerView } from '../engine/types'
 import { createAiDecider, type AiDecider } from './decider'
 import type { Tier } from './types'
+import { shimAccepts } from './world'
 
 export type WorkerRequest =
   | { type: 'init' }
@@ -17,7 +20,7 @@ export type WorkerResponse =
   | { type: 'error'; id: number; message: string }
 
 const MAX_DECIDERS = 8
-const deciders = new Map<string, AiDecider>()
+const deciders = new Map<string, { d: AiDecider; view: { current: PlayerView | null } }>()
 
 /** Answer one request with the bundle loaded by the host. Deciders (and their memory) are kept per memoryKey + tier. */
 export function handleRequest(req: WorkerRequest, bundle: EditionBundle): WorkerResponse | null {
@@ -26,13 +29,16 @@ export function handleRequest(req: WorkerRequest, bundle: EditionBundle): Worker
   const t0 = typeof performance !== 'undefined' ? performance.now() : Date.now()
   try {
     const key = `${req.memoryKey}:${req.tier}`
-    let d = deciders.get(key)
-    if (!d) {
+    let e = deciders.get(key)
+    if (!e) {
       if (deciders.size >= MAX_DECIDERS) deciders.clear()
-      d = createAiDecider(req.tier, { seed: req.seed, bundle, ...(req.budgetMs ? { budgetMs: req.budgetMs } : {}) })
-      deciders.set(key, d)
+      const view: { current: PlayerView | null } = { current: null }
+      const accepts = (a: Action): boolean => !!view.current && shimAccepts(view.current, bundle)(a)
+      e = { d: createAiDecider(req.tier, { seed: req.seed, bundle, accepts, ...(req.budgetMs ? { budgetMs: req.budgetMs } : {}) }), view }
+      deciders.set(key, e)
     }
-    const { action, fallback } = d.decideSync(req.view, req.pending, req.legal)
+    e.view.current = req.view
+    const { action, fallback } = e.d.decideSync(req.view, req.pending, req.legal)
     const ms = (typeof performance !== 'undefined' ? performance.now() : Date.now()) - t0
     return { type: 'action', id: req.id, action, ms, fallback }
   } catch (e) {
