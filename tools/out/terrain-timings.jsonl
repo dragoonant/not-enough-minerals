@@ -1,0 +1,80 @@
+{"stage": "concept", "slug": "outpost-bunker", "seconds": 159.4, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T18:06:17", "images": 4, "steps": 30}
+{"stage": "concept", "slug": "outpost-barricade", "seconds": 177.8, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T18:09:15", "images": 4, "steps": 30}
+{"stage": "cutout", "slug": "outpost-bunker", "seconds": 19.4, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T19:30:45", "pick": "art/terrain/concepts/outpost-bunker.png"}
+{"stage": "cutout", "slug": "outpost-comm-tower", "seconds": 20.5, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T19:31:05", "pick": "art/terrain/concepts/outpost-comm-tower.png"}
+{"stage": "cutout", "slug": "outpost-depot", "seconds": 18.8, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T19:31:24", "pick": "art/terrain/concepts/outpost-depot.png"}
+{"stage": "cutout", "slug": "outpost-generator", "seconds": 18.1, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T19:31:42", "pick": "art/terrain/concepts/outpost-generator.png"}
+{"stage": "cutout", "slug": "outpost-barricade", "seconds": 18.3, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T19:32:00", "pick": "art/terrain/concepts/outpost-barricade.png"}
+{"stage": "cutout", "slug": "outpost-gate-fence", "seconds": 18.4, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T19:32:19", "pick": "art/terrain/concepts/outpost-gate-fence.png"}
+{"stage": "cutout", "slug": "outpost-blast-wall", "seconds": 18.0, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T19:32:37", "pick": "art/terrain/concepts/outpost-blast-wall.png"}
+{"stage": "cutout", "slug": "outpost-fuel-tanks", "seconds": 18.3, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T19:32:55", "pick": "art/terrain/concepts/outpost-fuel-tanks.png"}
+{"stage": "cutout", "slug": "outpost-crate-stack", "seconds": 18.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T19:33:13", "pick": "art/terrain/concepts/outpost-crate-stack.png"}
+{"stage": "cutout", "slug": "outpost-containers", "seconds": 18.3, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T19:33:32", "pick": "art/terrain/concepts/outpost-containers.png"}
+{"stage": "cutout", "slug": "outpost-silo", "seconds": 20.1, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T19:33:52", "pick": "art/terrain/concepts/outpost-silo.png"}
+{"stage": "cutout", "slug": "outpost-dish", "seconds": 19.1, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T19:34:11", "pick": "art/terrain/concepts/outpost-dish.png"}
+{"stage": "shape-load", "slug": "-", "seconds": 42.8, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T19:36:09"}
+{"stage": "shape-load", "slug": "-", "seconds": 35.9, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T19:37:43"}
+{"stage": "shape-load", "slug": "-", "seconds": 32.9, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T19:40:09"}
+{"stage": "shape-load", "slug": "-", "seconds": 33.1, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T19:41:55"}
+{"stage": "shape", "slug": "outpost-bunker", "seconds": 90.6, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T19:43:26", "faces": 6000, "octree": 256, "offload": true, "peak_gb": 6.9}
+{"stage": "paint-load", "slug": "-", "seconds": 21.5, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T19:44:57"}
+{"stage": "paint-load", "slug": "-", "seconds": 15.6, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T19:45:56"}
+{"stage": "paint", "slug": "outpost-bunker", "seconds": 126.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T19:48:03", "peak_gb": 9.7}
+{"stage": "fit", "slug": "outpost-bunker", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T19:48:51", "faces": 6000, "stretch": 1.54, "turned": false}
+{"stage": "paint-load", "slug": "-", "seconds": 21.7, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T19:51:33"}
+{"stage": "shape-load", "slug": "-", "seconds": 32.4, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T19:53:21"}
+{"stage": "shape-load", "slug": "-", "seconds": 34.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T19:55:19"}
+{"stage": "shape-load", "slug": "-", "seconds": 35.0, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T19:58:54"}
+{"stage": "shape", "slug": "outpost-comm-tower", "seconds": 93.1, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:00:27", "faces": 6000, "octree": 256, "offload": true, "peak_gb": 6.9}
+{"stage": "shape-load", "slug": "-", "seconds": 34.4, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:01:40"}
+{"stage": "shape", "slug": "outpost-depot", "seconds": 93.8, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:03:14", "faces": 6000, "octree": 256, "offload": true, "peak_gb": 6.9}
+{"stage": "shape", "slug": "outpost-generator", "seconds": 97.3, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:04:51", "faces": 6000, "octree": 256, "offload": true, "peak_gb": 6.9}
+{"stage": "shape", "slug": "outpost-barricade", "seconds": 80.1, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:06:11", "faces": 6000, "octree": 256, "offload": true, "peak_gb": 6.9}
+{"stage": "shape", "slug": "outpost-gate-fence", "seconds": 81.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:07:32", "faces": 6000, "octree": 256, "offload": true, "peak_gb": 6.9}
+{"stage": "shape", "slug": "outpost-blast-wall", "seconds": 75.9, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:08:48", "faces": 6000, "octree": 256, "offload": true, "peak_gb": 6.9}
+{"stage": "shape", "slug": "outpost-fuel-tanks", "seconds": 87.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:10:16", "faces": 6000, "octree": 256, "offload": true, "peak_gb": 6.9}
+{"stage": "shape", "slug": "outpost-crate-stack", "seconds": 82.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:11:38", "faces": 6000, "octree": 256, "offload": true, "peak_gb": 6.9}
+{"stage": "shape", "slug": "outpost-containers", "seconds": 89.1, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:13:07", "faces": 6000, "octree": 256, "offload": true, "peak_gb": 6.9}
+{"stage": "fit", "slug": "outpost-bunker", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:13:41", "faces": 6000, "stretch": 1.54, "turned": false}
+{"stage": "shape", "slug": "outpost-silo", "seconds": 77.4, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:14:24", "faces": 6000, "octree": 256, "offload": true, "peak_gb": 6.9}
+{"stage": "shape", "slug": "outpost-dish", "seconds": 79.1, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:15:43", "faces": 6000, "octree": 256, "offload": true, "peak_gb": 6.9}
+{"stage": "paint-load", "slug": "-", "seconds": 17.6, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:16:28"}
+{"stage": "paint", "slug": "outpost-comm-tower", "seconds": 68.5, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:17:36", "peak_gb": 9.7}
+{"stage": "paint", "slug": "outpost-depot", "seconds": 72.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:18:49", "peak_gb": 9.7}
+{"stage": "paint", "slug": "outpost-generator", "seconds": 163.1, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:21:32", "peak_gb": 9.7}
+{"stage": "paint", "slug": "outpost-barricade", "seconds": 67.5, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:22:40", "peak_gb": 9.7}
+{"stage": "paint", "slug": "outpost-gate-fence", "seconds": 301.7, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:27:42", "peak_gb": 9.7}
+{"stage": "fit", "slug": "outpost-bunker", "seconds": 0.3, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:34:59", "faces": 6000, "stretch": 1.54, "turned": false}
+{"stage": "fit", "slug": "outpost-comm-tower", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:34:59", "faces": 6000, "stretch": 1.22, "turned": false}
+{"stage": "fit", "slug": "outpost-depot", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:34:59", "faces": 6000, "stretch": 1.71, "turned": false}
+{"stage": "fit", "slug": "outpost-generator", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:35:00", "faces": 6000, "stretch": 1.09, "turned": false}
+{"stage": "fit", "slug": "outpost-barricade", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:35:00", "faces": 6000, "stretch": 2.42, "turned": false}
+{"stage": "fit", "slug": "outpost-gate-fence", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:35:00", "faces": 6000, "stretch": 2.14, "turned": false}
+{"stage": "paint", "slug": "outpost-blast-wall", "seconds": 450.0, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:35:13", "peak_gb": 9.7}
+{"stage": "paint", "slug": "outpost-fuel-tanks", "seconds": 82.7, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:36:36", "peak_gb": 9.7}
+{"stage": "paint", "slug": "outpost-crate-stack", "seconds": 156.0, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:39:13", "peak_gb": 9.7}
+{"stage": "paint", "slug": "outpost-containers", "seconds": 109.5, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:41:03", "peak_gb": 9.7}
+{"stage": "paint", "slug": "outpost-silo", "seconds": 73.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:42:16", "peak_gb": 9.7}
+{"stage": "paint", "slug": "outpost-dish", "seconds": 73.1, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:43:30", "peak_gb": 9.7}
+{"stage": "fit", "slug": "outpost-bunker", "seconds": 0.3, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:44:08", "faces": 6000, "stretch": 1.54, "turned": false}
+{"stage": "fit", "slug": "outpost-comm-tower", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:44:08", "faces": 6000, "stretch": 1.22, "turned": false}
+{"stage": "fit", "slug": "outpost-depot", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:44:08", "faces": 6000, "stretch": 1.71, "turned": false}
+{"stage": "fit", "slug": "outpost-generator", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:44:08", "faces": 6000, "stretch": 1.09, "turned": false}
+{"stage": "fit", "slug": "outpost-barricade", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:44:09", "faces": 6000, "stretch": 2.42, "turned": false}
+{"stage": "fit", "slug": "outpost-gate-fence", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:44:09", "faces": 6000, "stretch": 2.14, "turned": false}
+{"stage": "fit", "slug": "outpost-blast-wall", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:44:09", "faces": 6000, "stretch": 3.29, "turned": false}
+{"stage": "fit", "slug": "outpost-fuel-tanks", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:44:09", "faces": 6000, "stretch": 1.55, "turned": false}
+{"stage": "fit", "slug": "outpost-crate-stack", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:44:09", "faces": 6000, "stretch": 1.4, "turned": false}
+{"stage": "fit", "slug": "outpost-containers", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:44:10", "faces": 6000, "stretch": 1.44, "turned": false}
+{"stage": "fit", "slug": "outpost-silo", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:44:10", "faces": 6000, "stretch": 2.87, "turned": false}
+{"stage": "fit", "slug": "outpost-dish", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:44:10", "faces": 6000, "stretch": 1.63, "turned": false}
+{"stage": "cutout", "slug": "outpost-blast-wall", "seconds": 17.5, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:49:22", "pick": "art/terrain/concepts/outpost-blast-wall.png"}
+{"stage": "cutout", "slug": "outpost-silo", "seconds": 17.1, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:49:39", "pick": "art/terrain/concepts/outpost-silo.png"}
+{"stage": "shape-load", "slug": "-", "seconds": 34.1, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:50:40"}
+{"stage": "shape", "slug": "outpost-blast-wall", "seconds": 72.5, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:51:53", "faces": 6000, "octree": 256, "offload": true, "peak_gb": 6.9}
+{"stage": "shape", "slug": "outpost-silo", "seconds": 80.6, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:53:13", "faces": 6000, "octree": 256, "offload": true, "peak_gb": 6.9}
+{"stage": "paint-load", "slug": "-", "seconds": 17.7, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:53:58"}
+{"stage": "paint", "slug": "outpost-blast-wall", "seconds": 75.6, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:55:13", "peak_gb": 9.7}
+{"stage": "paint", "slug": "outpost-silo", "seconds": 75.4, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:56:29", "peak_gb": 9.7}
+{"stage": "fit", "slug": "outpost-blast-wall", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:56:52", "faces": 6000, "stretch": 2.18, "turned": true}
+{"stage": "fit", "slug": "outpost-silo", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:56:52", "faces": 6000, "stretch": 1.49, "turned": false}

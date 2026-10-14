@@ -1,7 +1,7 @@
 // Generates every terrain GLB + manifest.json + catalog.json. Run from the repo root: node art/terrain/gen-terrain.mjs
 // Sizes are the engine's terrain footprints (generateTerrain + demo table); each piece stands on a base plate cut to its exact
 // footprint so the rules edge is the visible base edge. Original designs only (no Blizzard IP).
-import { mkdirSync, writeFileSync, readdirSync, unlinkSync } from 'node:fs'
+import { mkdirSync, writeFileSync, readdirSync, unlinkSync, readFileSync } from 'node:fs'
 import { Piece, bboxOf, toGlb } from './lib.mjs'
 
 const OUT = 'public/assets/terrain'
@@ -359,7 +359,9 @@ for (const [kind, g] of Object.entries(SETS)) {
 }
 pieces.push(...extras())
 
-for (const f of readdirSync(OUT)) if (f.endsWith('.glb')) unlinkSync(`${OUT}/${f}`)
+// Slugs rebuilt by the Hunyuan terrain pass (tools/models/terrain/pieces.json) keep their GLB; only their manifest row is written here.
+const HUNYUAN = new Set(Object.keys(JSON.parse(readFileSync('tools/models/terrain/pieces.json', 'utf8'))).filter((k) => !k.startsWith('_')))
+for (const f of readdirSync(OUT)) if (f.endsWith('.glb') && !HUNYUAN.has(f.slice(0, -4))) unlinkSync(`${OUT}/${f}`)
 mkdirSync(OUT, { recursive: true })
 const manifest = {}, catalog = []
 let bad = 0
@@ -370,7 +372,7 @@ for (const [slug, P, theme, rulesType, shape] of pieces) {
   const off = [Math.abs(bb.min.x + bb.max.x) / 2, Math.abs(bb.min.z + bb.max.z) / 2, Math.abs(bb.min.y)]
   const err = got.map((v, i) => Math.abs(v - size[i]))
   if (err[0] > 0.02 || err[1] > 0.02 || err[2] > 0.06 || off[0] > 0.02 || off[1] > 0.02 || off[2] > 0.001) { bad++; console.log('BBOX', slug, 'want', size, 'got', got.map((n) => +n.toFixed(3)), 'off', off.map((n) => +n.toFixed(3))) }
-  writeFileSync(`${OUT}/${slug}.glb`, toGlb(prims))
+  if (!HUNYUAN.has(slug)) writeFileSync(`${OUT}/${slug}.glb`, toGlb(prims))
   manifest[slug] = { file: `${slug}.glb`, size, rulesType, theme, footprint: shape === 'circle' ? { circle: { r: P.W / 2 } } : { rect: { w: P.W, d: P.D } } }
   catalog.push({ slug, theme, rulesType, footprint: shape === 'circle' ? [P.W / 2] : [P.W, P.D], height: P.H })
 }

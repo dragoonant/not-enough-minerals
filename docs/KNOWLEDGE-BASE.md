@@ -845,3 +845,35 @@ it when the owner says so. Ask everything once, then run all night without stopp
   `data/**/units/*` at M1, and alias every variant to its base unit's GLB in the manifest on day one.
 - The art agents refused web reference downloads "without chat approval" although the owner approved them at kickoff:
   restate standing approvals (with the date) inside every art prompt.
+
+### 10.1 Terrain pass v2 on the Alienware Aurora R11 (RTX 3080 10 GB, 2026-10-13)
+Scripts now live in the repo (`tools/models/terrain/`: `pieces.json`, `picks.json`, `t_concepts.py`, `t_cutout.py`,
+`t_shape.py`, `t_paint.py`, `t_fit.py`, `receiver.mjs`); working files go to `%USERPROFILE%\Hunyuan3D-2\outputs\terrain\`.
+Per-stage wall clock is appended to `tools/out/terrain-timings.jsonl` (host, GPU, seconds). Medians for 12 outpost pieces:
+
+| Stage | R11 (RTX 3080 10 GB) | 5080 PC (16 GB) |
+|---|---|---|
+| Concept | Gemini ~10-16 s per image in one chat (SDXL: ~40 s per image, 160-178 s for 4, unusable for terrain) | Gemini |
+| Cutout (BRIA rembg, CPU) | 18 s | n/a (seconds) |
+| Shape 2.1 (octree 256, offload) | 82 s (73-97), load 34 s | ~90 s (octree 384) |
+| Paint 2.0 (1024 tex) | 83 s median, 68-450 s (spills past 10 GB, peak 9.7 GB) | ~20 s |
+| Fit + optimize | <1 s + ~1 s | same |
+| 12 pieces end to end | ~45 min of GPU time (plus two 2-piece redos) | ~25 min for 10 figures |
+
+What 10 GB needs (all in the scripts):
+- Shape 2.1 at the upstream defaults (octree 384, chunks 8000, all sub-models resident) runs out of memory. `t_shape.py
+  --offload` keeps only the sub-model in use on the GPU (conditioner -> DiT -> VAE; upstream `enable_model_cpu_offload`
+  is broken for this pipeline) and builds the modules in fp16 (`torch.set_default_dtype`). Peak 6.9 GB.
+- On Windows (WDDM) GPU allocations also count against the system commit limit (48.7 GB here). A CPU-side fp32 model
+  build made 32 MB CUDA allocations fail with 3 GB of VRAM free, followed by host `MemoryError`s. Load straight to the GPU
+  in fp16.
+- Paint 2.0: `enable_model_cpu_offload()` crashes (cuda/cpu tensor mix in the delight/multiview pipelines); run it
+  without offload and accept the spill. Never run two GPU jobs at once (another session's paint test made shape segfault).
+- Gemini terrain concepts beat SDXL by a mile (12/12 usable, first try). State the base ratio in capitals (RECTANGULAR
+  1.5:1, strip FOUR or EIGHT times longer than deep, ROUND), and for walls and round obstructions also state the HEIGHT
+  ratio: Gemini draws pieces low, and the client stretches every model to the rules height (blast wall 3.3x and a low
+  gun pit 2.9x looked melted; re-prompted "one third as tall as it is long" / "as tall as it is wide" fixed both).
+- Hunyuan paint de-lights textures to a flat pale tan; `t_fit.py` grades them back (contrast 1.3, saturation 1.25,
+  brightness 0.82) and sets metallic/roughness per theme for the owner's "shiny".
+- Two Windows Chromes can be connected (this PC and the 5080 PC). Pick `onThisComputer: true`, or the local receiver is
+  unreachable (Chrome shows an error page for 127.0.0.1). Chats sync, so the same chat URL on the right PC recovers images.

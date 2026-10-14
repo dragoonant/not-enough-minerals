@@ -102,6 +102,22 @@ so ask the owner only if a value exists nowhere else.
   per stage there (concept, cutout, shape, paint, finalize per piece) and compare with this PC's RTX 5080 (~90 s
   shape and ~20 s paint per model; batch 5 = 10 figures in ~25 min end to end). Put the numbers in KB section 10.
 
+### Terrain pass v2: status (2026-10-13 evening, on the R11 "Alteisen")
+- **Done: outpost set (12 pieces)**. Gemini concepts in `art/terrain/concepts/` (prompts in `PROMPTS.md`), Hunyuan 2.1
+  shape + 2.0 paint, fitted and graded by `tools/models/terrain/t_fit.py`, in `public/assets/terrain/outpost-*.glb`
+  (same slugs and manifest rows; the procedural v1 files are in `art/archive/terrain-v1/`). Contact sheet
+  `art/terrain/contact-outpost-v2.png`, in-game `screenshots/terrain-v2-outpost-board.png`. R11 timings: KB 10.1.
+- **Owner gate**: does the outpost look land ("war-torn, hurried, shiny")? Known soft spots: the blast wall is still a bit
+  smooth, the barricade and gate fence are stretched ~2.2x in height to the 1.6 in rules height.
+- **Next, same pipeline, one Gemini chat per set**: temple (ruins hastily fortified: sandbags against broken columns,
+  scaffolding), crystal (mining camp: rigs, scaffolds and plate barricades among mineral clusters), creep (overrun
+  Terran fortifications grown over with creep). Slugs and footprints are the existing ones in `manifest.json`; add each
+  to `tools/models/terrain/pieces.json` with a prompt, then follow `tools/models/terrain/` stage order: concepts
+  (Gemini + `receiver.mjs`) -> `t_cutout` -> `t_shape --offload` -> `t_paint` -> `t_fit <art/terrain/staging>` ->
+  `node tools/models/optimize.mjs --dir art/terrain/staging` -> `node art/terrain/shot.mjs <set> 0.3 0.6 -
+  /art/terrain/staging/ <png>` (set `MSYS_NO_PATHCONV=1` in Git Bash) -> `git mv` old GLBs to `art/archive/terrain-v1/`
+  and copy. `art/terrain/gen-terrain.mjs` now skips every slug in `pieces.json`, so rerunning it keeps the Hunyuan GLBs.
+
 ### Terrain pass on the R11: what the new session needs
 - Repo: `git clone https://github.com/dragoonant/not-enough-minerals`, then `npm ci`; dev server `npm run dev -- --port
   5201`. Read this file, CLAUDE.md, STATUS.md, KB sections 3.2 (terrain), 9.6 and 10.

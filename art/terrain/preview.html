@@ -4,19 +4,21 @@
 <script type="module">
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
-const q = new URLSearchParams(location.search), theme = q.get('set') || 'temple'
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js'
+const q = new URLSearchParams(location.search), theme = q.get('set') || 'temple', dir = q.get('dir') || '/public/assets/terrain/'
 const r = new THREE.WebGLRenderer({ antialias: true }); r.setSize(innerWidth, innerHeight); r.shadowMap.enabled = true; document.body.appendChild(r.domElement)
 const sc = new THREE.Scene(); sc.background = new THREE.Color('#3a3128')
+if (q.get('env')) { const { RGBELoader } = await import('three/addons/loaders/RGBELoader.js'); const e = await new RGBELoader().loadAsync('/public/assets/ground/env_studio_small_03_1k.hdr'); e.mapping = THREE.EquirectangularReflectionMapping; sc.environment = e; sc.environmentIntensity = 0.6 }
 sc.add(new THREE.HemisphereLight('#ffe2b4', '#2b2217', 1.3)); const k = new THREE.DirectionalLight('#ffd9a0', 2.6); k.position.set(10, 22, 12); k.castShadow = true; k.shadow.mapSize.set(2048, 2048); Object.assign(k.shadow.camera, { left: -30, right: 30, top: 30, bottom: -30 }); sc.add(k)
 const ground = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshStandardMaterial({ color: '#5a4c3c', roughness: 1 })); ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; sc.add(ground)
-const man = await (await fetch('/public/assets/terrain/manifest.json')).json()
+const man = await (await fetch(dir + 'manifest.json')).json()
 const slugs = Object.keys(man).filter((s) => man[s].theme === theme)
-const ld = new GLTFLoader(); let x = 0, row = 0
+const ld = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder); let x = 0, row = 0
 const cam = new THREE.PerspectiveCamera(35, innerWidth / innerHeight, 0.1, 400)
 const groups = { b: [], o: [], c: [] }
 for (const s of slugs) { const m = man[s]; (m.rulesType === 'building' ? groups.b : m.footprint.circle ? groups.c : groups.o).push(s) }
 const rows = [groups.b, groups.o, groups.c]
-for (const [ri, row] of rows.entries()) { let xx = 0; for (const s of row) { const g = (await ld.loadAsync('/public/assets/terrain/' + man[s].file)).scene; g.traverse((o) => { if (o.isMesh) { o.castShadow = o.receiveShadow = true } }); const w = man[s].size[0]; g.position.set(xx + w / 2, 0, ri * 8); xx += w + 1.5; sc.add(g) } }
+for (const [ri, row] of rows.entries()) { let xx = 0; for (const s of row) { const g = (await ld.loadAsync(dir + man[s].file)).scene; g.traverse((o) => { if (o.isMesh) { o.castShadow = o.receiveShadow = true } }); const w = man[s].size[0]; g.position.set(xx + w / 2, 0, ri * 8); xx += w + 1.5; sc.add(g) } }
 const maxX = Math.max(...rows.map((row) => row.reduce((a, s) => a + man[s].size[0] + 1.5, 0)))
 const az = +(q.get('az') ?? 0.0), el = +(q.get('el') ?? 0.75), dist = +(q.get('d') ?? maxX * 1.3)
 const cx = maxX / 2, cz = 8

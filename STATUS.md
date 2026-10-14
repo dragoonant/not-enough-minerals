@@ -63,6 +63,9 @@ under `docs/spec/` (00 architecture, 10-19 rules, 20-21 data, 30 AI, 50 client, 
   tips) through `ui/ModalLayer.tsx`; collapsible rails with objective tracker, score, Supply table, Reserves, unit
   card with weapon panel and statuses, odds panel, "What happened" feed (`ui/feedView.ts`); PhaseBar, hint strip,
   settings, game-over screen with a per-Round VP table and rosters.
+- Terrain GLBs (`public/assets/terrain/`, 44 slugs): the outpost set (12) is Hunyuan-made war-torn models (terrain
+  pass v2, `tools/models/terrain/`); temple, crystal and creep are still the procedural set from
+  `art/terrain/gen-terrain.mjs`.
 - Board (`board/`): mat, placeholder terrain, deployment zones and edges, objective rings with control labels,
   threat/detection overlay, camera presets facing the viewer's Entry Edge. Figures (`figures/`): GLB models where
   present, procedural MGSD-ish proxies otherwise, status icons, `?gallery`.

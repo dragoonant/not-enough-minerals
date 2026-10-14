@@ -1,0 +1,14 @@
+{
+ "outpost-bunker": "art/terrain/concepts/outpost-bunker.png",
+ "outpost-comm-tower": "art/terrain/concepts/outpost-comm-tower.png",
+ "outpost-depot": "art/terrain/concepts/outpost-depot.png",
+ "outpost-generator": "art/terrain/concepts/outpost-generator.png",
+ "outpost-barricade": "art/terrain/concepts/outpost-barricade.png",
+ "outpost-gate-fence": "art/terrain/concepts/outpost-gate-fence.png",
+ "outpost-blast-wall": "art/terrain/concepts/outpost-blast-wall.png",
+ "outpost-fuel-tanks": "art/terrain/concepts/outpost-fuel-tanks.png",
+ "outpost-crate-stack": "art/terrain/concepts/outpost-crate-stack.png",
+ "outpost-containers": "art/terrain/concepts/outpost-containers.png",
+ "outpost-silo": "art/terrain/concepts/outpost-silo.png",
+ "outpost-dish": "art/terrain/concepts/outpost-dish.png"
+}
