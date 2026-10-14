@@ -10,8 +10,8 @@
     "yaw": 0
   },
   "corpser": {
-    "file": "roach.glb",
-    "height": 2.12,
+    "file": "corpser.glb",
+    "height": 2.22,
     "yaw": 0
   },
   "goliath": {
@@ -40,8 +40,8 @@
     "yaw": 0
   },
   "kerrigan-swarm-raptor": {
-    "file": "zergling.glb",
-    "height": 1.52,
+    "file": "kerrigan-swarm-raptor.glb",
+    "height": 1.399,
     "yaw": 0
   },
   "marauder": {
@@ -60,13 +60,28 @@
     "yaw": 0
   },
   "nerazim-watchers": {
-    "file": "adept.glb",
+    "file": "nerazim-watchers.glb",
     "height": 2.02,
+    "yaw": 0
+  },
+  "omega-worm": {
+    "file": "omega-worm.glb",
+    "height": 3.12,
+    "yaw": 0
+  },
+  "point-defense-drone": {
+    "file": "point-defense-drone.glb",
+    "height": 1.92,
     "yaw": 0
   },
   "praetor-guard": {
     "file": "praetor-guard.glb",
     "height": 2.12,
+    "yaw": 0
+  },
+  "pylon": {
+    "file": "pylon.glb",
+    "height": 3.12,
     "yaw": 0
   },
   "queen": {
@@ -75,8 +90,8 @@
     "yaw": 0
   },
   "raptor": {
-    "file": "zergling.glb",
-    "height": 1.52,
+    "file": "raptor.glb",
+    "height": 1.359,
     "yaw": 0
   },
   "ravager": {
@@ -95,8 +110,8 @@
     "yaw": 0
   },
   "roachling": {
-    "file": "roach.glb",
-    "height": 1.31,
+    "file": "roachling.glb",
+    "height": 1.62,
     "yaw": 0
   },
   "sentry": {
@@ -115,13 +130,13 @@
     "yaw": 0
   },
   "swarmling": {
-    "file": "zergling.glb",
+    "file": "swarmling.glb",
     "height": 1.52,
     "yaw": 0
   },
   "vile": {
-    "file": "roach.glb",
-    "height": 2.12,
+    "file": "vile.glb",
+    "height": 2.22,
     "yaw": 0
   },
   "zealot": {

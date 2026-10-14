@@ -64,25 +64,28 @@ reads consistently; a paint re-run is optional for the whole faction, not per un
 
 ## Batch 5 (Gemini concepts, 1024x572; variants and structures that were still procedural)
 
-Concept gate only: **no meshes yet**. Hunyuan stages 2-5 (cutout, shape, paint, finalize) have not been run for
-these ten slugs, so there is no `<slug>.glb` or `contact-<slug>.png` in this folder and nothing ships this batch.
-Until the meshes land, the seven variants keep their base unit's GLB through the manifest alias (raptor, swarmling,
-kerrigan-swarm-raptor -> zergling; corpser, vile, roachling -> roach; nerazim-watchers -> adept) and the three
-structures/drones (omega-worm, pylon, point-defense-drone) stay procedural. All ten: one figure, round black
-uncropped base, no lettering, logos or glyphs, faction palette held.
+Concepts: all ten are one figure on a round black uncropped base, with no lettering, logos or glyphs, and the faction palette holds.
+Meshes landed 2026-10-13 (Hunyuan stages 2-5). Every contact sheet (`contact-<slug>.png`, front view in
+`contact-batch5.png`) was checked against its concept. No mesh has text marks, extra figures or invented weapons.
+GLB bounds: every figure starts at y 0 (base bottom), so nothing dips below the table. Optimised copies are wired at
+`public/models/<slug>.glb` with the measured height (bounding-box height, base included) and yaw 0. In the `?gallery`
+close-ups (front and side) all ten stand upright on their bases and face +z, so no yaw fix was needed.
 
-| Slug | Concept | Mesh | Verdict |
+| Slug | Concept | Mesh (contact sheet) | Verdict |
 |---|---|---|---|
-| raptor | zergling build, head + crest ~40%, two scythes, two big bone bat wings, stubby legs. Wingspan far wider than a 32mm base | none yet | **concept pass**, mesh next (wings may come out edge-on slabs like the zergling) |
-| swarmling | one head ~45% (try 2; try 1's back head is gone), crest, slim scythes, no wings, short tail with no face | none yet | **concept pass**, mesh next |
-| kerrigan-swarm-raptor | raptor edit: glossier royal violet, tall quill crest, glowing violet eyes and wing-vein lights, no rider | none yet | **concept pass**, mesh next |
-| corpser | roach body, bone-ribbed pink corpse-sac, purple crystal spikes, scythe arms with heavy claw tips | none yet | **concept pass**, mesh next (translucent crystals may mesh as blobs) |
-| vile | roach body, green acid glands, green crystal spines, acid drool from the jaw | none yet | **concept pass**, mesh next (drool strands may become floating islands: keep largest component) |
-| roachling | pill-bug shell ~65%, blunt head, tiny tusks, stubby legs | none yet | **concept pass**, mesh next |
-| omega-worm | worm from a spiked flesh mound, toothed round mouth ~half the height; one side tendril (prompt asked two) | none yet | **concept pass**, mesh next (deep open mouth may close up in the mesh) |
-| nerazim-watchers | hood ~38%, ~2.6 heads, green eyes, violet-black + gold trim, green glaive gripped in the right fist rather than forearm-mounted | none yet | **concept pass**, mesh next |
-| pylon | floating cyan crystal ~half the height in gold ribs on a plinth, plain blue panels (try 2) | none yet | **concept pass**, mesh next (crystal floats: check it fuses to the ring or bridge it) |
-| point-defense-drone | domed saucer ~55%, dish + two antennae, front turret, four fins (prompt said three), one thin clear stand | none yet | **concept pass**, mesh next (the clear stand will likely vanish in cutout: body becomes an island; finalize must add a stand) |
+| raptor | zergling build, head + crest ~40%, two scythes, two big bone bat wings, stubby legs | Faithful: crest, scythes, tail, claws on base. The wings came out as full membranes, not edge-on slabs, and there are no floating fragments. Wingspan 2.4 in overhangs the base (as in the concept) | **ship** (height 1.359) |
+| kerrigan-swarm-raptor | raptor edit: royal violet, tall quill crest, vein lights, no rider | Faithful: quill crest, wings with membranes, glossier violet than the raptor. Vein lights read as pale dots only. No rider | **ship** (height 1.399) |
+| swarmling | one head ~45%, crest, slim scythes, no wings, short tail with no face | Faithful: one head, crest, back spines, tail. The scythe tips stand slightly apart from the forearms in the front view, but they are attached, not floating | **ship** (minor; a re-roll is optional; height 1.52) |
+| corpser | roach body, pink corpse-sac in bone ribs, purple crystal spikes, scythe arms with claw tips | Faithful: pink sac, ribs, crystal spikes (solid, not blobs), scythe arms. The base was not auto-cut ('no base found'), so a grey mottled patch shows on the base top around the feet | **ship** (cosmetic patch, like the ravager's disc; height 2.22) |
+| vile | roach body, green acid glands, green crystal spines, acid drool | Faithful: green spines and glands, tusks. The drool fused into the jaw instead of becoming floating islands | **ship** (height 2.22) |
+| roachling | pill-bug shell ~65%, blunt head, tiny tusks, stubby legs | Faithful: shell, back nubs, short legs, tusks. No invented parts. The shell overhangs its small base front to back (as in the concept) | **ship** (height 1.62) |
+| nerazim-watchers | hood ~38%, ~2.6 heads, green eyes, violet-black + gold trim, green glaive in the right fist | Faithful: hood, mask, green eyes, gold trim, glaive gripped in the right fist. No extra weapon or head. Back: green gland lights | **ship** (height 2.02) |
+| omega-worm | worm from a spiked flesh mound, toothed round mouth, one side tendril | Faithful: the toothed mouth stayed open and the one side tendril is intact. The mound covers most of the base | **ship** (structure; height 3.12) |
+| pylon | cyan crystal in gold ribs on a plinth, plain blue panels | Faithful: the crystal is fused inside the gold ribs and nothing floats. Gold reads tan, as on the other Protoss meshes | **ship** (structure; height 3.12) |
+| point-defense-drone | domed saucer, dish + two antennae, front turret, four fins, one thin clear stand | Faithful: dome, dish, antennae, turret, fins. The clear stand survived the cutout and is visible, so no solid post was added | **ship** (height 1.92) |
+
+All ten replace their batch-4 manifest aliases. The seven variants no longer borrow the zergling, roach or adept GLB,
+and the three structures/drones are no longer procedural.
 
 ## Veto list (all batches, current)
 - **medic** (`medic.glb`, batch 4): hold until a paint re-run removes the text-like label on the backpack back.
@@ -117,6 +120,16 @@ Cleared: raynor and stalker (batch 2); hydralisk (batch 4 redo, no floating isla
 | immortal | immortal | ship (new) |
 | zeratul | zeratul | ship (new) |
 | artanis | artanis | ship (new) |
+| raptor | raptor | ship (new, batch 5) |
+| swarmling | swarmling | ship (new, batch 5) |
+| kerrigan-swarm-raptor | kerrigan-swarm-raptor | ship (new, batch 5) |
+| corpser | corpser | ship (new, batch 5) |
+| vile | vile | ship (new, batch 5) |
+| roachling | roachling | ship (new, batch 5) |
+| nerazim-watchers | nerazim-watchers | ship (new, batch 5) |
+| omega-worm | omega-worm | ship (new, batch 5) |
+| pylon | pylon | ship (new, batch 5) |
+| point-defense-drone | point-defense-drone | ship (new, batch 5) |
 
 Use each GLB's own figure top as the manifest `height` (queen is now 1.969, not 2.513). Check quadruped
 `yaw` (zergling, roach, ravager, immortal, stalker) and the `?gallery` front/side close-ups before pushing.
