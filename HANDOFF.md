@@ -113,7 +113,8 @@ so ask the owner only if a value exists nowhere else.
   side on +x, y up, ~6k tris, then `node tools/models/optimize.mjs --dir <scratch>` (never on a live folder).
 - Hunyuan3D is NOT in the repo. On the 5080 PC it lives in `%USERPROFILE%\Hunyuan3D-2` (Python 3.11 venv: SDXL
   concepts, cutout, paint) and `%USERPROFILE%\Hunyuan3D-2.1` (Python 3.10 venv: shape, finalize, `nem_fit.py`), weights
-  in `%USERPROFILE%\.cache\hy3dgen`. The R11 needs its own install of both, plus our stage scripts
+  in `%USERPROFILE%\.cache\hy3dgen` (on the 5080 PC: 2.0 folder 11 GB, 2.1 folder 6.8 GB, weights 48 GB; copying
+  them by USB drive or LAN beats re-downloading). The R11 needs its own install of both, plus our stage scripts
   (`stage_cutout.py`, `stage_shape.py` with SHAPE_SEED, `stage_paint.py`, `stage_finalize.py` with "fit",
   `terrain_*.py`, `nem_fit.py`). Pin transformers 4.48.3 / diffusers 0.32.2 in the 2.0 venv (KB 3.2).
 - Gemini on the R11: connect the Claude in Chrome extension there and `select_browser` that machine; standing rules
