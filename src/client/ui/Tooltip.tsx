@@ -25,7 +25,7 @@ function place(a: Box, w: number, h: number, want: TipPlacement): { left: number
   return { left: Math.max(MARGIN, Math.min(left, vw - w - MARGIN)), top: Math.max(MARGIN, Math.min(top, vh - h - MARGIN)) }
 }
 
-function Popup({ id, anchor, placement, title, body }: { id: string; anchor: Box; placement: TipPlacement; title: ReactNode; body?: ReactNode }) {
+function Popup({ id, anchor, placement, title, body, wide }: { id: string; anchor: Box; placement: TipPlacement; title: ReactNode; body?: ReactNode; wide?: boolean }) {
   const ref = useRef<HTMLDivElement>(null)
   const [pos, setPos] = useState<{ left: number; top: number } | null>(null)
   useLayoutEffect(() => {
@@ -35,7 +35,7 @@ function Popup({ id, anchor, placement, title, body }: { id: string; anchor: Box
     setPos(place(anchor, r.width, r.height, placement))
   }, [anchor, placement])
   return createPortal(
-    <div ref={ref} id={id} role="tooltip" className="tip" data-testid="tooltip" style={{ left: pos?.left ?? -9999, top: pos?.top ?? -9999, visibility: pos ? 'visible' : 'hidden' }}>
+    <div ref={ref} id={id} role="tooltip" className={wide ? 'tip tip-wide' : 'tip'} data-testid="tooltip" style={{ left: pos?.left ?? -9999, top: pos?.top ?? -9999, visibility: pos ? 'visible' : 'hidden' }}>
       <div className="tip-title">{title}</div>
       {body ? <div className="tip-body">{body}</div> : null}
     </div>,
@@ -43,9 +43,10 @@ function Popup({ id, anchor, placement, title, body }: { id: string; anchor: Box
   )
 }
 
-export interface TipProps { title?: ReactNode; body?: ReactNode; placement?: TipPlacement; disabled?: boolean; children: ReactElement }
+/** `wide` = the roomier skill popup (max 320px). */
+export interface TipProps { title?: ReactNode; body?: ReactNode; placement?: TipPlacement; disabled?: boolean; wide?: boolean; children: ReactElement }
 
-export function Tip({ title, body, placement = 'top', disabled, children }: TipProps) {
+export function Tip({ title, body, placement = 'top', disabled, wide, children }: TipProps) {
   const id = useId()
   const [anchor, setAnchor] = useState<Box | null>(null)
   const timer = useRef<number | null>(null)
@@ -77,7 +78,7 @@ export function Tip({ title, body, placement = 'top', disabled, children }: TipP
         onFocus: chain('onFocus', (e: SyntheticEvent) => show(e, 0)),
         onBlur: chain('onBlur', hide),
       } as Record<string, unknown>)}
-      {anchor ? <Popup id={id} anchor={anchor} placement={placement} title={title} body={body} /> : null}
+      {anchor ? <Popup id={id} anchor={anchor} placement={placement} title={title} body={body} wide={wide} /> : null}
     </>
   )
 }

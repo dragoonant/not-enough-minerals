@@ -1,6 +1,7 @@
 // Player-facing text helpers for the interaction layer: engine option labels carry raw ids ("Fire gauss-rifle at A3"); the
 // screen shows record names with a short tag so two squads of one kind stay distinguishable.
-import { data, dataName, seatLabel, unitName } from '../contract'
+import { dataName, getBundle, seatLabel, unitName } from '../contract'
+import { abilityInfo, findAbility, type SkillInfo } from '../ui/skillInfo'
 import type { GameState, UnitId } from '../../engine/types'
 
 /** "Marine (A3)". */
@@ -53,14 +54,14 @@ export function explainRejection(state: GameState | null, code: string, text: st
 }
 
 /** For a decision opened by an ability (ability.target): the ability's name and its first sentence, or null. */
-export function abilityHeading(state: GameState | null, context: Record<string, unknown>): { name: string; line: string } | null {
+export function abilityHeading(state: GameState | null, context: Record<string, unknown>): { name: string; line: string; info?: SkillInfo } | null {
   const cont = context['cont'] as { ctx?: { sourceId?: string; unitId?: string | null }; flow?: { abilityId?: string; unitId?: string | null } } | undefined
   const src = cont?.flow?.abilityId ?? cont?.ctx?.sourceId
   const uid = cont?.flow?.unitId ?? cont?.ctx?.unitId
-  const unit = uid ? state?.units[uid] : undefined
-  const def = unit ? data.unit(unit.profileId) : undefined
-  const a = def && src ? data.abilities(def).find((x) => x.id === src) : undefined
+  const b = getBundle()
+  const hit = src ? findAbility(b, state, src, uid ?? null) : null
+  const a = hit?.ability
   if (!a) return typeof context['prompt'] === 'string' ? { name: context['prompt'] as string, line: '' } : null
   const first = a.text.split(/(?<=[.!?])\s/)[0] ?? ''
-  return { name: a.name, line: first.length > 140 ? `${first.slice(0, 137)}...` : first }
+  return { name: a.name, line: first.length > 140 ? `${first.slice(0, 137)}...` : first, info: abilityInfo(a, b, { cardName: hit.cardName }) }
 }

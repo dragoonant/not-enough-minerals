@@ -1,16 +1,18 @@
 // Right rail panels: UnitCard (hover or selection, with keyword tooltips and figure glow), WeaponPanel (one Batch per
 // weapon profile), OddsPanel (engine previews) and EventFeed (narrated log).
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { UnitDef } from '../../data/types'
+import type { UnitDef, WeaponProfile } from '../../data/types'
 import type { GameState } from '../../engine/types'
 import {
-  data, focus, seatLabel, unitName, useAttackPreview, useChargeOdds, useCover, useFeed, useFocus, usePresented, usePresentedTurn,
+  data, focus, getBundle, seatLabel, unitName, useAttackPreview, useChargeOdds, useCover, useFeed, useFocus, usePresented, usePresentedTurn,
   usePresentedUnit, useUnitDefOf, useViewerSeat,
 } from '../contract'
 import { sideColour } from '../theme'
 import { Emblem, KeywordChip, PanelHead } from './bits'
-import { feedLines } from './feedView'
+import { feedLines, type FeedLine } from './feedView'
 import { attackOddsRows, chargeOddsRows, prettyId, statusWords, tn, type OddsRow } from './hudView'
+import { abilityInfo, findAbility, statusInfo, upgradeInfo, weaponInfo } from './skillInfo'
+import { SkillName, SkillTip } from './SkillTip'
 import { Tip } from './Tooltip'
 
 const STAT_TIPS: Record<string, [string, string]> = {
@@ -37,7 +39,7 @@ function Weapons({ def, bought }: { def: UnitDef; bought: string[] }) {
         {ws.map((w) => (
           <tr key={w.id}>
             <td colSpan={6} className="wrow">
-              <div className="wline"><b>{w.name}</b><span>{w.range === 'E' ? 'Engaged' : `${w.range}"`}</span><span>{String(w.roa)}</span><span>{tn(w.hit)}</span><span>{w.sDice ?? '-'}</span><span>{w.dmg}</span></div>
+              <div className="wline"><b><SkillName info={weaponInfo(w, getBundle())} testid={`weapon-name-${w.id}`} /></b><span>{w.range === 'E' ? 'Engaged' : `${w.range}"`}</span><span>{String(w.roa)}</span><span>{tn(w.hit)}</span><span>{w.sDice ?? '-'}</span><span>{w.dmg}</span></div>
               <div className="chips">
                 <span className="chip dim">{w.phase === 'assault' ? 'Assault' : 'Combat'}</span>
                 {w.keywords.map((k, i) => <KeywordChip key={i} kw={k} />)}
@@ -65,6 +67,7 @@ export function UnitCard() {
   const abilities = data.abilities(def, bought)
   const colour = sideColour(state.seats[unit.owner]?.colour)
   const status = statusWords({ ...unit, location: unit.location }, phase)
+  const b = getBundle()
   return (
     <section className="panel-sec unit-card" data-testid="unit-card" data-unit={unit.id} onMouseEnter={() => focus.cardHover(unit.id)} onMouseLeave={() => focus.cardHover(null)}>
       <div className="uc-head" style={{ borderColor: colour }}>
@@ -85,16 +88,38 @@ export function UnitCard() {
       <div className="small uc-live" data-testid="unit-card-live">
         <span>Models {alive}/{unit.modelIds.length}</span>
         <Tip title="Damage Marker" body="Damage carried over on this unit. It stays until the unit heals."><span tabIndex={0}>Damage {unit.damage}</span></Tip>
-        {status.map((s) => <span key={s} className="chip warn">{s}</span>)}
+        {status.map((s) => <SkillTip key={s} info={statusInfo(s, getBundle())}><span className="chip warn skill-name" tabIndex={0} data-testid="status-chip">{s}</span></SkillTip>)}
       </div>
       <Weapons def={def} bought={bought} />
       {abilities.length > 0 && (
         <div className="abils" data-testid="card-abilities">
           <h4>Abilities</h4>
-          {abilities.map((a) => <p key={a.id} className="small"><b>{a.name}</b> <span className="chip dim">{a.type}{a.phase === 'any' ? '' : `, ${a.phase}`}</span> {a.text}</p>)}
+          <ul className="abil-list">
+            {abilities.map((a) => {
+              const info = abilityInfo(a, b)
+              return (
+                <li key={a.id} data-testid={`ability-${a.id}`}>
+                  <SkillName info={info} testid={`ability-name-${a.id}`} />
+                  {info.chips.map((c, i) => <span key={i} className={`chip dim${i === 0 ? ` ty-${a.type}` : ''}`}>{c}</span>)}
+                </li>
+              )
+            })}
+          </ul>
         </div>
       )}
-      {unit.upgrades.length > 0 && <p className="small" data-testid="card-upgrades">Upgrades: {unit.upgrades.map((u) => def.upgrades.find((x) => x.id === u.id)?.name ?? prettyId(u.id)).join(', ')}</p>}
+      {unit.upgrades.length > 0 && (
+        <div className="small abils" data-testid="card-upgrades">
+          <h4>Upgrades</h4>
+          <div className="chips">
+            {unit.upgrades.map((u) => {
+              const ud = def.upgrades.find((x) => x.id === u.id)
+              return ud
+                ? <SkillName key={u.id} info={upgradeInfo(ud, def, b)} className="chip" testid={`upgrade-${u.id}`} />
+                : <span key={u.id} className="chip">{prettyId(u.id)}</span>
+            })}
+          </div>
+        </div>
+      )}
       <p className="small dim" data-testid="card-supply">Supply: {def.supplyProfile.map((b) => `${b.min === b.max ? b.min : `${b.min}-${b.max}`} models = ${b.supply}`).join('; ')}</p>
     </section>
   )
@@ -103,7 +128,7 @@ export function UnitCard() {
 // ---------- weapon panel ----------
 // Legality per target is asked lazily: a weapon row only runs its previews once the player opens it (hover, focus or click),
 // and then on the PRESENTED state through the same hook as the odds panel, so the panel never mixes in the true state.
-interface Row { weaponId: string; name: string; carriers: number }
+interface Row { weaponId: string; name: string; carriers: number; def?: WeaponProfile }
 
 function TargetChip({ attackerId, weaponId, targetId }: { attackerId: string; weaponId: string; targetId: string }) {
   const p = useAttackPreview(attackerId, weaponId, targetId)
@@ -125,7 +150,7 @@ function WeaponRowView({ row, attackerId, foes }: { row: Row; attackerId: string
   const [open, setOpen] = useState(false)
   return (
     <div className="wp-row" data-testid={`weapon-row-${row.weaponId}`} onMouseEnter={() => setOpen(true)} onFocus={() => setOpen(true)}>
-      <b>{row.name}</b> <span className="chip">{row.carriers} model{row.carriers === 1 ? '' : 's'}</span>
+      {row.def ? <b><SkillName info={weaponInfo(row.def, getBundle())} /></b> : <b>{row.name}</b>} <span className="chip">{row.carriers} model{row.carriers === 1 ? '' : 's'}</span>
       <div className="chips">
         {foes.length === 0 && <span className="dim small">No enemy on the table.</span>}
         {open
@@ -151,7 +176,7 @@ export function WeaponPanel() {
       if (!m || m.life === 'dead') continue
       for (const w of m.weapons) carried.set(w, (carried.get(w) ?? 0) + 1)
     }
-    return [...carried.entries()].map(([weaponId, n]) => ({ weaponId, name: data.weapons(def).find((x) => x.id === weaponId)?.name ?? weaponId, carriers: n }))
+    return [...carried.entries()].map(([weaponId, n]) => { const w = data.weapons(def).find((x) => x.id === weaponId); return { weaponId, name: w?.name ?? weaponId, carriers: n, def: w } })
   }, [mine, unit, def, state])
   const foes = useMemo(() => (unit && state ? Object.values(state.units).filter((u) => u.owner !== unit.owner && u.location === 'table').map((u) => u.id) : []), [unit, state])
   if (!mine || !unit || rows.length < 2) return null
@@ -219,6 +244,13 @@ export function OddsPanel() {
 }
 
 // ---------- event feed ----------
+function FeedSkill({ line, state }: { line: FeedLine; state: GameState | null }) {
+  const sk = line.skill!
+  const b = getBundle()
+  const hit = findAbility(b, state, sk.abilityId, sk.source)
+  return <>{sk.before}{hit ? <SkillName info={abilityInfo(hit.ability, b, { cardName: hit.cardName })} testid="feed-skill" /> : sk.name}{sk.after}</>
+}
+
 export function EventFeed() {
   const feed = useFeed()
   const state = usePresented()
@@ -232,7 +264,7 @@ export function EventFeed() {
       <PanelHead>What happened</PanelHead>
       <div className="feed" ref={box} role="log" aria-live="polite">
         {lines.length === 0 && <p className="dim small">Nothing yet.</p>}
-        {lines.map((f, i) => <p key={`${f.id}:${i}`} className={f.head ? 'head' : 'small'}>{f.text}</p>)}
+        {lines.map((f, i) => <p key={`${f.id}:${i}`} className={f.head ? 'head' : 'small'}>{f.skill ? <FeedSkill line={f} state={state} /> : f.text}</p>)}
       </div>
     </section>
   )

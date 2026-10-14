@@ -19,8 +19,15 @@ import { readParams } from './params'
 import { useStore, type CameraPreset } from './store'
 import { useLaunchStore } from './store/launch'
 import { Hud } from './ui/Hud'
+import { MinButton, RestoreTab } from './ui/bits'
+import { useHideAll, usePanelMin } from './ui/panelStore'
+import { Tip } from './ui/Tooltip'
 
 const PRESET_LABELS: [CameraPreset, string][] = [['overview', 'Overview'], ['near', 'Near seat'], ['far', 'Far seat'], ['top', 'Top down']]
+
+const CAM_TIPS: Record<CameraPreset, string> = {
+  overview: 'Angled view of the whole table.', near: 'Low view from your side of the table.', far: 'Low view from the far side.', top: 'Straight down, like a map.',
+}
 
 let startedLaunch = -1
 
@@ -32,6 +39,8 @@ export function GameScreen() {
   const setPreset = useStore((s) => s.setPreset)
   // ?gallery: the figure line-up only (no HUD, prompts or dice over it).
   const gallery = readParams().gallery
+  const hideAll = useHideAll()
+  const camsMin = usePanelMin('cams')
 
   useEffect(() => {
     const params = readParams()
@@ -48,11 +57,20 @@ export function GameScreen() {
 
   return (
     <div className="game" data-testid="game-screen">
-      <div className="hud cams">
-        {PRESET_LABELS.map(([id, label]) => (
-          <button key={id} aria-pressed={preset === id} data-testid={`cam-${id}`} onClick={() => setPreset(id)}>{label}</button>
-        ))}
-      </div>
+      {!gallery && !hideAll && (
+        <div className="hud cams" data-testid="cams" data-min={camsMin ? '1' : '0'}>
+          {camsMin ? <RestoreTab id="cams" label="Camera views" placement="top">Camera</RestoreTab> : (
+            <>
+              {PRESET_LABELS.map(([id, label]) => (
+                <Tip key={id} title={label} body={CAM_TIPS[id]} placement="top">
+                  <button aria-pressed={preset === id} data-testid={`cam-${id}`} onClick={() => setPreset(id)}>{label}</button>
+                </Tip>
+              ))}
+              <MinButton id="cams" label="Camera views" placement="top" />
+            </>
+          )}
+        </div>
+      )}
       <Board>
         <Figures />
         {!gallery && <InteractionScene />}

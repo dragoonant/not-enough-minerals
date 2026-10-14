@@ -1,9 +1,12 @@
 // Small shared HUD pieces: emblem, seat tag, keyword chip, rail frame.
 import type { ReactNode } from 'react'
-import { data, focus, seatLabel, useFocus, useGame, usePresented, type RailId } from '../contract'
+import { data, focus, getBundle, seatLabel, useFocus, useGame, usePresented, type RailId } from '../contract'
 import type { KwRef } from '../../data/types'
 import { emblemFor, sideColour } from '../theme'
+import { keywordInfo } from './skillInfo'
+import { SkillTip } from './SkillTip'
 import { Tip } from './Tooltip'
+import { panels, useHideAll, usePanelMin, type PanelId } from './panelStore'
 
 export function Emblem({ race, size = 18, title }: { race: string | null | undefined; size?: number; title?: string }) {
   return (
@@ -36,22 +39,23 @@ export function kwLabel(kw: KwRef): string {
   return bits.join(' ') + x
 }
 export function KeywordChip({ kw }: { kw: KwRef }) {
-  const def = data.keyword(kw.kw)
   return (
-    <Tip title={def?.name ?? kw.kw} body={def?.text ?? 'No summary yet.'}>
+    <SkillTip info={keywordInfo(kw, getBundle(), kwLabel(kw))}>
       <span className="chip kw" tabIndex={0} data-testid={`kw-${kw.kw}`}>{kwLabel(kw)}</span>
-    </Tip>
+    </SkillTip>
   )
 }
 
 const RAIL_ICON: Record<string, string> = { objectives: 'M12 3l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.3 6.8 19.1l1-5.8L3.5 9.2l5.9-.8z', supply: 'M4 19V9l4 3V7l4 3V5l4 4v10zM3 20h18', reserves: 'M4 7h16v12H4zM8 7V4h8v3M9 12h6', unit: 'M12 4a3 3 0 100 6 3 3 0 000-6zM6 20c0-4 2.5-6 6-6s6 2 6 6', feed: 'M5 6h14M5 12h14M5 18h9', weapons: 'M4 20L14 10M12 6l6-2 2 6-6 2zM6 14l4 4', odds: 'M12 4a8 8 0 100 16 8 8 0 000-16zM12 8v4l3 2' }
 
-export interface RailSection { id: string; label: string; icon: keyof typeof RAIL_ICON; node: ReactNode; hidden?: boolean }
+export interface RailSection { id: PanelId; label: string; icon: keyof typeof RAIL_ICON; node: ReactNode; hidden?: boolean }
 
 /** A translucent rail that collapses to a column of icon tabs (the table stays the hero). */
 export function Rail({ id, side, sections, testid }: { id: RailId; side: 'left' | 'right'; sections: RailSection[]; testid: string }) {
   const open = useFocusRail(id)
+  const hideAll = useHideAll()
   const shown = sections.filter((s) => !s.hidden)
+  if (hideAll) return null
   const toggleLabel = open ? 'Collapse panel' : 'Open panel'
   return (
     <aside className={`rail rail-${side}${open ? ' open' : ' shut'}`} data-testid={testid} data-open={open}>
@@ -59,7 +63,7 @@ export function Rail({ id, side, sections, testid }: { id: RailId; side: 'left' 
         <button className="rail-toggle" aria-expanded={open} aria-label={toggleLabel} data-testid={`${testid}-toggle`} onClick={() => focus.toggleRail(id)}>{(open ? side === 'left' : side !== 'left') ? '‹' : '›'}</button>
       </Tip>
       {open
-        ? <div className="rail-body">{shown.map((s) => <div key={s.id} className="rail-section" data-section={s.id}>{s.node}</div>)}</div>
+        ? <div className="rail-body">{shown.map((s) => <RailSectionView key={s.id} s={s} side={side} />)}</div>
         : (
           <div className="rail-tabs">
             {shown.map((s) => (
@@ -72,6 +76,37 @@ export function Rail({ id, side, sections, testid }: { id: RailId; side: 'left' 
           </div>
         )}
     </aside>
+  )
+}
+
+/** A minimise button (top right of a box) or, once minimised, the small labelled tab that brings the box back. */
+export function MinButton({ id, label, placement = 'left', className }: { id: PanelId; label: string; placement?: 'left' | 'right' | 'top' | 'bottom'; className?: string }) {
+  return (
+    <Tip title={`Minimise ${label}`} body="Shrink this box to a small tab. Click the tab to bring it back. H hides every box at once." placement={placement}>
+      <button className={`min-btn${className ? ` ${className}` : ''}`} aria-label={`Minimise ${label}`} data-testid={`min-${id}`} onClick={() => panels.setMin(id, true)}>&#8211;</button>
+    </Tip>
+  )
+}
+export function RestoreTab({ id, label, placement = 'left', className, children }: { id: PanelId; label: string; placement?: 'left' | 'right' | 'top' | 'bottom'; className?: string; children?: ReactNode }) {
+  const hideAll = useHideAll()
+  return (
+    <Tip title={`Show ${label}`} body={hideAll ? 'Everything is hidden. Press H or Show UI to bring the whole layout back.' : 'Bring this box back.'} placement={placement}>
+      <button className={`min-tab${className ? ` ${className}` : ''}`} aria-label={`Show ${label}`} data-testid={`restore-${id}`} onClick={() => { if (hideAll) panels.setHideAll(false); panels.setMin(id, false) }}>
+        <span aria-hidden>+</span> {children ?? label}
+      </button>
+    </Tip>
+  )
+}
+
+function RailSectionView({ s, side }: { s: RailSection; side: 'left' | 'right' }) {
+  const min = usePanelMin(s.id)
+  const place = side === 'left' ? 'right' : 'left'
+  return (
+    <div className={`rail-section${min ? ' is-min' : ''}`} data-section={s.id} data-min={min ? '1' : '0'}>
+      {min
+        ? <RestoreTab id={s.id} label={s.label} placement={place} />
+        : <><MinButton id={s.id} label={s.label} placement={place} className="sec-min" /><div className="sec-body">{s.node}</div></>}
+    </div>
   )
 }
 

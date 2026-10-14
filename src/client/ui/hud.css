@@ -72,6 +72,17 @@ h2, h3, h4 { font-family: "Bahnschrift", "Segoe UI Semibold", sans-serif; letter
 /* tooltip */
 .tip { position: fixed; z-index: 2000; max-width: 260px; padding: 6px 9px; background: rgba(12,16,22,.96); border: 1px solid #59b8d688; border-radius: 4px; font-size: 12px; line-height: 1.4; color: var(--bone); pointer-events: none; }
 .tip-title { font-weight: 700; color: var(--cyan); } .tip-body { margin-top: 2px; }
+.tip.tip-wide { max-width: min(320px, calc(100vw - 16px)); }
+.skill-name { text-decoration: underline dotted; text-decoration-color: #59b8d6aa; text-underline-offset: 3px; cursor: help; }
+.skill-tip .skill-lines { margin: 4px 0 0; display: grid; gap: 2px; }
+.skill-tip .skill-lines div { display: grid; grid-template-columns: 64px 1fr; gap: 6px; }
+.skill-tip dt { opacity: .65; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; padding-top: 1px; }
+.skill-tip dd { margin: 0; }
+.skill-tip .skill-text { margin: 6px 0 0; padding-top: 5px; border-top: 1px solid #59b8d644; }
+.abil-list { list-style: none; margin: 0; padding: 0; }
+.abil-list li { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 6px; padding: 2px 0; font-size: 12px; }
+.abil-list .skill-name { font-weight: 600; }
+.chip.ty-active { border-color: #e0a03a99; } .chip.ty-reaction { border-color: #c98ae099; } .chip.ty-passive { border-color: #46515c; opacity: .85; }
 
 /* centre */
 .ticker { position: absolute; top: 56px; left: 50%; transform: translateX(-50%); max-width: calc(100% - 24px); padding: 4px 12px; background: rgba(15,20,27,.7); border-radius: 4px; font-size: 13px; }
@@ -109,3 +120,18 @@ h2, h3, h4 { font-family: "Bahnschrift", "Segoe UI Semibold", sans-serif; letter
 .bf-pools th { text-align: left; font-weight: 600; opacity: .8; }
 .supply td:first-child { white-space: nowrap; }
 .hint button { white-space: nowrap; flex-shrink: 0; }
+
+/* minimise / restore (every box can shrink to a tab; H hides them all) */
+.hud-root .min-btn, .hud .min-btn { width: 20px; height: 20px; padding: 0 !important; line-height: 1; font-size: 13px; border-radius: 10px; background: rgba(15,20,27,.7); border: 1px solid #46515c; color: var(--bone); cursor: pointer; }
+.rail-section { position: relative; }
+.rail-section .sec-min { position: absolute; top: 6px; right: 6px; z-index: 1; opacity: .55; }
+.rail-section:hover .sec-min, .rail-section .sec-min:focus-visible { opacity: 1; }
+.rail-section:has(> .sec-body:empty) { display: none; }
+.rail-section .sec-body > .panel-sec > .phead, .rail-section .sec-body > section > .phead { padding-right: 24px; }
+.rail-section.is-min { padding: 3px 8px; }
+.min-tab { display: inline-flex; gap: 4px; align-items: center; padding: 2px 9px !important; font-size: 12px !important; border-radius: 10px !important; border-color: #59b8d688 !important; background: rgba(15,20,27,.75) !important; color: var(--cyan) !important; cursor: pointer; }
+.min-btn.inline { margin-left: 6px; vertical-align: middle; width: 18px; height: 18px; font-size: 12px; }
+.ticker { pointer-events: auto; } .ticker-min { padding: 0; background: transparent; }
+.topbar-min { justify-content: flex-start; gap: 12px; padding: 3px 10px; background: rgba(15,20,27,.6); }
+.topbar-min .phasebar { gap: 4px 10px; }
+.kbd { display: inline-block; margin-left: 4px; padding: 0 4px; border-radius: 3px; background: rgba(0,0,0,.35); font-size: 10px; font-family: inherit; opacity: .8; }

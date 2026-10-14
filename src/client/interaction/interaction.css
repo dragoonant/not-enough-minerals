@@ -45,3 +45,10 @@
 @media (max-width: 900px) {
   .ix-prompt, .ix-prompt[data-side="left"], .ix-prompt[data-side="right"] { left: 50%; right: auto; transform: translateX(-50%); bottom: 8px; max-height: 40vh; }
 }
+.ix-cost { display: inline-block; margin-left: 6px; padding: 0 5px; border-radius: 8px; border: 1px solid currentColor; font-size: 11px; line-height: 15px; opacity: .85; }
+.ix-btn .skill-name, .ix-chip .skill-name { text-decoration: underline dotted; text-underline-offset: 3px; }
+.ix-yourmove { flex: none; padding: 2px 8px; border-radius: 10px; background: var(--amber, #e0a03a); color: var(--ink, #0f141b); font-weight: 700; font-size: 12px; letter-spacing: .04em; animation: ix-pulse 1.6s ease-in-out infinite; }
+@keyframes ix-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(224,160,58,.7); } 50% { box-shadow: 0 0 0 6px rgba(224,160,58,0); } }
+@media (prefers-reduced-motion: reduce) { .ix-yourmove { animation: none; } }
+.ix-prompt.collapsed .ix-head { gap: 8px; }
+.ix-prompt.collapsed .ix-btn { padding: 2px 8px; font-size: 12px; }

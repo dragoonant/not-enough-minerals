@@ -2,10 +2,15 @@
 // are the engine's own options, path answers are dry-run by the engine, odds come from the query hooks.
 import { useLayoutEffect, useRef, useState, type ReactElement } from 'react'
 import { HintStrip } from '../ui/HintStrip'
+import { cardListWords, optionSkill, resourceInfo, weaponInfo, type SkillInfo } from '../ui/skillInfo'
+import { SkillName, SkillTip } from '../ui/SkillTip'
+import { panels, useHideAll, usePanelMin } from '../ui/panelStore'
+import { Tip } from '../ui/Tooltip'
 import {
-  dataName, focus, queries, useAttackPreview, useBoardGeometry, useChargeOdds, useFocus, useGame, useWaitingFor,
+  data, dataName, focus, getBundle, queries, useAttackPreview, useBoardGeometry, useChargeOdds, useFocus, useGame, useWaitingFor,
 } from '../contract'
-import type { DecisionOption, PendingDecision } from '../../engine/types'
+import type { DecisionOption, GameState, PendingDecision } from '../../engine/types'
+import type { Resource } from '../../data/types'
 import { answerOption, clickUnit, confirmPath, fireArmed, optionForTarget } from './actions'
 import { attentionPoints, dockSide, midOf, sideName } from './attention'
 import { activeWeapon } from './highlights'
@@ -22,18 +27,33 @@ const saveHints = (on: boolean): void => { try { localStorage.setItem(HINT_KEY, 
 
 function glow(ids: string[]): void { focus.hover(ids[0] ?? null) }
 
-/** One engine option as a button. */
+/** Name + cost chip for an option that uses an ability; the full explanation sits in the tooltip. */
+function SkillLabel({ info }: { info: SkillInfo }): ReactElement {
+  const cost = info.chips[2]
+  const from = info.lines.find((l) => l.label === 'From')
+  return <><span className="skill-name">{info.name}</span>{cost ? <span className="ix-cost">{cost}</span> : null}{from ? <span className="dim"> ({from.text})</span> : null}</>
+}
+
+/** Engine option label in player words: ids become names, card ids in payments become card names. */
+function optionText(state: GameState | null, o: DecisionOption): string {
+  return o.action.type === 'ability.pay' ? cardListWords(getBundle(), o.label) : prettify(state, o.label)
+}
+
+/** One engine option as a button. Ability options show the ability name and cost, and explain it on hover. */
 function OptionButton({ o, index, primary, suffix }: { o: DecisionOption; index?: number; primary?: boolean; suffix?: string }): ReactElement {
   const { state } = useGame()
+  const skill = optionSkill(getBundle(), state, o.action)
   return (
-    <button
-      className={`ix-btn${primary ? ' primary' : ''}`} data-testid={`opt-${o.id}`}
-      onMouseEnter={() => { draft.hoverOption(o.id); glow(mentionedUnits(o.action)) }}
-      onMouseLeave={() => { draft.hoverOption(null); focus.hover(null) }}
-      onClick={() => answerOption(o)}
-    >
-      {index !== undefined && <kbd>{index + 1}</kbd>}{prettify(state, o.label)}{suffix ? <span className="dim"> ({suffix})</span> : null}
-    </button>
+    <SkillTip info={skill}>
+      <button
+        className={`ix-btn${primary ? ' primary' : ''}`} data-testid={`opt-${o.id}`}
+        onMouseEnter={() => { draft.hoverOption(o.id); glow(mentionedUnits(o.action)) }}
+        onMouseLeave={() => { draft.hoverOption(null); focus.hover(null) }}
+        onClick={() => answerOption(o)}
+      >
+        {index !== undefined && <kbd>{index + 1}</kbd>}{skill ? <SkillLabel info={skill} /> : optionText(state, o)}{suffix ? <span className="dim"> ({suffix})</span> : null}
+      </button>
+    </SkillTip>
   )
 }
 
@@ -61,11 +81,15 @@ function ActivateBody({ pending }: { pending: PendingDecision }): ReactElement {
           <div className="ix-row">
             {open.options.map((o, i) => {
               const v = verbOf(o)
+              const skill = optionSkill(getBundle(), state, o.action)
+              const hint = skill ? skill.text : v.hint
               return (
-                <button key={`${o.id}:${i}`} className="ix-btn primary" data-testid={`act-${o.id}`} onMouseEnter={() => setTip(v.hint)} onMouseLeave={() => setTip('')}
-                  onFocus={() => setTip(v.hint)} onClick={() => answerOption(o)}>
-                  <kbd>{i + 1}</kbd>{v.label}
-                </button>
+                <SkillTip key={`${o.id}:${i}`} info={skill}>
+                  <button className="ix-btn primary" data-testid={`act-${o.id}`} onMouseEnter={() => setTip(hint)} onMouseLeave={() => setTip('')}
+                    onFocus={() => setTip(hint)} onBlur={() => setTip('')} onClick={() => answerOption(o)}>
+                    <kbd>{i + 1}</kbd>{skill ? <SkillLabel info={skill} /> : v.label}
+                  </button>
+                </SkillTip>
               )
             })}
           </div>
@@ -114,6 +138,12 @@ function PathBody({ pending }: { pending: PendingDecision }): ReactElement {
   )
 }
 
+function weaponOf(state: GameState | null, unitId: string | null, weaponId: string) {
+  const u = unitId ? state?.units[unitId] : undefined
+  const def = u ? data.unit(u.profileId) : undefined
+  return def ? data.weapons(def).find((x) => x.id === weaponId) : undefined
+}
+
 // ------------------------------------------------------------------ targets (shoot.batch and friends)
 const CHARGE_WHY: Record<string, string> = { outOfReach: 'Out of reach this turn.', noTarget: 'Pick at least one target.' }
 
@@ -158,11 +188,16 @@ function TargetBody({ pending }: { pending: PendingDecision }): ReactElement {
     return (
       <div className="ix-body" data-testid="ix-target">
         <div className="ix-chips" aria-label="Weapons">
-          {menu.rows.map((r) => (
-            <button key={r.weaponId} className={`ix-chip${r.weaponId === w ? ' on' : ''}`} data-testid={`weapon-${r.weaponId}`} onClick={() => draft.setWeapon(r.weaponId)}>
-              {dataName(r.weaponId)} <span className="dim">({r.targets.length} {r.targets.length === 1 ? 'target' : 'targets'})</span>
-            </button>
-          ))}
+          {menu.rows.map((r) => {
+            const wd = weaponOf(state, menu.unitId, r.weaponId)
+            return (
+              <SkillTip key={r.weaponId} info={wd ? weaponInfo(wd, getBundle()) : null}>
+                <button className={`ix-chip${r.weaponId === w ? ' on' : ''}`} data-testid={`weapon-${r.weaponId}`} onClick={() => draft.setWeapon(r.weaponId)}>
+                  <span className={wd ? 'skill-name' : ''}>{dataName(r.weaponId)}</span> <span className="dim">({r.targets.length} {r.targets.length === 1 ? 'target' : 'targets'})</span>
+                </button>
+              </SkillTip>
+            )
+          })}
         </div>
         <div className="ix-row">
           {row?.targets.map((t) => (
@@ -299,8 +334,14 @@ export function Prompt({ pending }: { pending: PendingDecision }): ReactElement 
   const geo = useBoardGeometry()
   const d = useDraftFor(pending.id)
   const [hints, setHints] = useState(readHints)
-  const [collapsed, setCollapsed] = useState(false)
+  const collapsed = usePanelMin('prompt')
+  const hideAll = useHideAll()
+  const setCollapsed = (c: boolean) => { if (!c && hideAll) panels.setHideAll(false); panels.setMin('prompt', c) }
+  const passOpt = pending.options.find((o) => o.action.type === 'turn.pass') ?? null
   const ability = pending.kind === 'ability.target' ? abilityHeading(state, pending.context) : null
+  const payRes = pending.context['res']
+  const pay = pending.kind === 'ability.pay' && typeof payRes === 'string' && ['CP', 'BM', 'PE'].includes(payRes) && typeof pending.context['n'] === 'number'
+    ? { res: payRes as Resource, n: pending.context['n'] as number } : null
   // Dock on the side of the table away from the active squad, the entry edge and the offered spots.
   const pts = attentionPoints(pending, state, geo, d.menuUnit)
   const side = dockSide(pts)
@@ -319,11 +360,24 @@ export function Prompt({ pending }: { pending: PendingDecision }): ReactElement 
   return (
     <section ref={ref} className={`ix-prompt${collapsed ? ' collapsed' : ''}`} data-testid="interaction-prompt" data-kind={pending.kind} data-mode={mode} data-dock={dock} data-side={side} aria-live="polite">
       <header className="ix-head">
-        <h3>{ability ? ability.name : info.title}{waiting?.hotSeat ? <span className="dim"> ({waiting.label})</span> : null}</h3>
+        {collapsed && <span className="ix-yourmove" data-testid="ix-your-move">Your move</span>}
+        {!collapsed && <h3>{ability ? (ability.info ? <SkillName info={ability.info} testid="ix-ability-name" /> : ability.name) : pay ? <>Pay {pay.n} <SkillName info={resourceInfo(pay.res)} testid="ix-pay-res">{pay.res}</SkillName></> : info.title}{waiting?.hotSeat ? <span className="dim"> ({waiting.label})</span> : null}</h3>}
+        {collapsed && <span className="ix-sum">{ability ? ability.name : info.title}</span>}
         {collapsed && <Summary pending={pending} />}
+        {collapsed && passOpt && (
+          <Tip title="Pass" body="Give up your remaining activations for this Phase." placement="top">
+            <button className="ix-btn quiet" data-testid="ix-pass-min" onClick={() => answerOption(passOpt)}>Pass</button>
+          </Tip>
+        )}
         <div className="ix-head-tools">
-          <button className="ix-icon" aria-pressed={hints} aria-label="Show hints" data-testid="ix-hints-toggle" onClick={() => { setHints(!hints); saveHints(!hints) }}>?</button>
-          <button className="ix-icon" aria-expanded={!collapsed} aria-label={collapsed ? 'Expand panel' : 'Collapse panel'} data-testid="ix-collapse" onClick={() => setCollapsed(!collapsed)}>{collapsed ? '+' : '-'}</button>
+          {!collapsed && (
+            <Tip title={hints ? 'Hide hints' : 'Show hints'} body="Toggle the one-line help under the title." placement="top">
+              <button className="ix-icon" aria-pressed={hints} aria-label="Show hints" data-testid="ix-hints-toggle" onClick={() => { setHints(!hints); saveHints(!hints) }}>?</button>
+            </Tip>
+          )}
+          <Tip title={collapsed ? 'Show the decision panel' : 'Minimise the decision panel'} body={collapsed ? (hideAll ? 'Brings back the whole layout (same as H).' : 'Bring the full choices back.') : 'Shrink it to a small Your move tab; Pass stays reachable.'} placement="top">
+            <button className="ix-icon" aria-expanded={!collapsed} aria-label={collapsed ? 'Expand panel' : 'Collapse panel'} data-testid="ix-collapse" onClick={() => setCollapsed(!collapsed)}>{collapsed ? '+' : '-'}</button>
+          </Tip>
         </div>
       </header>
       {!collapsed && (

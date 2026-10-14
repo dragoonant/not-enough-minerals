@@ -5,8 +5,11 @@ import type { GameState } from '../../engine/types'
 import type { Cue } from '../presentation/cues'
 import type { FeedEntry } from '../presentation/presentedStore'
 import { dataName, phaseLabel, seatLabel, unitName } from '../presentation/labels'
+import { getBundle } from '../contract'
+import { findAbility } from './skillInfo'
 
-export interface FeedLine { id: number; text: string; head?: boolean }
+/** `skill`: the line names an ability (the feed shows its name with a tooltip). */
+export interface FeedLine { id: number; text: string; head?: boolean; skill?: { abilityId: string; source: string | null; name: string; before: string; after: string } }
 
 const entryWords = (cue: Extract<Cue, { kind: 'arrival' }>): string => {
   const e = cue.entry
@@ -80,7 +83,11 @@ export function feedLines(feed: readonly FeedEntry[], state: GameState | null): 
       case 'note': {
         const ev = c.event as { type?: string; abilityId?: string; source?: string }
         if (typeof ev.type === 'string' && /^ability\.(use|action)/.test(ev.type) && ev.abilityId) {
-          out.push({ id: f.id, text: `${ev.source && state?.units[ev.source] ? un(ev.source) : 'A unit'} uses ${dataName(ev.abilityId)}.` })
+          const hit = findAbility(getBundle(), state, ev.abilityId, ev.source ?? null)
+          const name = hit?.ability.name ?? dataName(ev.abilityId)
+          const who = ev.source && state?.units[ev.source] ? un(ev.source) : hit?.cardName ? `${hit.cardName}:` : 'A unit'
+          const before = hit?.cardName && !(ev.source && state?.units[ev.source]) ? `${who} ` : `${who} uses `
+          out.push({ id: f.id, text: `${before}${name}.`, skill: { abilityId: ev.abilityId, source: ev.source ?? null, name, before, after: '.' } })
         } else if (f.text) out.push({ id: f.id, text: f.text })
         continue
       }

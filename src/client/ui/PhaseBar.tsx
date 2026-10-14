@@ -15,7 +15,8 @@ export function pickHold(options: readonly DecisionOption[], unitId: string | nu
   return holds.find((o) => o.action['unitId'] === unitId) ?? null
 }
 
-export function PhaseBar() {
+/** `compact`: the Hide UI strip (no seat pills; Round, Phase, status and Pass stay). */
+export function PhaseBar({ compact }: { compact?: boolean } = {}) {
   const turn = usePresentedTurn()
   const state = usePresented()
   const g = useGame()
@@ -39,7 +40,7 @@ export function PhaseBar() {
         <span className="pb-phase" data-testid="hud-phase">{over ? 'Game over' : phaseLabel(turn.roundPhase)}</span>
         <span className="pb-turn" data-testid="hud-turn">{over ? '' : status}</span>
       </div>
-      <div className="pb-seats">
+      {!compact && <div className="pb-seats">
         {g.seatOrder.map((seat) => {
           const first = turn.firstPlayer === seat
           const passed = turn.passed.includes(seat)
@@ -52,7 +53,7 @@ export function PhaseBar() {
             </span>
           )
         })}
-      </div>
+      </div>}
       {!over && (
         <div className="pb-acts">
           {hold && (

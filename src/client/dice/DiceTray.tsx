@@ -5,6 +5,8 @@
 // read from the engine's atk.stage payloads; re-rolled dice are marked. It collapses to a small dice chip.
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { dataName, directorNow, onCue, queries, rollLabel, seatLabel, useDiceLog, useShownRoll, type ShownRoll } from '../contract'
+import { useHideAll } from '../ui/panelStore'
+import { Tip } from '../ui/Tooltip'
 import './dice.css'
 import { buildBatchView, damageLine, needsText, plainTitle, viewRoll, type BatchView, type DieView, type PlainDie, type RollView } from './diceView'
 
@@ -152,6 +154,7 @@ export function DiceTray() {
   const log = useDiceLog()
   const rolling = useRolling(roll)
   const [pref, setPref] = useState<Pref>(readPref)
+  const hideAll = useHideAll()
   const [open, setOpen] = useState(false)
   const charge = useChargeNote()
   // What a charge roll needed, kept per shown roll so the log can say it too.
@@ -159,7 +162,7 @@ export function DiceTray() {
   if (roll && roll.cue.kind === 'dice' && roll.cue.purpose.split(':')[0] === 'charge' && !needed.current.has(roll.id)) needed.current.set(roll.id, charge?.needed ?? null)
   const view = useMemo<RollView | null>(() => (roll ? viewRoll(roll.cue, labelOf(roll)) : null), [roll])
   const batch = useMemo(() => (roll ? buildBatchView(log, roll, rolling) : null), [log, roll, rolling])
-  if (!roll || !view) return null
+  if (!roll || !view || hideAll) return null
   const set = (p: Partial<Pref>) => setPref((cur) => { const n = { ...cur, ...p }; writePref(n); return n })
   const attack = roll.cue.kind === 'attackStage'
   const kind: Kind = roll.cue.kind === 'attackStage' ? stageKind(roll.cue.step) : 'plain'
@@ -170,9 +173,11 @@ export function DiceTray() {
 
   if (pref.collapsed) {
     return (
-      <button className="dt-chip" data-testid="dice-tray" data-collapsed="true" aria-label="Show the dice tray" onClick={() => set({ collapsed: false })}>
-        Dice{rolling ? '' : ` ${view.dice.map((d) => d.text).join(' ')}`}
-      </button>
+      <Tip title="Show the dice tray" body="Bring back the dice and the working of the last roll." placement="left">
+        <button className="dt-chip" data-testid="dice-tray" data-collapsed="true" aria-label="Show the dice tray" onClick={() => set({ collapsed: false })}>
+          Dice{rolling ? '' : ` ${view.dice.map((d) => d.text).join(' ')}`}
+        </button>
+      </Tip>
     )
   }
   const settledAttack = attack && !rolling && batch
@@ -182,7 +187,9 @@ export function DiceTray() {
         <span className="dt-label" data-testid="dice-label">{title}</span>
         <span className="dt-btns">
           {attack && <button className="dt-mini" data-testid="dice-mode" aria-pressed={pref.mode === 'full'} onClick={() => set({ mode: pref.mode === 'full' ? 'quick' : 'full' })}>{pref.mode === 'full' ? 'Quick' : 'Working'}</button>}
-          <button className="dt-mini" data-testid="dice-collapse" aria-label="Hide the dice tray" onClick={() => set({ collapsed: true })}>&#8211;</button>
+          <Tip title="Minimise the dice tray" body="Shrink it to a small Dice tab. Click the tab to bring it back." placement="left">
+            <button className="dt-mini" data-testid="dice-collapse" aria-label="Hide the dice tray" onClick={() => set({ collapsed: true })}>&#8211;</button>
+          </Tip>
         </span>
       </div>
       {(!attack || rolling) && (
