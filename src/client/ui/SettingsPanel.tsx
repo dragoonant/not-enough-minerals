@@ -1,12 +1,14 @@
-// SettingsPanel: volume, dice mode, animation speed, narration. Opens from the top bar.
+// SettingsPanel: volume, dice mode, animation speed, narration, battlefield effects level. Opens from the top bar.
 import { useEffect, useState } from 'react'
 import { audio, type AudioSettings } from '../audio/manager'
 import { SPEED_PRESETS, presentation, settings, useSettings } from '../contract'
+import { EFFECTS_LEVELS, setEffectsLevel, useEffectsLevel, type EffectsLevel } from '../vfx/vfxStore'
 import { ModalLayer } from './ModalLayer'
 import { Tip } from './Tooltip'
 
 export function SettingsPanel({ onClose }: { onClose: () => void }) {
   const { speed, narration } = useSettings()
+  const fx = useEffectsLevel()
   const [a, setA] = useState<AudioSettings>(() => audio.getSettings())
   useEffect(() => audio.subscribe(setA), [])
   useEffect(() => {
@@ -35,6 +37,12 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
           </select>
         </label>
         <label className="srow"><span>Narration lines</span><input type="checkbox" checked={narration} data-testid="settings-narration" onChange={(e) => settings.set({ narration: e.target.checked })} /></label>
+        <h4>Visuals</h4>
+        <label className="srow"><span>Battlefield effects</span>
+          <select value={fx} data-testid="settings-effects" onChange={(e) => setEffectsLevel(e.target.value as EffectsLevel)}>
+            {EFFECTS_LEVELS.map((l) => <option key={l.id} value={l.id}>{l.label}</option>)}
+          </select>
+        </label>
         <h4>Dice</h4>
         <fieldset className="srow dice-mode" data-testid="settings-dice-mode">
           <label><input type="radio" name="dice" defaultChecked /> Quick tray</label>

@@ -10,9 +10,11 @@ import { AnchorProjector } from './Anchored'
 import { CameraRig } from './Camera'
 import { FpsMeter, FpsProbe, fpsEnabled } from './FpsMeter'
 import { BoardLabels } from './Labels'
+import { LightsRig } from './LightsRig'
 import { Mat } from './Mat'
 import { ModelProxies, ProxySync } from './ModelProxies'
 import { Objectives } from './Objectives'
+import { SkyRig } from './SkyRig'
 import { TerrainPieces } from './Terrain'
 import { ThreatOverlay } from './ThreatOverlay'
 import { Zones } from './Zones'
@@ -56,11 +58,8 @@ export function Board({ children }: { children?: ReactNode }): ReactElement {
   return (
     <div style={{ position: 'absolute', inset: 0, zIndex: 0, isolation: 'isolate' }} data-testid="board">
       <Canvas frameloop="demand" dpr={[1, 1.5]} shadows="percentage" camera={{ fov: 42, position: START.pos }} gl={{ preserveDrawingBuffer: readParams().test }}>
-        <color attach="background" args={['#0f141b']} />
-        <fog attach="fog" args={['#0f141b', 70 * (half / 20), 150 * (half / 20)]} />
-        <hemisphereLight args={['#cfe2f2', '#2a2622', 0.85]} />
-        <directionalLight position={[16, 36, 18]} intensity={2.3} castShadow shadow-mapSize={[2048, 2048]} shadow-bias={-0.0004} shadow-normalBias={0.03}
-          shadow-camera-left={-half} shadow-camera-right={half} shadow-camera-top={half} shadow-camera-bottom={-half} shadow-camera-far={120} />
+        <SkyRig half={half} />
+        <LightsRig half={half} />
         <Mat w={table.w} d={table.d} />
         {gallery ? <Gallery /> : (
           <>

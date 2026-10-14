@@ -10,6 +10,7 @@ import {
   tweenPosition, useFocus, useGame, useModelIds, usePresented, usePresentedModel, usePresentedUnits, useReportFiguresReady, useTween,
 } from '../contract'
 import { sideHex } from '../board/sideColours'
+import { Vfx } from '../vfx'
 import { CueFx } from './CueFx'
 import { FigureBody, useFigureHeight } from './FigureBody'
 import { useGlbsSettled } from './glbLoader'
@@ -118,6 +119,7 @@ export function Figures() {
         return <Figure key={id} id={id} seatIndex={Math.max(0, owner ? seatOrder.indexOf(owner) : 0)} />
       })}
       <CueFx />
+      <Vfx />
     </>
   )
 }

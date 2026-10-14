@@ -1,0 +1,433 @@
+[
+ {
+  "slug": "temple-stepped-platform",
+  "theme": "temple",
+  "rulesType": "building",
+  "footprint": [
+   6,
+   4
+  ],
+  "height": 4
+ },
+ {
+  "slug": "temple-shrine",
+  "theme": "temple",
+  "rulesType": "building",
+  "footprint": [
+   5,
+   5
+  ],
+  "height": 4
+ },
+ {
+  "slug": "temple-carved-wall",
+  "theme": "temple",
+  "rulesType": "obstacle",
+  "footprint": [
+   5,
+   1.2
+  ],
+  "height": 1.6
+ },
+ {
+  "slug": "temple-rubble-drums",
+  "theme": "temple",
+  "rulesType": "obstacle",
+  "footprint": [
+   3,
+   2
+  ],
+  "height": 1.8
+ },
+ {
+  "slug": "temple-broken-pillars",
+  "theme": "temple",
+  "rulesType": "obstruction",
+  "footprint": [
+   1.7
+  ],
+  "height": 3
+ },
+ {
+  "slug": "temple-colonnade",
+  "theme": "temple",
+  "rulesType": "building",
+  "footprint": [
+   6,
+   4
+  ],
+  "height": 4
+ },
+ {
+  "slug": "temple-ziggurat",
+  "theme": "temple",
+  "rulesType": "building",
+  "footprint": [
+   5,
+   5
+  ],
+  "height": 4
+ },
+ {
+  "slug": "temple-arcade",
+  "theme": "temple",
+  "rulesType": "obstacle",
+  "footprint": [
+   5,
+   1.2
+  ],
+  "height": 1.6
+ },
+ {
+  "slug": "temple-altar",
+  "theme": "temple",
+  "rulesType": "obstacle",
+  "footprint": [
+   3,
+   2
+  ],
+  "height": 1.8
+ },
+ {
+  "slug": "temple-monolith",
+  "theme": "temple",
+  "rulesType": "obstruction",
+  "footprint": [
+   1.7
+  ],
+  "height": 3
+ },
+ {
+  "slug": "outpost-bunker",
+  "theme": "outpost",
+  "rulesType": "building",
+  "footprint": [
+   6,
+   4
+  ],
+  "height": 4
+ },
+ {
+  "slug": "outpost-comm-tower",
+  "theme": "outpost",
+  "rulesType": "building",
+  "footprint": [
+   5,
+   5
+  ],
+  "height": 4
+ },
+ {
+  "slug": "outpost-barricade",
+  "theme": "outpost",
+  "rulesType": "obstacle",
+  "footprint": [
+   5,
+   1.2
+  ],
+  "height": 1.6
+ },
+ {
+  "slug": "outpost-fuel-tanks",
+  "theme": "outpost",
+  "rulesType": "obstacle",
+  "footprint": [
+   3,
+   2
+  ],
+  "height": 1.8
+ },
+ {
+  "slug": "outpost-silo",
+  "theme": "outpost",
+  "rulesType": "obstruction",
+  "footprint": [
+   1.7
+  ],
+  "height": 3
+ },
+ {
+  "slug": "outpost-depot",
+  "theme": "outpost",
+  "rulesType": "building",
+  "footprint": [
+   6,
+   4
+  ],
+  "height": 4
+ },
+ {
+  "slug": "outpost-generator",
+  "theme": "outpost",
+  "rulesType": "building",
+  "footprint": [
+   5,
+   5
+  ],
+  "height": 4
+ },
+ {
+  "slug": "outpost-gate-fence",
+  "theme": "outpost",
+  "rulesType": "obstacle",
+  "footprint": [
+   5,
+   1.2
+  ],
+  "height": 1.6
+ },
+ {
+  "slug": "outpost-crate-stack",
+  "theme": "outpost",
+  "rulesType": "obstacle",
+  "footprint": [
+   3,
+   2
+  ],
+  "height": 1.8
+ },
+ {
+  "slug": "outpost-dish",
+  "theme": "outpost",
+  "rulesType": "obstruction",
+  "footprint": [
+   1.7
+  ],
+  "height": 3
+ },
+ {
+  "slug": "crystal-sanctum",
+  "theme": "crystal",
+  "rulesType": "building",
+  "footprint": [
+   6,
+   4
+  ],
+  "height": 4
+ },
+ {
+  "slug": "crystal-spire-hall",
+  "theme": "crystal",
+  "rulesType": "building",
+  "footprint": [
+   5,
+   5
+  ],
+  "height": 4
+ },
+ {
+  "slug": "crystal-ridge",
+  "theme": "crystal",
+  "rulesType": "obstacle",
+  "footprint": [
+   5,
+   1.2
+  ],
+  "height": 1.6
+ },
+ {
+  "slug": "crystal-vent-rock",
+  "theme": "crystal",
+  "rulesType": "obstacle",
+  "footprint": [
+   3,
+   2
+  ],
+  "height": 1.8
+ },
+ {
+  "slug": "crystal-mineral-cluster",
+  "theme": "crystal",
+  "rulesType": "obstruction",
+  "footprint": [
+   1.7
+  ],
+  "height": 3
+ },
+ {
+  "slug": "crystal-cavern",
+  "theme": "crystal",
+  "rulesType": "building",
+  "footprint": [
+   6,
+   4
+  ],
+  "height": 4
+ },
+ {
+  "slug": "crystal-shrine",
+  "theme": "crystal",
+  "rulesType": "building",
+  "footprint": [
+   5,
+   5
+  ],
+  "height": 4
+ },
+ {
+  "slug": "crystal-rock-fence",
+  "theme": "crystal",
+  "rulesType": "obstacle",
+  "footprint": [
+   5,
+   1.2
+  ],
+  "height": 1.6
+ },
+ {
+  "slug": "crystal-shard-heap",
+  "theme": "crystal",
+  "rulesType": "obstacle",
+  "footprint": [
+   3,
+   2
+  ],
+  "height": 1.8
+ },
+ {
+  "slug": "crystal-geode",
+  "theme": "crystal",
+  "rulesType": "obstruction",
+  "footprint": [
+   1.7
+  ],
+  "height": 3
+ },
+ {
+  "slug": "creep-hive-hall",
+  "theme": "creep",
+  "rulesType": "building",
+  "footprint": [
+   6,
+   4
+  ],
+  "height": 4
+ },
+ {
+  "slug": "creep-spore-nest",
+  "theme": "creep",
+  "rulesType": "building",
+  "footprint": [
+   5,
+   5
+  ],
+  "height": 4
+ },
+ {
+  "slug": "creep-spine-ridge",
+  "theme": "creep",
+  "rulesType": "obstacle",
+  "footprint": [
+   5,
+   1.2
+  ],
+  "height": 1.6
+ },
+ {
+  "slug": "creep-pods",
+  "theme": "creep",
+  "rulesType": "obstacle",
+  "footprint": [
+   3,
+   2
+  ],
+  "height": 1.8
+ },
+ {
+  "slug": "creep-mound",
+  "theme": "creep",
+  "rulesType": "obstruction",
+  "footprint": [
+   1.7
+  ],
+  "height": 3
+ },
+ {
+  "slug": "creep-brood-chamber",
+  "theme": "creep",
+  "rulesType": "building",
+  "footprint": [
+   6,
+   4
+  ],
+  "height": 4
+ },
+ {
+  "slug": "creep-sac-hall",
+  "theme": "creep",
+  "rulesType": "building",
+  "footprint": [
+   5,
+   5
+  ],
+  "height": 4
+ },
+ {
+  "slug": "creep-chitin-wall",
+  "theme": "creep",
+  "rulesType": "obstacle",
+  "footprint": [
+   5,
+   1.2
+  ],
+  "height": 1.6
+ },
+ {
+  "slug": "creep-tumour",
+  "theme": "creep",
+  "rulesType": "obstacle",
+  "footprint": [
+   3,
+   2
+  ],
+  "height": 1.8
+ },
+ {
+  "slug": "creep-spore-spire",
+  "theme": "creep",
+  "rulesType": "obstruction",
+  "footprint": [
+   1.7
+  ],
+  "height": 3
+ },
+ {
+  "slug": "temple-collapsed-arch",
+  "theme": "temple",
+  "rulesType": "building",
+  "footprint": [
+   7,
+   4
+  ],
+  "height": 4
+ },
+ {
+  "slug": "outpost-containers",
+  "theme": "outpost",
+  "rulesType": "obstacle",
+  "footprint": [
+   4,
+   3
+  ],
+  "height": 2.5
+ },
+ {
+  "slug": "outpost-blast-wall",
+  "theme": "outpost",
+  "rulesType": "obstacle",
+  "footprint": [
+   10,
+   1.2
+  ],
+  "height": 3.5
+ },
+ {
+  "slug": "crystal-rock-outcrop",
+  "theme": "crystal",
+  "rulesType": "obstruction",
+  "footprint": [
+   2
+  ],
+  "height": 3
+ }
+]

@@ -1,0 +1,18 @@
+// Screenshot of the terrain hover card + footprint outline: node art/terrain/hover-shot.mjs (dev server on :5201).
+import { chromium } from '@playwright/test'
+const b = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] })
+const p = await b.newPage({ viewport: { width: 1280, height: 800 } })
+p.on('pageerror', (e) => console.log('pageerror', e.message))
+await p.goto('http://localhost:5201/not-enough-minerals/?test=1&seats=bot,bot&seed=m5-temple&speed=fast&theme=temple')
+await p.getByTestId('game-screen').waitFor({ timeout: 60000 })
+await p.waitForFunction(() => { const t = window.__terrain; return t && Object.keys(t).length && !Object.values(t).some((v) => v === 'loading') }, null, { timeout: 90000 })
+await p.waitForTimeout(6000)
+await p.evaluate(() => window.__game.pauseBots(true))
+await p.getByRole('button', { name: 'Overview', exact: true }).click()
+await p.waitForTimeout(1500)
+const [x, y] = (process.argv[2] ?? '520,450').split(',').map(Number)
+await p.mouse.move(x - 20, y - 20); await p.mouse.move(x, y, { steps: 4 })
+await p.waitForTimeout(1200)
+console.log(await p.evaluate(() => document.querySelector('[data-testid="terrain-card"]')?.textContent ?? 'NO CARD'))
+await p.screenshot({ path: 'screenshots/m5-terrain-hover.png' })
+await b.close()

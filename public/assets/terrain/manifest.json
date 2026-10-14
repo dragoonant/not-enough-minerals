@@ -1,0 +1,697 @@
+{
+ "temple-stepped-platform": {
+  "file": "temple-stepped-platform.glb",
+  "size": [
+   6,
+   4,
+   4
+  ],
+  "rulesType": "building",
+  "theme": "temple",
+  "footprint": {
+   "rect": {
+    "w": 6,
+    "d": 4
+   }
+  }
+ },
+ "temple-shrine": {
+  "file": "temple-shrine.glb",
+  "size": [
+   5,
+   5,
+   4
+  ],
+  "rulesType": "building",
+  "theme": "temple",
+  "footprint": {
+   "rect": {
+    "w": 5,
+    "d": 5
+   }
+  }
+ },
+ "temple-carved-wall": {
+  "file": "temple-carved-wall.glb",
+  "size": [
+   5,
+   1.2,
+   1.6
+  ],
+  "rulesType": "obstacle",
+  "theme": "temple",
+  "footprint": {
+   "rect": {
+    "w": 5,
+    "d": 1.2
+   }
+  }
+ },
+ "temple-rubble-drums": {
+  "file": "temple-rubble-drums.glb",
+  "size": [
+   3,
+   2,
+   1.8
+  ],
+  "rulesType": "obstacle",
+  "theme": "temple",
+  "footprint": {
+   "rect": {
+    "w": 3,
+    "d": 2
+   }
+  }
+ },
+ "temple-broken-pillars": {
+  "file": "temple-broken-pillars.glb",
+  "size": [
+   3.4,
+   3.4,
+   3
+  ],
+  "rulesType": "obstruction",
+  "theme": "temple",
+  "footprint": {
+   "circle": {
+    "r": 1.7
+   }
+  }
+ },
+ "temple-colonnade": {
+  "file": "temple-colonnade.glb",
+  "size": [
+   6,
+   4,
+   4
+  ],
+  "rulesType": "building",
+  "theme": "temple",
+  "footprint": {
+   "rect": {
+    "w": 6,
+    "d": 4
+   }
+  }
+ },
+ "temple-ziggurat": {
+  "file": "temple-ziggurat.glb",
+  "size": [
+   5,
+   5,
+   4
+  ],
+  "rulesType": "building",
+  "theme": "temple",
+  "footprint": {
+   "rect": {
+    "w": 5,
+    "d": 5
+   }
+  }
+ },
+ "temple-arcade": {
+  "file": "temple-arcade.glb",
+  "size": [
+   5,
+   1.2,
+   1.6
+  ],
+  "rulesType": "obstacle",
+  "theme": "temple",
+  "footprint": {
+   "rect": {
+    "w": 5,
+    "d": 1.2
+   }
+  }
+ },
+ "temple-altar": {
+  "file": "temple-altar.glb",
+  "size": [
+   3,
+   2,
+   1.8
+  ],
+  "rulesType": "obstacle",
+  "theme": "temple",
+  "footprint": {
+   "rect": {
+    "w": 3,
+    "d": 2
+   }
+  }
+ },
+ "temple-monolith": {
+  "file": "temple-monolith.glb",
+  "size": [
+   3.4,
+   3.4,
+   3
+  ],
+  "rulesType": "obstruction",
+  "theme": "temple",
+  "footprint": {
+   "circle": {
+    "r": 1.7
+   }
+  }
+ },
+ "outpost-bunker": {
+  "file": "outpost-bunker.glb",
+  "size": [
+   6,
+   4,
+   4
+  ],
+  "rulesType": "building",
+  "theme": "outpost",
+  "footprint": {
+   "rect": {
+    "w": 6,
+    "d": 4
+   }
+  }
+ },
+ "outpost-comm-tower": {
+  "file": "outpost-comm-tower.glb",
+  "size": [
+   5,
+   5,
+   4
+  ],
+  "rulesType": "building",
+  "theme": "outpost",
+  "footprint": {
+   "rect": {
+    "w": 5,
+    "d": 5
+   }
+  }
+ },
+ "outpost-barricade": {
+  "file": "outpost-barricade.glb",
+  "size": [
+   5,
+   1.2,
+   1.6
+  ],
+  "rulesType": "obstacle",
+  "theme": "outpost",
+  "footprint": {
+   "rect": {
+    "w": 5,
+    "d": 1.2
+   }
+  }
+ },
+ "outpost-fuel-tanks": {
+  "file": "outpost-fuel-tanks.glb",
+  "size": [
+   3,
+   2,
+   1.8
+  ],
+  "rulesType": "obstacle",
+  "theme": "outpost",
+  "footprint": {
+   "rect": {
+    "w": 3,
+    "d": 2
+   }
+  }
+ },
+ "outpost-silo": {
+  "file": "outpost-silo.glb",
+  "size": [
+   3.4,
+   3.4,
+   3
+  ],
+  "rulesType": "obstruction",
+  "theme": "outpost",
+  "footprint": {
+   "circle": {
+    "r": 1.7
+   }
+  }
+ },
+ "outpost-depot": {
+  "file": "outpost-depot.glb",
+  "size": [
+   6,
+   4,
+   4
+  ],
+  "rulesType": "building",
+  "theme": "outpost",
+  "footprint": {
+   "rect": {
+    "w": 6,
+    "d": 4
+   }
+  }
+ },
+ "outpost-generator": {
+  "file": "outpost-generator.glb",
+  "size": [
+   5,
+   5,
+   4
+  ],
+  "rulesType": "building",
+  "theme": "outpost",
+  "footprint": {
+   "rect": {
+    "w": 5,
+    "d": 5
+   }
+  }
+ },
+ "outpost-gate-fence": {
+  "file": "outpost-gate-fence.glb",
+  "size": [
+   5,
+   1.2,
+   1.6
+  ],
+  "rulesType": "obstacle",
+  "theme": "outpost",
+  "footprint": {
+   "rect": {
+    "w": 5,
+    "d": 1.2
+   }
+  }
+ },
+ "outpost-crate-stack": {
+  "file": "outpost-crate-stack.glb",
+  "size": [
+   3,
+   2,
+   1.8
+  ],
+  "rulesType": "obstacle",
+  "theme": "outpost",
+  "footprint": {
+   "rect": {
+    "w": 3,
+    "d": 2
+   }
+  }
+ },
+ "outpost-dish": {
+  "file": "outpost-dish.glb",
+  "size": [
+   3.4,
+   3.4,
+   3
+  ],
+  "rulesType": "obstruction",
+  "theme": "outpost",
+  "footprint": {
+   "circle": {
+    "r": 1.7
+   }
+  }
+ },
+ "crystal-sanctum": {
+  "file": "crystal-sanctum.glb",
+  "size": [
+   6,
+   4,
+   4
+  ],
+  "rulesType": "building",
+  "theme": "crystal",
+  "footprint": {
+   "rect": {
+    "w": 6,
+    "d": 4
+   }
+  }
+ },
+ "crystal-spire-hall": {
+  "file": "crystal-spire-hall.glb",
+  "size": [
+   5,
+   5,
+   4
+  ],
+  "rulesType": "building",
+  "theme": "crystal",
+  "footprint": {
+   "rect": {
+    "w": 5,
+    "d": 5
+   }
+  }
+ },
+ "crystal-ridge": {
+  "file": "crystal-ridge.glb",
+  "size": [
+   5,
+   1.2,
+   1.6
+  ],
+  "rulesType": "obstacle",
+  "theme": "crystal",
+  "footprint": {
+   "rect": {
+    "w": 5,
+    "d": 1.2
+   }
+  }
+ },
+ "crystal-vent-rock": {
+  "file": "crystal-vent-rock.glb",
+  "size": [
+   3,
+   2,
+   1.8
+  ],
+  "rulesType": "obstacle",
+  "theme": "crystal",
+  "footprint": {
+   "rect": {
+    "w": 3,
+    "d": 2
+   }
+  }
+ },
+ "crystal-mineral-cluster": {
+  "file": "crystal-mineral-cluster.glb",
+  "size": [
+   3.4,
+   3.4,
+   3
+  ],
+  "rulesType": "obstruction",
+  "theme": "crystal",
+  "footprint": {
+   "circle": {
+    "r": 1.7
+   }
+  }
+ },
+ "crystal-cavern": {
+  "file": "crystal-cavern.glb",
+  "size": [
+   6,
+   4,
+   4
+  ],
+  "rulesType": "building",
+  "theme": "crystal",
+  "footprint": {
+   "rect": {
+    "w": 6,
+    "d": 4
+   }
+  }
+ },
+ "crystal-shrine": {
+  "file": "crystal-shrine.glb",
+  "size": [
+   5,
+   5,
+   4
+  ],
+  "rulesType": "building",
+  "theme": "crystal",
+  "footprint": {
+   "rect": {
+    "w": 5,
+    "d": 5
+   }
+  }
+ },
+ "crystal-rock-fence": {
+  "file": "crystal-rock-fence.glb",
+  "size": [
+   5,
+   1.2,
+   1.6
+  ],
+  "rulesType": "obstacle",
+  "theme": "crystal",
+  "footprint": {
+   "rect": {
+    "w": 5,
+    "d": 1.2
+   }
+  }
+ },
+ "crystal-shard-heap": {
+  "file": "crystal-shard-heap.glb",
+  "size": [
+   3,
+   2,
+   1.8
+  ],
+  "rulesType": "obstacle",
+  "theme": "crystal",
+  "footprint": {
+   "rect": {
+    "w": 3,
+    "d": 2
+   }
+  }
+ },
+ "crystal-geode": {
+  "file": "crystal-geode.glb",
+  "size": [
+   3.4,
+   3.4,
+   3
+  ],
+  "rulesType": "obstruction",
+  "theme": "crystal",
+  "footprint": {
+   "circle": {
+    "r": 1.7
+   }
+  }
+ },
+ "creep-hive-hall": {
+  "file": "creep-hive-hall.glb",
+  "size": [
+   6,
+   4,
+   4
+  ],
+  "rulesType": "building",
+  "theme": "creep",
+  "footprint": {
+   "rect": {
+    "w": 6,
+    "d": 4
+   }
+  }
+ },
+ "creep-spore-nest": {
+  "file": "creep-spore-nest.glb",
+  "size": [
+   5,
+   5,
+   4
+  ],
+  "rulesType": "building",
+  "theme": "creep",
+  "footprint": {
+   "rect": {
+    "w": 5,
+    "d": 5
+   }
+  }
+ },
+ "creep-spine-ridge": {
+  "file": "creep-spine-ridge.glb",
+  "size": [
+   5,
+   1.2,
+   1.6
+  ],
+  "rulesType": "obstacle",
+  "theme": "creep",
+  "footprint": {
+   "rect": {
+    "w": 5,
+    "d": 1.2
+   }
+  }
+ },
+ "creep-pods": {
+  "file": "creep-pods.glb",
+  "size": [
+   3,
+   2,
+   1.8
+  ],
+  "rulesType": "obstacle",
+  "theme": "creep",
+  "footprint": {
+   "rect": {
+    "w": 3,
+    "d": 2
+   }
+  }
+ },
+ "creep-mound": {
+  "file": "creep-mound.glb",
+  "size": [
+   3.4,
+   3.4,
+   3
+  ],
+  "rulesType": "obstruction",
+  "theme": "creep",
+  "footprint": {
+   "circle": {
+    "r": 1.7
+   }
+  }
+ },
+ "creep-brood-chamber": {
+  "file": "creep-brood-chamber.glb",
+  "size": [
+   6,
+   4,
+   4
+  ],
+  "rulesType": "building",
+  "theme": "creep",
+  "footprint": {
+   "rect": {
+    "w": 6,
+    "d": 4
+   }
+  }
+ },
+ "creep-sac-hall": {
+  "file": "creep-sac-hall.glb",
+  "size": [
+   5,
+   5,
+   4
+  ],
+  "rulesType": "building",
+  "theme": "creep",
+  "footprint": {
+   "rect": {
+    "w": 5,
+    "d": 5
+   }
+  }
+ },
+ "creep-chitin-wall": {
+  "file": "creep-chitin-wall.glb",
+  "size": [
+   5,
+   1.2,
+   1.6
+  ],
+  "rulesType": "obstacle",
+  "theme": "creep",
+  "footprint": {
+   "rect": {
+    "w": 5,
+    "d": 1.2
+   }
+  }
+ },
+ "creep-tumour": {
+  "file": "creep-tumour.glb",
+  "size": [
+   3,
+   2,
+   1.8
+  ],
+  "rulesType": "obstacle",
+  "theme": "creep",
+  "footprint": {
+   "rect": {
+    "w": 3,
+    "d": 2
+   }
+  }
+ },
+ "creep-spore-spire": {
+  "file": "creep-spore-spire.glb",
+  "size": [
+   3.4,
+   3.4,
+   3
+  ],
+  "rulesType": "obstruction",
+  "theme": "creep",
+  "footprint": {
+   "circle": {
+    "r": 1.7
+   }
+  }
+ },
+ "temple-collapsed-arch": {
+  "file": "temple-collapsed-arch.glb",
+  "size": [
+   7,
+   4,
+   4
+  ],
+  "rulesType": "building",
+  "theme": "temple",
+  "footprint": {
+   "rect": {
+    "w": 7,
+    "d": 4
+   }
+  }
+ },
+ "outpost-containers": {
+  "file": "outpost-containers.glb",
+  "size": [
+   4,
+   3,
+   2.5
+  ],
+  "rulesType": "obstacle",
+  "theme": "outpost",
+  "footprint": {
+   "rect": {
+    "w": 4,
+    "d": 3
+   }
+  }
+ },
+ "outpost-blast-wall": {
+  "file": "outpost-blast-wall.glb",
+  "size": [
+   10,
+   1.2,
+   3.5
+  ],
+  "rulesType": "obstacle",
+  "theme": "outpost",
+  "footprint": {
+   "rect": {
+    "w": 10,
+    "d": 1.2
+   }
+  }
+ },
+ "crystal-rock-outcrop": {
+  "file": "crystal-rock-outcrop.glb",
+  "size": [
+   4,
+   4,
+   3
+  ],
+  "rulesType": "obstruction",
+  "theme": "crystal",
+  "footprint": {
+   "circle": {
+    "r": 2
+   }
+  }
+ }
+}

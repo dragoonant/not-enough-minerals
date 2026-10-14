@@ -1,83 +1,82 @@
-// The table mat: a procedural canvas texture (no binary assets) sized from the deployment table, 1 world unit = 1 inch.
-// Ash-grey ground with mottling, panel seams, a faint 6-inch grid and tick numbers along the near edge, on a dark plinth.
-import { useEffect, useMemo } from 'react'
-import { CanvasTexture, SRGBColorSpace, RepeatWrapping } from 'three'
-import { PALETTE } from '../theme'
-import { hash01 } from './layout'
+// The table mat: tiled CC0 PBR ground (themed per game, see boardTheme.ts / groundMaterial.ts) inside a dark bevelled
+// gaming-mat frame on a wooden tabletop that runs off into the fog, 1 world unit = 1 inch. No painted grid: the Entry
+// Edge strips and Zone bands (Zones.tsx) are the only markings on the surface.
+import { useEffect, useMemo, useState } from 'react'
+import { Color, ExtrudeGeometry, Path, RepeatWrapping, Shape, ShapeGeometry, SRGBColorSpace, TextureLoader, type Texture } from 'three'
+import { useThree } from '@react-three/fiber'
+import { createGroundMaterial, groundUrl } from './groundMaterial'
+import { useBoardTheme } from './SkyRig'
 
-const PX = 24 // texture pixels per inch
+const FRAME = 1.4 // frame width in inches
+const BEVEL = 0.16
 
-function paintMat(w: number, d: number): HTMLCanvasElement | null {
-  if (typeof document === 'undefined') return null
-  const c = document.createElement('canvas')
-  c.width = Math.round(w * PX); c.height = Math.round(d * PX)
-  const g = c.getContext('2d')
-  if (!g) return null
-  g.fillStyle = PALETTE.ashDark
-  g.fillRect(0, 0, c.width, c.height)
-  // soft mottling: big translucent blobs placed by a deterministic hash
-  for (let i = 0; i < 260; i++) {
-    const x = hash01(i, 1) * c.width, y = hash01(i, 2) * c.height, r = (2 + hash01(i, 3) * 6) * PX
-    const lum = hash01(i, 4) > 0.5
-    const grad = g.createRadialGradient(x, y, 0, x, y, r)
-    grad.addColorStop(0, lum ? 'rgba(160,150,132,0.16)' : 'rgba(30,28,24,0.18)')
-    grad.addColorStop(1, 'rgba(0,0,0,0)')
-    g.fillStyle = grad
-    g.fillRect(x - r, y - r, r * 2, r * 2)
-  }
-  // fine speckle
-  for (let i = 0; i < 9000; i++) {
-    g.fillStyle = hash01(i, 7) > 0.5 ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.07)'
-    g.fillRect(hash01(i, 5) * c.width, hash01(i, 6) * c.height, 2, 2)
-  }
-  // grid every 6 inches, heavier at 12
-  for (let x = 6; x < w; x += 6) {
-    g.strokeStyle = x % 12 === 0 ? 'rgba(15,20,27,0.38)' : 'rgba(15,20,27,0.22)'
-    g.lineWidth = x % 12 === 0 ? 2 : 1
-    g.beginPath(); g.moveTo(x * PX, 0); g.lineTo(x * PX, c.height); g.stroke()
-  }
-  for (let y = 6; y < d; y += 6) {
-    g.strokeStyle = y % 12 === 0 ? 'rgba(15,20,27,0.38)' : 'rgba(15,20,27,0.22)'
-    g.lineWidth = y % 12 === 0 ? 2 : 1
-    g.beginPath(); g.moveTo(0, y * PX); g.lineTo(c.width, y * PX); g.stroke()
-  }
-  // inch ticks on the near and far edges so distances can be read at a glance
-  g.fillStyle = 'rgba(15,20,27,0.45)'
-  for (let x = 1; x < w; x++) {
-    const len = x % 6 === 0 ? 10 : x % 3 === 0 ? 6 : 3
-    g.fillRect(x * PX - 0.5, 0, 1, len); g.fillRect(x * PX - 0.5, c.height - len, 1, len)
-  }
-  for (let y = 1; y < d; y++) {
-    const len = y % 6 === 0 ? 10 : y % 3 === 0 ? 6 : 3
-    g.fillRect(0, y * PX - 0.5, len, 1); g.fillRect(c.width - len, y * PX - 0.5, len, 1)
-  }
-  // edge vignette
-  const edge = g.createLinearGradient(0, 0, 0, c.height)
-  edge.addColorStop(0, 'rgba(0,0,0,0.22)'); edge.addColorStop(0.08, 'rgba(0,0,0,0)'); edge.addColorStop(0.92, 'rgba(0,0,0,0)'); edge.addColorStop(1, 'rgba(0,0,0,0.22)')
-  g.fillStyle = edge; g.fillRect(0, 0, c.width, c.height)
-  return c
+function ringShape(ow: number, od: number, iw: number, id: number): Shape {
+  const s = new Shape()
+  s.moveTo(-ow / 2, -od / 2); s.lineTo(ow / 2, -od / 2); s.lineTo(ow / 2, od / 2); s.lineTo(-ow / 2, od / 2); s.closePath()
+  const h = new Path()
+  h.moveTo(-iw / 2, -id / 2); h.lineTo(-iw / 2, id / 2); h.lineTo(iw / 2, id / 2); h.lineTo(iw / 2, -id / 2); h.closePath()
+  s.holes.push(h)
+  return s
+}
+
+const TABLE_SPAN = 14 // tabletop edge = this many times the longest mat side
+const TABLE_TILE = 30 // inches per wood tile
+
+/** Wood tabletop textures (CC0 Poly Haven wood_table_001); null until they load, flat tint meanwhile. */
+function useTableTextures(span: number, onLoad: () => void): { map: Texture | null; rough: Texture | null } {
+  const [tex, setTex] = useState<{ map: Texture | null; rough: Texture | null }>({ map: null, rough: null })
+  useEffect(() => {
+    let alive = true
+    const owned: Texture[] = []
+    const loader = new TextureLoader()
+    const load = (kind: 'albedo' | 'rough', key: 'map' | 'rough', srgb: boolean) => loader.load(groundUrl('table', kind), (t) => {
+      if (!alive) { t.dispose(); return }
+      t.wrapS = t.wrapT = RepeatWrapping; t.repeat.set(span / TABLE_TILE, span / TABLE_TILE); t.anisotropy = 8
+      if (srgb) t.colorSpace = SRGBColorSpace
+      owned.push(t); setTex((p) => ({ ...p, [key]: t })); onLoad()
+    }, undefined, () => { /* flat tint */ })
+    load('albedo', 'map', true); load('rough', 'rough', false)
+    return () => { alive = false; owned.forEach((t) => t.dispose()) }
+  }, [span, onLoad])
+  return tex
 }
 
 export function Mat({ w, d }: { w: number; d: number }) {
-  const tex = useMemo(() => {
-    const canvas = paintMat(w, d)
-    if (!canvas) return null
-    const t = new CanvasTexture(canvas)
-    t.colorSpace = SRGBColorSpace
-    t.wrapS = t.wrapT = RepeatWrapping
-    t.anisotropy = 4
-    return t
+  const theme = useBoardTheme()
+  const invalidate = useThree((s) => s.invalidate)
+  const ground = useMemo(() => createGroundMaterial(theme, w, d, () => invalidate()), [theme, w, d, invalidate])
+  useEffect(() => () => ground.dispose(), [ground])
+  const span = TABLE_SPAN * Math.max(w, d)
+  const onTex = useMemo(() => () => invalidate(), [invalidate])
+  const tableColour = useMemo(() => new Color(theme.table.tint).multiplyScalar(theme.table.gain), [theme])
+  const table = useTableTextures(span, onTex)
+  const frameGeo = useMemo(() => {
+    const g = new ExtrudeGeometry(ringShape(w + 2 * FRAME, d + 2 * FRAME, w + 2 * BEVEL, d + 2 * BEVEL), {
+      depth: 0.3, bevelEnabled: true, bevelSize: BEVEL, bevelThickness: 0.12, bevelSegments: 3, steps: 1,
+    })
+    g.rotateX(-Math.PI / 2)
+    return g
   }, [w, d])
-  useEffect(() => () => { tex?.dispose() }, [tex])
+  const rimGeo = useMemo(() => new ShapeGeometry(ringShape(w + 2 * BEVEL + 0.22, d + 2 * BEVEL + 0.22, w + 2 * BEVEL, d + 2 * BEVEL)).rotateX(-Math.PI / 2), [w, d])
+  useEffect(() => () => { frameGeo.dispose(); rimGeo.dispose() }, [frameGeo, rimGeo])
   return (
     <group>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow name="mat">
+      <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow name="mat" material={ground.material}>
         <planeGeometry args={[w, d]} />
-        <meshStandardMaterial color={tex ? '#ffffff' : PALETTE.ashDark} map={tex} roughness={0.95} />
+      </mesh>
+      <mesh geometry={frameGeo} position={[0, -0.18, 0]} receiveShadow castShadow name="mat-frame">
+        <meshStandardMaterial color={theme.frame.colour} roughness={0.55} metalness={0.35} />
+      </mesh>
+      <mesh geometry={rimGeo} position={[0, 0.262, 0]} name="mat-rim">
+        <meshBasicMaterial color={theme.frame.rim} />
+      </mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.525, 0]} receiveShadow name="tabletop">
+        <planeGeometry args={[span, span]} />
+        <meshStandardMaterial color={tableColour} map={table.map} roughnessMap={table.rough} roughness={0.8} metalness={0} />
       </mesh>
       <mesh position={[0, -0.27, 0]} receiveShadow>
-        <boxGeometry args={[w + 1.2, 0.5, d + 1.2]} />
-        <meshStandardMaterial color={PALETTE.slateLight} roughness={0.8} metalness={0.2} />
+        <boxGeometry args={[w + 2 * FRAME + 0.6, 0.5, d + 2 * FRAME + 0.6]} />
+        <meshStandardMaterial color="#10141a" roughness={0.9} metalness={0.1} />
       </mesh>
     </group>
   )
