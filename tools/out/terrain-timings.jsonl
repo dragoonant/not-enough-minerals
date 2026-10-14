@@ -137,3 +137,50 @@
 {"stage": "fit", "slug": "temple-monolith", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:54:46", "faces": 6000, "stretch": 1.31, "turned": false}
 {"stage": "shape-load", "slug": "-", "seconds": 53.4, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:55:29"}
 {"stage": "paint-load", "slug": "-", "seconds": 28.3, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:56:31"}
+{"stage": "cutout", "slug": "crystal-sanctum", "seconds": 18.5, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:58:28", "pick": "art/terrain/concepts/crystal-sanctum.png"}
+{"stage": "cutout", "slug": "crystal-spire-hall", "seconds": 17.1, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:58:45", "pick": "art/terrain/concepts/crystal-spire-hall.png"}
+{"stage": "cutout", "slug": "crystal-cavern", "seconds": 16.8, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:59:02", "pick": "art/terrain/concepts/crystal-cavern.png"}
+{"stage": "cutout", "slug": "crystal-shrine", "seconds": 17.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:59:19", "pick": "art/terrain/concepts/crystal-shrine.png"}
+{"stage": "cutout", "slug": "crystal-ridge", "seconds": 16.1, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:59:35", "pick": "art/terrain/concepts/crystal-ridge.png"}
+{"stage": "cutout", "slug": "crystal-rock-fence", "seconds": 17.0, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:59:52", "pick": "art/terrain/concepts/crystal-rock-fence.png"}
+{"stage": "cutout", "slug": "crystal-vent-rock", "seconds": 17.3, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:00:09", "pick": "art/terrain/concepts/crystal-vent-rock.png"}
+{"stage": "cutout", "slug": "crystal-shard-heap", "seconds": 16.8, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:00:26", "pick": "art/terrain/concepts/crystal-shard-heap.png"}
+{"stage": "cutout", "slug": "crystal-mineral-cluster", "seconds": 15.9, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:00:42", "pick": "art/terrain/concepts/crystal-mineral-cluster.png"}
+{"stage": "shape-load", "slug": "-", "seconds": 34.8, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:01:39"}
+{"stage": "shape", "slug": "crystal-sanctum", "seconds": 87.0, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:03:06", "faces": 6000, "octree": 256, "offload": true, "peak_gb": 6.9}
+{"stage": "shape", "slug": "crystal-spire-hall", "seconds": 92.0, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:04:38", "faces": 6000, "octree": 256, "offload": true, "peak_gb": 6.9}
+{"stage": "shape", "slug": "crystal-cavern", "seconds": 84.0, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:06:02", "faces": 6000, "octree": 256, "offload": true, "peak_gb": 6.9}
+{"stage": "shape", "slug": "crystal-shrine", "seconds": 88.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:07:30", "faces": 6000, "octree": 256, "offload": true, "peak_gb": 6.9}
+{"stage": "shape", "slug": "crystal-ridge", "seconds": 74.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:08:45", "faces": 6000, "octree": 256, "offload": true, "peak_gb": 6.9}
+{"stage": "shape", "slug": "crystal-rock-fence", "seconds": 75.1, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:10:00", "faces": 6000, "octree": 256, "offload": true, "peak_gb": 6.9}
+{"stage": "shape", "slug": "crystal-vent-rock", "seconds": 84.6, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:11:24", "faces": 6000, "octree": 256, "offload": true, "peak_gb": 6.9}
+{"stage": "shape", "slug": "crystal-shard-heap", "seconds": 80.4, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:12:45", "faces": 6000, "octree": 256, "offload": true, "peak_gb": 6.9}
+{"stage": "shape", "slug": "crystal-mineral-cluster", "seconds": 87.0, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:14:12", "faces": 6000, "octree": 256, "offload": true, "peak_gb": 6.9}
+{"stage": "paint-load", "slug": "-", "seconds": 17.7, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:14:50"}
+{"stage": "paint", "slug": "crystal-sanctum", "seconds": 74.8, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:16:05", "peak_gb": 9.7}
+{"stage": "paint", "slug": "crystal-spire-hall", "seconds": 78.0, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:17:23", "peak_gb": 9.7}
+{"stage": "paint", "slug": "crystal-cavern", "seconds": 158.3, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:20:02", "peak_gb": 9.7}
+{"stage": "paint", "slug": "crystal-shrine", "seconds": 70.8, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:21:13", "peak_gb": 9.7}
+{"stage": "paint", "slug": "crystal-ridge", "seconds": 74.4, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:22:28", "peak_gb": 9.7}
+{"stage": "paint", "slug": "crystal-rock-fence", "seconds": 161.6, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:25:10", "peak_gb": 9.7}
+{"stage": "paint", "slug": "crystal-vent-rock", "seconds": 69.3, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:26:20", "peak_gb": 9.7}
+{"stage": "paint", "slug": "crystal-shard-heap", "seconds": 72.6, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:27:33", "peak_gb": 9.7}
+{"stage": "paint", "slug": "crystal-mineral-cluster", "seconds": 157.6, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:30:11", "peak_gb": 9.7}
+{"stage": "fit", "slug": "crystal-sanctum", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:30:41", "faces": 6000, "stretch": 1.11, "turned": false}
+{"stage": "fit", "slug": "crystal-spire-hall", "seconds": 0.4, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:30:41", "faces": 6000, "stretch": 1.23, "turned": false}
+{"stage": "fit", "slug": "crystal-cavern", "seconds": 0.3, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:30:42", "faces": 6000, "stretch": 1.1, "turned": false}
+{"stage": "fit", "slug": "crystal-shrine", "seconds": 0.3, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:30:42", "faces": 6000, "stretch": 1.2, "turned": false}
+{"stage": "fit", "slug": "crystal-ridge", "seconds": 0.4, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:30:42", "faces": 6000, "stretch": 3.51, "turned": false}
+{"stage": "fit", "slug": "crystal-rock-fence", "seconds": 0.3, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:30:43", "faces": 6000, "stretch": 2.59, "turned": false}
+{"stage": "fit", "slug": "crystal-vent-rock", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:30:43", "faces": 6000, "stretch": 1.47, "turned": false}
+{"stage": "fit", "slug": "crystal-shard-heap", "seconds": 0.3, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:30:43", "faces": 6000, "stretch": 1.5, "turned": false}
+{"stage": "fit", "slug": "crystal-mineral-cluster", "seconds": 0.4, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:30:44", "faces": 6000, "stretch": 1.05, "turned": false}
+{"stage": "cutout", "slug": "crystal-geode", "seconds": 17.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:30:56", "pick": "art/terrain/concepts/crystal-geode.png"}
+{"stage": "cutout", "slug": "crystal-rock-outcrop", "seconds": 20.3, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:31:16", "pick": "art/terrain/concepts/crystal-rock-outcrop.png"}
+{"stage": "cutout", "slug": "creep-hive-hall", "seconds": 38.9, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:31:55", "pick": "art/terrain/concepts/creep-hive-hall.png"}
+{"stage": "cutout", "slug": "creep-brood-chamber", "seconds": 20.8, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:32:16", "pick": "art/terrain/concepts/creep-brood-chamber.png"}
+{"stage": "cutout", "slug": "creep-spore-nest", "seconds": 21.6, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:32:38", "pick": "art/terrain/concepts/creep-spore-nest.png"}
+{"stage": "cutout", "slug": "creep-sac-hall", "seconds": 17.7, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:32:55", "pick": "art/terrain/concepts/creep-sac-hall.png"}
+{"stage": "cutout", "slug": "creep-spine-ridge", "seconds": 18.4, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:33:14", "pick": "art/terrain/concepts/creep-spine-ridge.png"}
+{"stage": "cutout", "slug": "creep-chitin-wall", "seconds": 17.6, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:33:31", "pick": "art/terrain/concepts/creep-chitin-wall.png"}
+{"stage": "cutout", "slug": "creep-pods", "seconds": 17.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:33:49", "pick": "art/terrain/concepts/creep-pods.png"}

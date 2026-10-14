@@ -42,3 +42,14 @@ blast wall). 11 of 11 usable on the first try.
 
 Gemini now returns some new images as googleusercontent URLs instead of `blob:`; the queue script waits for either, and
 extraction draws `blob:` images to a canvas and fetches the others with `=s0?alr=yes`.
+
+## Crystal set (third chat) and creep set (fourth chat), 2026-10-13/14
+Crystal theme: frontier mining camp among glossy glowing blue crystals (dark basalt, gunmetal and olive drab mining
+gear). Creep theme: military fortifications overrun by glossy purple alien flesh, bone-white chitin and acid-green sacs
+("no creatures" in every prompt). Same first-prompt and follow-up pattern; piece texts are in
+`tools/models/terrain/pieces.json`.
+
+- Gemini's image limit hit after ~31 images in one evening ("I can create more images as soon as your limit resets";
+  the input box shows the reset time). The queue script now stops on that message instead of waiting out a timeout.
+- Known soft spot: `creep-sac-hall` came out almost the same as `creep-spore-nest` (both tall overgrown towers);
+  re-prompt it as a low, wide membrane dome if the owner wants more variety.
