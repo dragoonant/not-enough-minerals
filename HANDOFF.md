@@ -117,7 +117,24 @@ so ask the owner only if a value exists nowhere else.
   them by USB drive or LAN beats re-downloading). The R11 needs its own install of both, plus our stage scripts
   (`stage_cutout.py`, `stage_shape.py` with SHAPE_SEED, `stage_paint.py`, `stage_finalize.py` with "fit",
   `terrain_*.py`, `nem_fit.py`). Pin transformers 4.48.3 / diffusers 0.32.2 in the 2.0 venv (KB 3.2).
-- Gemini on the R11: connect the Claude in Chrome extension there and `select_browser` that machine; standing rules
+- **Hunyuan3D install on the R11** (mirror of the working 5080 setup, checked 2026-10-13):
+  1. Prereqs: NVIDIA driver with CUDA 12.8 support, Git, `uv` (`%USERPROFILE%\.local\bin\uv.exe`; set
+     `UV_SYSTEM_CERTS=1`), Visual Studio 2022 Build Tools (C++ workload) + CUDA Toolkit 12.8 for the compiled paint
+     extensions, Blender's `bpy` comes from pip in the 2.1 venv.
+  2. `git clone https://github.com/Tencent/Hunyuan3D-2 %USERPROFILE%\Hunyuan3D-2`; venv Python 3.11; torch 2.11.0
+     cu128 (`--index-url https://download.pytorch.org/whl/cu128`); `pip install -r requirements.txt`; pin
+     `transformers==4.48.3 diffusers==0.32.2`; build `hy3dgen/texgen/custom_rasterizer` and
+     `hy3dgen/texgen/differentiable_renderer` (`pip install -e .` / `python setup.py install` from a VS x64 Native
+     Tools prompt). Import torch before custom_rasterizer (the kernel DLL loads from torch's lib).
+  3. `git clone https://github.com/Tencent-Hunyuan/Hunyuan3D-2.1 %USERPROFILE%\Hunyuan3D-2.1`; venv Python 3.10; same
+     torch; `pip install -r requirements.win.txt`; build `hy3dpaint/custom_rasterizer` (Windows kernel in
+     `lib/custom_rasterizer_kernel_for_windows`) and `hy3dpaint/DifferentiableRenderer`.
+  4. Weights: copy `%USERPROFILE%\.cache\hy3dgen` (48 GB: `tencent/`, `Tencent-Hunyuan/`, `sdxl/`) from the 5080 PC;
+     HF symlinks fail without Developer Mode, so keep them as plain files.
+  5. Copy our scripts on top of the clones: from Hunyuan3D-2 (`stage_cutout.py`, `stage_paint.py`,
+     `stage_finalize.py`, `concepts_sdxl.py`, `terrain_*.py`, `finalize_model.py`, `units.json`, `picks.json`) and
+     from Hunyuan3D-2.1 (`stage_shape.py`, `nem_fit.py`, `terrain_shape.py`, `terrain_finalize.py`,
+     `torchvision_fix.py`). Smoke test: `smoke_shape21.py` in 2.1, then one figure end to end. the Claude in Chrome extension there and `select_browser` that machine; standing rules
   (no clipboard paste, hidden file input only) apply.
 
 ## Owner questions (fill in as they come up)
