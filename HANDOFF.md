@@ -93,5 +93,11 @@ so ask the owner only if a value exists nowhere else.
 - Unclear rules: log a RULING, use the most literal reading of R + CL/CT/F, keep going.
 - Push notifications: one when playable on Pages, one at stop. Session stays in auto mode.
 
+## Owner feedback queue
+- 2026-10-13 terrain (verbatim intent): "not in love with the terrain - it's too simple and not shiny, we need more
+  war-torn and hurried construction builds, like in war time." Second terrain pass planned later tonight:
+  battle-damaged, improvised wartime fortifications (sandbags, scrap-plate walls, cratered bunkers, wrecked
+  vehicles, scaffolding), richer detail and specular/metallic sheen. Do not start until the owner says go.
+
 ## Owner questions (fill in as they come up)
 - (none yet)
