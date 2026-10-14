@@ -839,3 +839,9 @@ it when the owner says so. Ask everything once, then run all night without stopp
   mode's safety check blocked it (correctly: it is a clipboard-paste workaround). Plan Gemini batches for when
   the owner is at the PC, or ask the owner to disable the screen lock for overnight runs; fall back to local
   SDXL img2img from an approved concept.
+- Figures are keyed by DATA UNIT ID, and StarCraft variant cards (Raptor, Swarmling, Kerrigan Swarm Raptor are
+  Zerglings; Corpser, Vile are Roaches; Nerazim Watchers are Adepts) each have their own id. The art batches were
+  planned from the box contents, so 11 of 31 ids stayed procedural and the owner asked why. Plan the figure list from
+  `data/**/units/*` at M1, and alias every variant to its base unit's GLB in the manifest on day one.
+- The art agents refused web reference downloads "without chat approval" although the owner approved them at kickoff:
+  restate standing approvals (with the date) inside every art prompt.
