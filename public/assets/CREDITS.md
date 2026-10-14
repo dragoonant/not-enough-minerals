@@ -8,7 +8,7 @@ No attribution is required by CC0; credited here as a courtesy.
 | --- | --- |
 | badlands | cracked_red_ground |
 | ash | burned_ground_01 |
-| temple | red_sandstone_pavement |
+| temple | dry_ground_rocks |
 | ice | snow_02 |
 
 ## Terrain models (public/assets/terrain)

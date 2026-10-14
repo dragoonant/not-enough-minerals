@@ -51,7 +51,7 @@ export interface BoardTheme {
 export const BOARD_THEMES: Record<BoardThemeId, BoardTheme> = {
   temple: {
     id: 'temple', label: 'Temple ruins',
-    ground: { stem: 'temple', mean: [102, 89, 75], tint: '#ad9f8c', tileInches: 14, macroA: '#85755a', macroB: '#4a4033', macroStrength: 0.35, gain: 1.2, normalScale: 1.5, roughness: 0.95, mix2: 0.8, mix3: 0.4, fallback: '#6a5e50' },
+    ground: { stem: 'temple', mean: [149, 115, 78], tint: '#b8a68c', tileInches: 20, macroA: '#85755a', macroB: '#4a4033', macroStrength: 0.35, gain: 1.0, normalScale: 1.2, roughness: 0.95, mix2: 0.8, mix3: 0.4, fallback: '#6a5e50' },
     frame: { colour: '#241f19', rim: '#6a5a3c' },
     table: { tint: '#9a8a78', gain: 0.8 },
     sky: { top: '#17202e', horizon: '#6b5636', floor: '#14110d', glow: '#ffb765', fog: '#2c2418', fogNear: 70, fogFar: 150 },
