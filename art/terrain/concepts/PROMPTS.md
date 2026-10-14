@@ -30,3 +30,15 @@ is what made Gemini match the rules footprints.
   machines, so opening the same chat URL on the right PC recovers the images without regenerating.
 - Older images in a reloaded chat are served from googleusercontent (tainted canvas): fetch `<src base>=s0?alr=yes` with
   credentials and post the blob as a data URL. Fresh images are `blob:` URLs and can be drawn to a canvas.
+
+## Temple set (second chat, 2026-10-13)
+Theme: ancient alien temple ruins hastily fortified in wartime. First prompt: "Generate an image of ONE tabletop
+wargame terrain miniature: " + the stepped-platform text from `tools/models/terrain/pieces.json` + this style line:
+"Painted and weathered like a premium resin model kit: warm sandstone with polished gold inlay that catches the
+light, plus gunmetal and olive drab military additions with glossy metallic highlights, rust streaks, soot. Whole
+model in frame, three-quarter view from above, plain white background, even soft lighting, no people, no figures, no
+text, no logos." Follow-ups as for the outpost set, each with its base shape AND height ratio (lesson from the outpost
+blast wall). 11 of 11 usable on the first try.
+
+Gemini now returns some new images as googleusercontent URLs instead of `blob:`; the queue script waits for either, and
+extraction draws `blob:` images to a canvas and fetches the others with `=s0?alr=yes`.

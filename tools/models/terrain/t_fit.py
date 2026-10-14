@@ -19,8 +19,9 @@ from _common import log, picks, pieces, slugs_from, work
 
 # Hunyuan paint bakes base colour only; a little metalness and lower roughness gives the wartime steel its sheen under the
 # board's environment map (owner 2026-10-13: "not shiny").
-GRADE = (1.3, 1.25, 0.82)  # contrast, saturation, brightness
-SHEEN = {'outpost': (0.3, 0.45), 'temple': (0.15, 0.6), 'crystal': (0.3, 0.35), 'creep': (0.1, 0.3)}
+# contrast, saturation, brightness per theme (sandstone saturates to orange fast)
+GRADE = {'outpost': (1.3, 1.25, 0.82), 'temple': (1.2, 0.85, 0.85), 'crystal': (1.3, 1.15, 0.85), 'creep': (1.3, 1.15, 0.85)}
+SHEEN = {'outpost': (0.3, 0.45), 'temple': (0.2, 0.5), 'crystal': (0.3, 0.35), 'creep': (0.1, 0.3)}
 
 dest = os.path.abspath(sys.argv[1])
 os.makedirs(dest, exist_ok=True)
@@ -52,8 +53,8 @@ for slug in slugs_from(sys.argv[2:], list(picks())):
         # Hunyuan paint de-lights the concept, which leaves the texture flat and pale; grade it back towards the concept
         tex = getattr(mat, 'baseColorTexture', None)
         if tex is not None:
-            tex = ImageEnhance.Contrast(tex.convert('RGB')).enhance(GRADE[0])
-            tex = ImageEnhance.Color(tex).enhance(GRADE[1])
-            mat.baseColorTexture = ImageEnhance.Brightness(tex).enhance(GRADE[2])
+            tex = ImageEnhance.Contrast(tex.convert('RGB')).enhance(GRADE[p['theme']][0])
+            tex = ImageEnhance.Color(tex).enhance(GRADE[p['theme']][1])
+            mat.baseColorTexture = ImageEnhance.Brightness(tex).enhance(GRADE[p['theme']][2])
     mesh.export(os.path.join(dest, f'{slug}.glb'))
     log('fit', slug, time.time() - t0, faces=len(mesh.faces), stretch=round(stretch, 2), turned=turned)

@@ -10,5 +10,16 @@
  "outpost-crate-stack": "art/terrain/concepts/outpost-crate-stack.png",
  "outpost-containers": "art/terrain/concepts/outpost-containers.png",
  "outpost-silo": "art/terrain/concepts/outpost-silo.png",
- "outpost-dish": "art/terrain/concepts/outpost-dish.png"
+ "outpost-dish": "art/terrain/concepts/outpost-dish.png",
+ "temple-stepped-platform": "art/terrain/concepts/temple-stepped-platform.png",
+ "temple-shrine": "art/terrain/concepts/temple-shrine.png",
+ "temple-colonnade": "art/terrain/concepts/temple-colonnade.png",
+ "temple-ziggurat": "art/terrain/concepts/temple-ziggurat.png",
+ "temple-collapsed-arch": "art/terrain/concepts/temple-collapsed-arch.png",
+ "temple-carved-wall": "art/terrain/concepts/temple-carved-wall.png",
+ "temple-arcade": "art/terrain/concepts/temple-arcade.png",
+ "temple-rubble-drums": "art/terrain/concepts/temple-rubble-drums.png",
+ "temple-altar": "art/terrain/concepts/temple-altar.png",
+ "temple-broken-pillars": "art/terrain/concepts/temple-broken-pillars.png",
+ "temple-monolith": "art/terrain/concepts/temple-monolith.png"
 }

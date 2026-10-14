@@ -78,3 +78,62 @@
 {"stage": "paint", "slug": "outpost-silo", "seconds": 75.4, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:56:29", "peak_gb": 9.7}
 {"stage": "fit", "slug": "outpost-blast-wall", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:56:52", "faces": 6000, "stretch": 2.18, "turned": true}
 {"stage": "fit", "slug": "outpost-silo", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T20:56:52", "faces": 6000, "stretch": 1.49, "turned": false}
+{"stage": "cutout", "slug": "temple-stepped-platform", "seconds": 21.4, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T22:55:21", "pick": "art/terrain/concepts/temple-stepped-platform.png"}
+{"stage": "cutout", "slug": "temple-shrine", "seconds": 21.1, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T22:55:42", "pick": "art/terrain/concepts/temple-shrine.png"}
+{"stage": "cutout", "slug": "temple-colonnade", "seconds": 19.5, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T22:56:02", "pick": "art/terrain/concepts/temple-colonnade.png"}
+{"stage": "cutout", "slug": "temple-ziggurat", "seconds": 19.3, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T22:56:21", "pick": "art/terrain/concepts/temple-ziggurat.png"}
+{"stage": "cutout", "slug": "temple-collapsed-arch", "seconds": 19.0, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T22:56:40", "pick": "art/terrain/concepts/temple-collapsed-arch.png"}
+{"stage": "cutout", "slug": "temple-carved-wall", "seconds": 18.9, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T22:56:59", "pick": "art/terrain/concepts/temple-carved-wall.png"}
+{"stage": "cutout", "slug": "temple-arcade", "seconds": 19.5, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T22:57:19", "pick": "art/terrain/concepts/temple-arcade.png"}
+{"stage": "cutout", "slug": "temple-rubble-drums", "seconds": 18.7, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T22:57:37", "pick": "art/terrain/concepts/temple-rubble-drums.png"}
+{"stage": "cutout", "slug": "temple-altar", "seconds": 18.6, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T22:57:56", "pick": "art/terrain/concepts/temple-altar.png"}
+{"stage": "cutout", "slug": "temple-broken-pillars", "seconds": 19.8, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T22:58:16", "pick": "art/terrain/concepts/temple-broken-pillars.png"}
+{"stage": "cutout", "slug": "temple-monolith", "seconds": 18.7, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T22:58:34", "pick": "art/terrain/concepts/temple-monolith.png"}
+{"stage": "shape-load", "slug": "-", "seconds": 43.7, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T22:59:58"}
+{"stage": "shape", "slug": "temple-stepped-platform", "seconds": 91.1, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:01:29", "faces": 6000, "octree": 256, "offload": true, "peak_gb": 6.9}
+{"stage": "shape", "slug": "temple-shrine", "seconds": 99.7, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:03:09", "faces": 6000, "octree": 256, "offload": true, "peak_gb": 6.9}
+{"stage": "shape", "slug": "temple-colonnade", "seconds": 92.0, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:04:41", "faces": 6000, "octree": 256, "offload": true, "peak_gb": 6.9}
+{"stage": "shape", "slug": "temple-ziggurat", "seconds": 88.1, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:06:09", "faces": 6000, "octree": 256, "offload": true, "peak_gb": 6.9}
+{"stage": "shape", "slug": "temple-collapsed-arch", "seconds": 89.8, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:07:39", "faces": 6000, "octree": 256, "offload": true, "peak_gb": 6.9}
+{"stage": "shape", "slug": "temple-carved-wall", "seconds": 80.7, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:09:00", "faces": 6000, "octree": 256, "offload": true, "peak_gb": 6.9}
+{"stage": "shape", "slug": "temple-arcade", "seconds": 82.4, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:10:22", "faces": 6000, "octree": 256, "offload": true, "peak_gb": 6.9}
+{"stage": "shape", "slug": "temple-rubble-drums", "seconds": 91.8, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:11:54", "faces": 6000, "octree": 256, "offload": true, "peak_gb": 6.9}
+{"stage": "shape", "slug": "temple-altar", "seconds": 94.1, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:13:28", "faces": 6000, "octree": 256, "offload": true, "peak_gb": 6.9}
+{"stage": "shape", "slug": "temple-broken-pillars", "seconds": 96.8, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:15:05", "faces": 6000, "octree": 256, "offload": true, "peak_gb": 6.9}
+{"stage": "shape", "slug": "temple-monolith", "seconds": 92.5, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:16:37", "faces": 6000, "octree": 256, "offload": true, "peak_gb": 6.9}
+{"stage": "paint-load", "slug": "-", "seconds": 23.9, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:17:32"}
+{"stage": "paint", "slug": "temple-stepped-platform", "seconds": 1235.6, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:38:08", "peak_gb": 9.7}
+{"stage": "paint", "slug": "temple-shrine", "seconds": 71.1, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:39:20", "peak_gb": 9.7}
+{"stage": "paint", "slug": "temple-colonnade", "seconds": 150.6, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:41:51", "peak_gb": 9.7}
+{"stage": "paint", "slug": "temple-ziggurat", "seconds": 102.5, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:43:34", "peak_gb": 9.7}
+{"stage": "paint", "slug": "temple-collapsed-arch", "seconds": 70.6, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:44:45", "peak_gb": 9.7}
+{"stage": "paint", "slug": "temple-carved-wall", "seconds": 71.5, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:45:57", "peak_gb": 9.7}
+{"stage": "paint", "slug": "temple-arcade", "seconds": 101.9, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:47:39", "peak_gb": 9.7}
+{"stage": "paint", "slug": "temple-rubble-drums", "seconds": 76.0, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:48:55", "peak_gb": 9.7}
+{"stage": "paint", "slug": "temple-altar", "seconds": 140.6, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:51:17", "peak_gb": 9.7}
+{"stage": "paint", "slug": "temple-broken-pillars", "seconds": 69.1, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:52:26", "peak_gb": 9.7}
+{"stage": "paint", "slug": "temple-monolith", "seconds": 70.8, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:53:37", "peak_gb": 9.7}
+{"stage": "fit", "slug": "temple-stepped-platform", "seconds": 0.3, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:54:10", "faces": 6000, "stretch": 1.69, "turned": false}
+{"stage": "fit", "slug": "temple-shrine", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:54:10", "faces": 6000, "stretch": 1.23, "turned": false}
+{"stage": "fit", "slug": "temple-colonnade", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:54:10", "faces": 6000, "stretch": 1.8, "turned": true}
+{"stage": "fit", "slug": "temple-ziggurat", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:54:10", "faces": 6000, "stretch": 1.54, "turned": false}
+{"stage": "fit", "slug": "temple-collapsed-arch", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:54:11", "faces": 6000, "stretch": 1.45, "turned": false}
+{"stage": "fit", "slug": "temple-carved-wall", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:54:11", "faces": 6000, "stretch": 1.84, "turned": false}
+{"stage": "fit", "slug": "temple-arcade", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:54:11", "faces": 6000, "stretch": 1.75, "turned": false}
+{"stage": "fit", "slug": "temple-rubble-drums", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:54:11", "faces": 6000, "stretch": 1.79, "turned": false}
+{"stage": "fit", "slug": "temple-altar", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:54:11", "faces": 6000, "stretch": 1.5, "turned": false}
+{"stage": "fit", "slug": "temple-broken-pillars", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:54:12", "faces": 6000, "stretch": 1.38, "turned": false}
+{"stage": "fit", "slug": "temple-monolith", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:54:12", "faces": 6000, "stretch": 1.31, "turned": false}
+{"stage": "fit", "slug": "temple-stepped-platform", "seconds": 0.3, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:54:44", "faces": 6000, "stretch": 1.69, "turned": false}
+{"stage": "fit", "slug": "temple-shrine", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:54:44", "faces": 6000, "stretch": 1.23, "turned": false}
+{"stage": "fit", "slug": "temple-colonnade", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:54:44", "faces": 6000, "stretch": 1.8, "turned": true}
+{"stage": "fit", "slug": "temple-ziggurat", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:54:45", "faces": 6000, "stretch": 1.54, "turned": false}
+{"stage": "fit", "slug": "temple-collapsed-arch", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:54:45", "faces": 6000, "stretch": 1.45, "turned": false}
+{"stage": "fit", "slug": "temple-carved-wall", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:54:45", "faces": 6000, "stretch": 1.84, "turned": false}
+{"stage": "fit", "slug": "temple-arcade", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:54:45", "faces": 6000, "stretch": 1.75, "turned": false}
+{"stage": "fit", "slug": "temple-rubble-drums", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:54:45", "faces": 6000, "stretch": 1.79, "turned": false}
+{"stage": "fit", "slug": "temple-altar", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:54:46", "faces": 6000, "stretch": 1.5, "turned": false}
+{"stage": "fit", "slug": "temple-broken-pillars", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:54:46", "faces": 6000, "stretch": 1.38, "turned": false}
+{"stage": "fit", "slug": "temple-monolith", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:54:46", "faces": 6000, "stretch": 1.31, "turned": false}
+{"stage": "shape-load", "slug": "-", "seconds": 53.4, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:55:29"}
+{"stage": "paint-load", "slug": "-", "seconds": 28.3, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-13T23:56:31"}

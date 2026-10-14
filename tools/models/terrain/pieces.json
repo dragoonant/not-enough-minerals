@@ -1,27 +1,698 @@
 {
   "_note": "Terrain pass v2 (owner 2026-10-13: war-torn, hurried wartime construction, shinier). size = [w, d, h] inches, the engine footprint and height; the long side is +x. prompt = what the piece is (the shared style words live in t_concepts.py).",
-  "outpost-bunker": { "theme": "outpost", "rulesType": "building", "size": [6, 4, 4], "footprint": { "rect": { "w": 6, "d": 4 } },
-    "prompt": "a battle-damaged two storey military command bunker, scorched riveted steel plates, shell holes, sandbag walls stacked around the doorway, steel scaffolding on one side, hazard stripes" },
-  "outpost-comm-tower": { "theme": "outpost", "rulesType": "building", "size": [5, 5, 4], "footprint": { "rect": { "w": 5, "d": 5 } },
-    "prompt": "a square fortified communications post with a bent radio mast, patched armour plating welded over holes, sandbag parapet on the roof, steel ladder and catwalk, blast scorch marks" },
-  "outpost-depot": { "theme": "outpost", "rulesType": "building", "size": [6, 4, 4], "footprint": { "rect": { "w": 6, "d": 4 } },
-    "prompt": "a half-ruined military supply depot hangar with a partly collapsed corrugated steel roof, exposed girders, piled crates and fuel drums inside, sandbags along the front, shell damage" },
-  "outpost-generator": { "theme": "outpost", "rulesType": "building", "size": [5, 5, 4], "footprint": { "rect": { "w": 5, "d": 5 } },
-    "prompt": "a square armoured power generator station with big pipes and exhaust stacks, dented steel panels, improvised scrap-plate armour, sandbags and barbed wire around the base, battle damage" },
-  "outpost-barricade": { "theme": "outpost", "rulesType": "obstacle", "size": [5, 1.2, 1.6], "footprint": { "rect": { "w": 5, "d": 1.2 } },
-    "prompt": "a long low wartime barricade of stacked sandbags reinforced with welded scrap steel plates and wooden posts, straight line, battle worn" },
-  "outpost-gate-fence": { "theme": "outpost", "rulesType": "obstacle", "size": [5, 1.2, 1.6], "footprint": { "rect": { "w": 5, "d": 1.2 } },
-    "prompt": "a long straight improvised steel wall made of riveted scrap armour plates bolted to girders, bullet holes, a few sandbags at its foot, straight line" },
-  "outpost-blast-wall": { "theme": "outpost", "rulesType": "obstacle", "size": [10, 1.2, 3.5], "footprint": { "rect": { "w": 10, "d": 1.2 } },
-    "prompt": "a very long tall straight military blast wall of heavy concrete and steel segments, cracked and shell-damaged, steel scaffolding and a catwalk behind it, hazard stripes" },
-  "outpost-fuel-tanks": { "theme": "outpost", "rulesType": "obstacle", "size": [3, 2, 1.8], "footprint": { "rect": { "w": 3, "d": 2 } },
-    "prompt": "two dented military fuel tanks on a steel skid with pipes and valves, one tank holed and scorched, a few sandbags beside them" },
-  "outpost-crate-stack": { "theme": "outpost", "rulesType": "obstacle", "size": [3, 2, 1.8], "footprint": { "rect": { "w": 3, "d": 2 } },
-    "prompt": "a hasty pile of military ammunition crates, steel cargo boxes and oil drums with a tarp, some crates broken open, sandbags" },
-  "outpost-containers": { "theme": "outpost", "rulesType": "obstacle", "size": [4, 3, 2.5], "footprint": { "rect": { "w": 4, "d": 3 } },
-    "prompt": "the burnt-out wreck of a six-wheeled armoured military transport vehicle, blown open hull, scorched steel, flat tyres" },
-  "outpost-silo": { "theme": "outpost", "rulesType": "obstruction", "size": [3.4, 3.4, 3], "footprint": { "circle": { "r": 1.7 } },
-    "prompt": "a round cratered gun emplacement ringed with sandbags and curved scrap steel plates, a wrecked twin autocannon turret in the middle" },
-  "outpost-dish": { "theme": "outpost", "rulesType": "obstruction", "size": [3.4, 3.4, 3], "footprint": { "circle": { "r": 1.7 } },
-    "prompt": "a round damaged sensor dish platform on a steel tripod, bent dish, cables, a ring of sandbags and scrap plates around the base" }
+  "outpost-bunker": {
+    "theme": "outpost",
+    "rulesType": "building",
+    "size": [
+      6,
+      4,
+      4
+    ],
+    "footprint": {
+      "rect": {
+        "w": 6,
+        "d": 4
+      }
+    },
+    "prompt": "a battle-damaged two storey military command bunker, scorched riveted steel plates, shell holes, sandbag walls stacked around the doorway, steel scaffolding on one side, hazard stripes"
+  },
+  "outpost-comm-tower": {
+    "theme": "outpost",
+    "rulesType": "building",
+    "size": [
+      5,
+      5,
+      4
+    ],
+    "footprint": {
+      "rect": {
+        "w": 5,
+        "d": 5
+      }
+    },
+    "prompt": "a square fortified communications post with a bent radio mast, patched armour plating welded over holes, sandbag parapet on the roof, steel ladder and catwalk, blast scorch marks"
+  },
+  "outpost-depot": {
+    "theme": "outpost",
+    "rulesType": "building",
+    "size": [
+      6,
+      4,
+      4
+    ],
+    "footprint": {
+      "rect": {
+        "w": 6,
+        "d": 4
+      }
+    },
+    "prompt": "a half-ruined military supply depot hangar with a partly collapsed corrugated steel roof, exposed girders, piled crates and fuel drums inside, sandbags along the front, shell damage"
+  },
+  "outpost-generator": {
+    "theme": "outpost",
+    "rulesType": "building",
+    "size": [
+      5,
+      5,
+      4
+    ],
+    "footprint": {
+      "rect": {
+        "w": 5,
+        "d": 5
+      }
+    },
+    "prompt": "a square armoured power generator station with big pipes and exhaust stacks, dented steel panels, improvised scrap-plate armour, sandbags and barbed wire around the base, battle damage"
+  },
+  "outpost-barricade": {
+    "theme": "outpost",
+    "rulesType": "obstacle",
+    "size": [
+      5,
+      1.2,
+      1.6
+    ],
+    "footprint": {
+      "rect": {
+        "w": 5,
+        "d": 1.2
+      }
+    },
+    "prompt": "a long low wartime barricade of stacked sandbags reinforced with welded scrap steel plates and wooden posts, straight line, battle worn"
+  },
+  "outpost-gate-fence": {
+    "theme": "outpost",
+    "rulesType": "obstacle",
+    "size": [
+      5,
+      1.2,
+      1.6
+    ],
+    "footprint": {
+      "rect": {
+        "w": 5,
+        "d": 1.2
+      }
+    },
+    "prompt": "a long straight improvised steel wall made of riveted scrap armour plates bolted to girders, bullet holes, a few sandbags at its foot, straight line"
+  },
+  "outpost-blast-wall": {
+    "theme": "outpost",
+    "rulesType": "obstacle",
+    "size": [
+      10,
+      1.2,
+      3.5
+    ],
+    "footprint": {
+      "rect": {
+        "w": 10,
+        "d": 1.2
+      }
+    },
+    "prompt": "a very long tall straight military blast wall of heavy concrete and steel segments, cracked and shell-damaged, steel scaffolding and a catwalk behind it, hazard stripes"
+  },
+  "outpost-fuel-tanks": {
+    "theme": "outpost",
+    "rulesType": "obstacle",
+    "size": [
+      3,
+      2,
+      1.8
+    ],
+    "footprint": {
+      "rect": {
+        "w": 3,
+        "d": 2
+      }
+    },
+    "prompt": "two dented military fuel tanks on a steel skid with pipes and valves, one tank holed and scorched, a few sandbags beside them"
+  },
+  "outpost-crate-stack": {
+    "theme": "outpost",
+    "rulesType": "obstacle",
+    "size": [
+      3,
+      2,
+      1.8
+    ],
+    "footprint": {
+      "rect": {
+        "w": 3,
+        "d": 2
+      }
+    },
+    "prompt": "a hasty pile of military ammunition crates, steel cargo boxes and oil drums with a tarp, some crates broken open, sandbags"
+  },
+  "outpost-containers": {
+    "theme": "outpost",
+    "rulesType": "obstacle",
+    "size": [
+      4,
+      3,
+      2.5
+    ],
+    "footprint": {
+      "rect": {
+        "w": 4,
+        "d": 3
+      }
+    },
+    "prompt": "the burnt-out wreck of a six-wheeled armoured military transport vehicle, blown open hull, scorched steel, flat tyres"
+  },
+  "outpost-silo": {
+    "theme": "outpost",
+    "rulesType": "obstruction",
+    "size": [
+      3.4,
+      3.4,
+      3
+    ],
+    "footprint": {
+      "circle": {
+        "r": 1.7
+      }
+    },
+    "prompt": "a round cratered gun emplacement ringed with sandbags and curved scrap steel plates, a wrecked twin autocannon turret in the middle"
+  },
+  "outpost-dish": {
+    "theme": "outpost",
+    "rulesType": "obstruction",
+    "size": [
+      3.4,
+      3.4,
+      3
+    ],
+    "footprint": {
+      "circle": {
+        "r": 1.7
+      }
+    },
+    "prompt": "a round damaged sensor dish platform on a steel tripod, bent dish, cables, a ring of sandbags and scrap plates around the base"
+  },
+  "temple-stepped-platform": {
+    "theme": "temple",
+    "rulesType": "building",
+    "size": [
+      6,
+      4,
+      4
+    ],
+    "footprint": {
+      "rect": {
+        "w": 6,
+        "d": 4
+      }
+    },
+    "prompt": "a stepped ancient alien temple platform of cracked sandstone blocks with gold-inlaid glyph bands, turned into a hasty firing position: sandbag walls on the terraces, a scrap-steel bunker roof bolted onto the top tier, a steel ladder, shell craters. RECTANGULAR base one and a half times wider than deep; the model is about two thirds as tall as it is wide."
+  },
+  "temple-shrine": {
+    "theme": "temple",
+    "rulesType": "building",
+    "size": [
+      5,
+      5,
+      4
+    ],
+    "footprint": {
+      "rect": {
+        "w": 5,
+        "d": 5
+      }
+    },
+    "prompt": "a square ruined alien temple shrine with a broken domed roof and carved sandstone walls with gold trim, hastily fortified with sandbagged doorways, scrap armour plates over the breaches and steel scaffolding. SQUARE base; the model is almost as tall as it is wide."
+  },
+  "temple-colonnade": {
+    "theme": "temple",
+    "rulesType": "building",
+    "size": [
+      6,
+      4,
+      4
+    ],
+    "footprint": {
+      "rect": {
+        "w": 6,
+        "d": 4
+      }
+    },
+    "prompt": "a ruined alien temple colonnade hall: rows of tall carved sandstone columns with gold capitals, half the roof collapsed, a soldiers outpost built inside with sandbags, crates and a corrugated steel lean-to. RECTANGULAR base one and a half times wider than deep; about two thirds as tall as it is wide."
+  },
+  "temple-ziggurat": {
+    "theme": "temple",
+    "rulesType": "building",
+    "size": [
+      5,
+      5,
+      4
+    ],
+    "footprint": {
+      "rect": {
+        "w": 5,
+        "d": 5
+      }
+    },
+    "prompt": "a small square stepped alien ziggurat of weathered sandstone with gold glyph panels, shell-damaged, with a sandbag machine-gun nest on its summit and steel stairs bolted up one side. SQUARE base; almost as tall as it is wide."
+  },
+  "temple-collapsed-arch": {
+    "theme": "temple",
+    "rulesType": "building",
+    "size": [
+      7,
+      4,
+      4
+    ],
+    "footprint": {
+      "rect": {
+        "w": 7,
+        "d": 4
+      }
+    },
+    "prompt": "a huge collapsed ancient alien temple archway of carved sandstone with gold inlay, one side fallen into rubble, braced with steel girders and scaffolding, sandbags piled in the gap. RECTANGULAR base almost twice as wide as deep; about half as tall as it is wide."
+  },
+  "temple-carved-wall": {
+    "theme": "temple",
+    "rulesType": "obstacle",
+    "size": [
+      5,
+      1.2,
+      1.6
+    ],
+    "footprint": {
+      "rect": {
+        "w": 5,
+        "d": 1.2
+      }
+    },
+    "prompt": "a long straight ruined alien temple wall of carved sandstone blocks with gold glyph bands, broken top edge, sandbags stacked along its foot and a scrap steel plate patching a hole. Long thin strip base about FOUR times longer than deep; the wall is about ONE THIRD as tall as it is long. Front three-quarter view."
+  },
+  "temple-arcade": {
+    "theme": "temple",
+    "rulesType": "obstacle",
+    "size": [
+      5,
+      1.2,
+      1.6
+    ],
+    "footprint": {
+      "rect": {
+        "w": 5,
+        "d": 1.2
+      }
+    },
+    "prompt": "a long straight row of short broken sandstone arches with gold trim, the gaps filled with sandbags and barbed wire, a straight line. Long thin strip base about FOUR times longer than deep; about ONE THIRD as tall as it is long. Front three-quarter view."
+  },
+  "temple-rubble-drums": {
+    "theme": "temple",
+    "rulesType": "obstacle",
+    "size": [
+      3,
+      2,
+      1.8
+    ],
+    "footprint": {
+      "rect": {
+        "w": 3,
+        "d": 2
+      }
+    },
+    "prompt": "a heap of fallen carved sandstone column drums with gold bands, used as cover, with sandbags and ammunition boxes wedged between them. Small rectangular base one and a half times wider than deep; about two thirds as tall as it is wide."
+  },
+  "temple-altar": {
+    "theme": "temple",
+    "rulesType": "obstacle",
+    "size": [
+      3,
+      2,
+      1.8
+    ],
+    "footprint": {
+      "rect": {
+        "w": 3,
+        "d": 2
+      }
+    },
+    "prompt": "a cracked ancient alien stone altar with glowing gold glyphs, turned into a field radio post with sandbags, cables and a field radio set on top. Small rectangular base one and a half times wider than deep; about two thirds as tall as it is wide."
+  },
+  "temple-broken-pillars": {
+    "theme": "temple",
+    "rulesType": "obstruction",
+    "size": [
+      3.4,
+      3.4,
+      3
+    ],
+    "footprint": {
+      "circle": {
+        "r": 1.7
+      }
+    },
+    "prompt": "a cluster of three tall broken carved sandstone pillars with gold capitals, ringed with sandbags and scrap steel plates as a strongpoint. ROUND base; about as tall as it is wide."
+  },
+  "temple-monolith": {
+    "theme": "temple",
+    "rulesType": "obstruction",
+    "size": [
+      3.4,
+      3.4,
+      3
+    ],
+    "footprint": {
+      "circle": {
+        "r": 1.7
+      }
+    },
+    "prompt": "a tall cracked alien obelisk monolith of dark stone with glowing gold glyphs, a steel scaffold and a sandbag ring around its foot, shell damage. ROUND base; about as tall as it is wide."
+  },
+  "crystal-sanctum": {
+    "theme": "crystal",
+    "rulesType": "building",
+    "size": [
+      6,
+      4,
+      4
+    ],
+    "footprint": {
+      "rect": {
+        "w": 6,
+        "d": 4
+      }
+    },
+    "prompt": "a hurried frontier mining station built against a wall of glowing blue crystals: a two-storey prefab steel hut with patched armour plates, a crane arm, conveyor chute and ore hopper, sandbags around the door, battle damage. RECTANGULAR base one and a half times wider than deep; the model is about two thirds as tall as it is wide."
+  },
+  "crystal-spire-hall": {
+    "theme": "crystal",
+    "rulesType": "building",
+    "size": [
+      5,
+      5,
+      4
+    ],
+    "footprint": {
+      "rect": {
+        "w": 5,
+        "d": 5
+      }
+    },
+    "prompt": "a square armoured refinery tower half grown through by tall glowing blue crystal spires, steel scaffolding, pipes and a sandbagged gun position on its roof, scorch marks. SQUARE base; almost as tall as it is wide."
+  },
+  "crystal-cavern": {
+    "theme": "crystal",
+    "rulesType": "building",
+    "size": [
+      6,
+      4,
+      4
+    ],
+    "footprint": {
+      "rect": {
+        "w": 6,
+        "d": 4
+      }
+    },
+    "prompt": "a fortified mine entrance cut into a dark rock outcrop with glowing blue crystals: timber and steel shoring around the tunnel mouth, mine cart rails, sandbag walls and a steel blast door hanging off its hinges. RECTANGULAR base one and a half times wider than deep; about two thirds as tall as it is wide."
+  },
+  "crystal-shrine": {
+    "theme": "crystal",
+    "rulesType": "building",
+    "size": [
+      5,
+      5,
+      4
+    ],
+    "footprint": {
+      "rect": {
+        "w": 5,
+        "d": 5
+      }
+    },
+    "prompt": "a square drilling rig platform over a crystal seam: a steel derrick tower, generators and cables, glowing blue crystals bursting up through the deck, sandbags and scrap-plate barricades at the corners, battle damage. SQUARE base; almost as tall as it is wide."
+  },
+  "crystal-ridge": {
+    "theme": "crystal",
+    "rulesType": "obstacle",
+    "size": [
+      5,
+      1.2,
+      1.6
+    ],
+    "footprint": {
+      "rect": {
+        "w": 5,
+        "d": 1.2
+      }
+    },
+    "prompt": "a long straight low ridge of dark rock with glowing blue crystals poking out, reinforced with sandbags and bolted steel plates as a firing line. Long thin strip base about FOUR times longer than deep; about ONE THIRD as tall as it is long. Front three-quarter view."
+  },
+  "crystal-rock-fence": {
+    "theme": "crystal",
+    "rulesType": "obstacle",
+    "size": [
+      5,
+      1.2,
+      1.6
+    ],
+    "footprint": {
+      "rect": {
+        "w": 5,
+        "d": 1.2
+      }
+    },
+    "prompt": "a long straight improvised barricade of stacked ore crates, mine cart wrecks and scrap steel plates with a few glowing blue crystal shards. Long thin strip base about FOUR times longer than deep; about ONE THIRD as tall as it is long. Front three-quarter view."
+  },
+  "crystal-vent-rock": {
+    "theme": "crystal",
+    "rulesType": "obstacle",
+    "size": [
+      3,
+      2,
+      1.8
+    ],
+    "footprint": {
+      "rect": {
+        "w": 3,
+        "d": 2
+      }
+    },
+    "prompt": "a dark volcanic rock with a steaming vent and glowing blue crystals, a wrecked drilling machine and sandbags beside it. Small rectangular base one and a half times wider than deep; about two thirds as tall as it is wide."
+  },
+  "crystal-shard-heap": {
+    "theme": "crystal",
+    "rulesType": "obstacle",
+    "size": [
+      3,
+      2,
+      1.8
+    ],
+    "footprint": {
+      "rect": {
+        "w": 3,
+        "d": 2
+      }
+    },
+    "prompt": "a heap of mined glowing blue crystal shards in a dented steel ore skip, with spilled shards, a shovel and sandbags. Small rectangular base one and a half times wider than deep; about two thirds as tall as it is wide."
+  },
+  "crystal-mineral-cluster": {
+    "theme": "crystal",
+    "rulesType": "obstruction",
+    "size": [
+      3.4,
+      3.4,
+      3
+    ],
+    "footprint": {
+      "circle": {
+        "r": 1.7
+      }
+    },
+    "prompt": "a tall cluster of big glowing blue crystals with a steel survey scaffold and floodlight around it, a ring of sandbags at its foot. ROUND base; about as tall as it is wide."
+  },
+  "crystal-geode": {
+    "theme": "crystal",
+    "rulesType": "obstruction",
+    "size": [
+      3.4,
+      3.4,
+      3
+    ],
+    "footprint": {
+      "circle": {
+        "r": 1.7
+      }
+    },
+    "prompt": "a huge cracked-open rock geode full of glowing blue crystals, with mining drills bolted into it and cables trailing away, sandbags and scrap plates around. ROUND base; about as tall as it is wide."
+  },
+  "crystal-rock-outcrop": {
+    "theme": "crystal",
+    "rulesType": "obstruction",
+    "size": [
+      4,
+      4,
+      3
+    ],
+    "footprint": {
+      "circle": {
+        "r": 2
+      }
+    },
+    "prompt": "a big dark rock outcrop studded with glowing blue crystals, a steel lookout platform and ladder bolted to its side, a sandbag ring at its foot. ROUND base; about three quarters as tall as it is wide."
+  },
+  "creep-hive-hall": {
+    "theme": "creep",
+    "rulesType": "building",
+    "size": [
+      6,
+      4,
+      4
+    ],
+    "footprint": {
+      "rect": {
+        "w": 6,
+        "d": 4
+      }
+    },
+    "prompt": "an overrun two-storey military bunker swallowed by a glossy purple alien flesh growth: ribbed chitin plates and pulsing veins burst through the riveted steel walls, sandbags half buried in slime, a broken gun barrel sticking out. RECTANGULAR base one and a half times wider than deep; the model is about two thirds as tall as it is wide."
+  },
+  "creep-brood-chamber": {
+    "theme": "creep",
+    "rulesType": "building",
+    "size": [
+      6,
+      4,
+      4
+    ],
+    "footprint": {
+      "rect": {
+        "w": 6,
+        "d": 4
+      }
+    },
+    "prompt": "a wrecked prefab military barracks cracked open by a bulging alien egg chamber of glossy purple flesh and bone ribs, acid-green fluid pooling, twisted steel girders and scattered sandbags. RECTANGULAR base one and a half times wider than deep; about two thirds as tall as it is wide."
+  },
+  "creep-spore-nest": {
+    "theme": "creep",
+    "rulesType": "building",
+    "size": [
+      5,
+      5,
+      4
+    ],
+    "footprint": {
+      "rect": {
+        "w": 5,
+        "d": 5
+      }
+    },
+    "prompt": "a square armoured watchtower overgrown by a tall alien spore pod of glossy purple flesh with acid-green glowing sacs, chitin spikes piercing the steel plates, a collapsed sandbag parapet. SQUARE base; almost as tall as it is wide."
+  },
+  "creep-sac-hall": {
+    "theme": "creep",
+    "rulesType": "building",
+    "size": [
+      5,
+      5,
+      4
+    ],
+    "footprint": {
+      "rect": {
+        "w": 5,
+        "d": 5
+      }
+    },
+    "prompt": "a square military supply depot buried under a dome of glossy purple alien membrane with veins and bulging acid-green sacs, crates and a jeep wreck half absorbed into it. SQUARE base; almost as tall as it is wide."
+  },
+  "creep-spine-ridge": {
+    "theme": "creep",
+    "rulesType": "obstacle",
+    "size": [
+      5,
+      1.2,
+      1.6
+    ],
+    "footprint": {
+      "rect": {
+        "w": 5,
+        "d": 1.2
+      }
+    },
+    "prompt": "a long straight sandbag and steel-plate trench line overrun by a ridge of curved bone spines and glossy purple alien flesh. Long thin strip base about FOUR times longer than deep; about ONE THIRD as tall as it is long. Front three-quarter view."
+  },
+  "creep-chitin-wall": {
+    "theme": "creep",
+    "rulesType": "obstacle",
+    "size": [
+      5,
+      1.2,
+      1.6
+    ],
+    "footprint": {
+      "rect": {
+        "w": 5,
+        "d": 1.2
+      }
+    },
+    "prompt": "a long straight wall of overlapping dark chitin plates grown over a broken concrete barrier, purple veins and acid-green drips, a few crushed sandbags. Long thin strip base about FOUR times longer than deep; about ONE THIRD as tall as it is long. Front three-quarter view."
+  },
+  "creep-pods": {
+    "theme": "creep",
+    "rulesType": "obstacle",
+    "size": [
+      3,
+      2,
+      1.8
+    ],
+    "footprint": {
+      "rect": {
+        "w": 3,
+        "d": 2
+      }
+    },
+    "prompt": "a cluster of glossy purple alien egg pods with acid-green glowing slits growing over a toppled ammunition crate stack and sandbags. Small rectangular base one and a half times wider than deep; about two thirds as tall as it is wide."
+  },
+  "creep-tumour": {
+    "theme": "creep",
+    "rulesType": "obstacle",
+    "size": [
+      3,
+      2,
+      1.8
+    ],
+    "footprint": {
+      "rect": {
+        "w": 3,
+        "d": 2
+      }
+    },
+    "prompt": "a bulging purple alien growth with acid-green blisters engulfing a wrecked field gun, cracked wheels and shells scattered around. Small rectangular base one and a half times wider than deep; about two thirds as tall as it is wide."
+  },
+  "creep-mound": {
+    "theme": "creep",
+    "rulesType": "obstruction",
+    "size": [
+      3.4,
+      3.4,
+      3
+    ],
+    "footprint": {
+      "circle": {
+        "r": 1.7
+      }
+    },
+    "prompt": "a round mound of glossy purple alien flesh and chitin swallowing a sandbagged machine-gun pit, the gun barrel and plates poking out. ROUND base; about as tall as it is wide."
+  },
+  "creep-spore-spire": {
+    "theme": "creep",
+    "rulesType": "obstruction",
+    "size": [
+      3.4,
+      3.4,
+      3
+    ],
+    "footprint": {
+      "circle": {
+        "r": 1.7
+      }
+    },
+    "prompt": "a tall twisted spire of bone and glossy purple flesh topped with acid-green glowing pods, grown through a wrecked steel radio mast with a ring of buried sandbags. ROUND base; about as tall as it is wide."
+  }
 }

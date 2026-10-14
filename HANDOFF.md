@@ -109,8 +109,9 @@ so ask the owner only if a value exists nowhere else.
   `art/terrain/contact-outpost-v2.png`, in-game `screenshots/terrain-v2-outpost-board.png`. R11 timings: KB 10.1.
 - **Owner gate**: does the outpost look land ("war-torn, hurried, shiny")? Known soft spots: the blast wall is still a bit
   smooth, the barricade and gate fence are stretched ~2.2x in height to the 1.6 in rules height.
-- **Next, same pipeline, one Gemini chat per set**: temple (ruins hastily fortified: sandbags against broken columns,
-  scaffolding), crystal (mining camp: rigs, scaffolds and plate barricades among mineral clusters), creep (overrun
+- **Done: temple set (11)**, 2026-10-13 late: `art/terrain/contact-temple-v2.png`, `screenshots/terrain-v2-temple-board.png`.
+  The texture grade in `t_fit.py` is per theme now (sandstone went orange with the outpost grade).
+- **Next, same pipeline, one Gemini chat per set**: crystal (mining camp: rigs, scaffolds and plate barricades among mineral clusters), creep (overrun
   Terran fortifications grown over with creep). Slugs and footprints are the existing ones in `manifest.json`; add each
   to `tools/models/terrain/pieces.json` with a prompt, then follow `tools/models/terrain/` stage order: concepts
   (Gemini + `receiver.mjs`) -> `t_cutout` -> `t_shape --offload` -> `t_paint` -> `t_fit <art/terrain/staging>` ->
