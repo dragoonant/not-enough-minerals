@@ -62,6 +62,28 @@ faction anchor was uploaded as image 2). Mesh bounds checked in the GLBs: every 
 Protoss gold drifted to pale tan in every batch-4 Protoss mesh, matching the shipped stalker, so the faction
 reads consistently; a paint re-run is optional for the whole faction, not per unit.
 
+## Batch 5 (Gemini concepts, 1024x572; variants and structures that were still procedural)
+
+Concept gate only: **no meshes yet**. Hunyuan stages 2-5 (cutout, shape, paint, finalize) have not been run for
+these ten slugs, so there is no `<slug>.glb` or `contact-<slug>.png` in this folder and nothing ships this batch.
+Until the meshes land, the seven variants keep their base unit's GLB through the manifest alias (raptor, swarmling,
+kerrigan-swarm-raptor -> zergling; corpser, vile, roachling -> roach; nerazim-watchers -> adept) and the three
+structures/drones (omega-worm, pylon, point-defense-drone) stay procedural. All ten: one figure, round black
+uncropped base, no lettering, logos or glyphs, faction palette held.
+
+| Slug | Concept | Mesh | Verdict |
+|---|---|---|---|
+| raptor | zergling build, head + crest ~40%, two scythes, two big bone bat wings, stubby legs. Wingspan far wider than a 32mm base | none yet | **concept pass**, mesh next (wings may come out edge-on slabs like the zergling) |
+| swarmling | one head ~45% (try 2; try 1's back head is gone), crest, slim scythes, no wings, short tail with no face | none yet | **concept pass**, mesh next |
+| kerrigan-swarm-raptor | raptor edit: glossier royal violet, tall quill crest, glowing violet eyes and wing-vein lights, no rider | none yet | **concept pass**, mesh next |
+| corpser | roach body, bone-ribbed pink corpse-sac, purple crystal spikes, scythe arms with heavy claw tips | none yet | **concept pass**, mesh next (translucent crystals may mesh as blobs) |
+| vile | roach body, green acid glands, green crystal spines, acid drool from the jaw | none yet | **concept pass**, mesh next (drool strands may become floating islands: keep largest component) |
+| roachling | pill-bug shell ~65%, blunt head, tiny tusks, stubby legs | none yet | **concept pass**, mesh next |
+| omega-worm | worm from a spiked flesh mound, toothed round mouth ~half the height; one side tendril (prompt asked two) | none yet | **concept pass**, mesh next (deep open mouth may close up in the mesh) |
+| nerazim-watchers | hood ~38%, ~2.6 heads, green eyes, violet-black + gold trim, green glaive gripped in the right fist rather than forearm-mounted | none yet | **concept pass**, mesh next |
+| pylon | floating cyan crystal ~half the height in gold ribs on a plinth, plain blue panels (try 2) | none yet | **concept pass**, mesh next (crystal floats: check it fuses to the ring or bridge it) |
+| point-defense-drone | domed saucer ~55%, dish + two antennae, front turret, four fins (prompt said three), one thin clear stand | none yet | **concept pass**, mesh next (the clear stand will likely vanish in cutout: body becomes an island; finalize must add a stand) |
+
 ## Veto list (all batches, current)
 - **medic** (`medic.glb`, batch 4): hold until a paint re-run removes the text-like label on the backpack back.
   The shape passes; only stage_paint + finalize are needed. Owner may override and ship it as is.
@@ -78,7 +100,7 @@ Cleared: raynor and stalker (batch 2); hydralisk (batch 4 redo, no floating isla
 | raynor | jim-raynor | ship (wired as jim-raynor.glb) |
 | raynors-raider | raynors-raider | ship (new) |
 | marauder | marauder | ship (wired) |
-| medic | medic | **hold** (paint redo; see veto list) |
+| medic | medic | wired in commit aa590e7 (public/models/medic.glb); the staging GLB here is the held batch-4 mesh |
 | goliath | goliath | ship (wired) |
 | siege-tank | siege-tank | ship (new) |
 | zergling | zergling | ship (wired) |

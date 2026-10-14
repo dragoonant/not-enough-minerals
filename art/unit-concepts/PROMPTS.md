@@ -418,3 +418,162 @@ praetor-guard (edit of the uploaded zealot):
 - Receiver page: open the popup from a real click, then `postMessage` canvas data URLs to a local
   127.0.0.1 page that POSTs them to a small local server. Keep JS inside a Python bytes literal free of
   backslash escapes (a raw newline broke the first receiver).
+
+---
+
+## Batch 5 (Gemini, 2026-10-13): variants and structures that were still procedural
+
+Ten units with no concept yet. One fresh Gemini chat per faction (Pro mode). Reference photos of the
+real miniatures came from a retailer's public product images (kept in `refs-local/`, outside the repo):
+the zergling and roach sets (the roach set shows the Corpser and Vile variants and the roachling tokens),
+the Kerrigan & Omega Worm set, the adept set, the Raynor & Point Defense Drone set, and a small pylon
+crop from the Protoss founders box. Raptor and Swarmling share the zergling kit. All images 1024x572.
+
+| Slug | Base | Result | Measured on the image |
+|---|---|---|---|
+| raptor | 32mm | pass | zergling build, head + crest ~40%, two big bone bat wings, two scythes, stubby legs |
+| swarmling | 32mm | pass (try 2) | one head ~45%, crest, no wings, slim scythes. Try 1 grew a second fanged head on the back |
+| kerrigan-swarm-raptor | 32mm | pass | raptor edit: glossier violet, tall quill crest, glowing violet eyes and wing veins, no rider |
+| corpser | 50mm | pass | roach body, bone-ribbed pink corpse-sac on the back, purple crystal spikes, shovel claws |
+| vile | 50mm | pass | roach body, green acid glands between plates, green crystal spines, acid drool |
+| roachling | 32mm | pass | round pill-bug shell ~65% of height, blunt head, tiny tusks, stubby legs |
+| omega-worm | 80mm | pass | squat worm from a spiked flesh mound; toothed round mouth ~half the height, one side tendril |
+| nerazim-watchers | 40mm | pass | adept edit: hood ~38%, ~2.6 heads, green eyes, violet-black + gold trim, green forearm glaive |
+| pylon | 80mm | pass (try 2) | floating cyan crystal ~half the height in four gold ribs on a plinth. Try 1 had a small emblem on a blue panel |
+| point-defense-drone | 32mm | pass | domed saucer ~55%, dish + two antennae, front laser turret, stubby fins, one thin clear stand |
+
+### Zerg chat (images: style, zergling.png, zergling set photo)
+raptor (first prompt):
+> Generate an image: an SD Gundam style model kit figure (Bandai MGSD line) of a Raptor strain swarm beast,
+> an evolved leaping variant of our small swarm beast. Match the style, chunky toy-like shapes, violet
+> carapace and pale bone palette, proportions and framing of the SECOND image (our swarm beast) closely;
+> FIRST image = style reference only; THIRD image = anatomy only (use the winged beasts in it). The head is
+> the biggest part of the figure (about 40-45%): a huge rounded armoured skull with a wide fanged jaw and a
+> tall swept-back bony crest on top of the head. Two big curved bone scythe blade forearms, a tiny compact
+> body, four short thick stubby legs with big chunky clawed feet, crouched low ready to leap. Two BIG bony
+> membrane wings spread up and back from the shoulders (much larger than the SECOND image's small wings,
+> like a gliding bat-wing frame of bone struts with violet membrane). Short tail. Fierce, not cute. Crisp
+> Master Grade sculpted chitin plates. No lettering or text, no logos, no emblems. Front three-quarter
+> view, plain round black base (32mm), white background, even soft lighting. Exactly ONE single creature,
+> centred.
+
+swarmling (try 2, kept; try 1 asked for "smaller, faster, sleeker ... running crouch" and grew a second head):
+> Generate an image: that one has a second head growing on its back, which is wrong. Start again from the
+> SECOND image I uploaded (our SD swarm beast) and keep its MGSD style, violet and pale bone palette, base
+> and background. Make the Swarmling strain: a SMALLER, slimmer, sleeker beast for a 32mm base, with exactly
+> ONE head at the front: the huge armoured skull with the wide fanged jaw is the biggest part (about 45% of
+> the figure height). Behind the head only a short, smooth, streamlined body with swept-back carapace plates
+> and a short thin whip tail with NO face, jaw or teeth on it. Two slim curved bone scythe forearms, four
+> short stubby legs with chunky clawed feet, NO wings. Compact, the whole creature well inside the base.
+> Fierce, not cute. No lettering or logos. Front three-quarter view. Exactly ONE single creature with ONE
+> head, centred.
+
+kerrigan-swarm-raptor (edit, kerrigan.png attached):
+> Generate an image: start from the FIRST image you generated in this chat (the winged Raptor beast with the
+> bone crest) and keep EVERYTHING the same: MGSD style, huge head, crouched leaping pose, two big bony wings,
+> two scythe forearms, stubby legs, round black base, white background, exactly one head. Make it the hero
+> queen's personal Raptor for a 32mm base, using the attached image (our SD hero queen) only for her colours
+> and accents: a brighter, glossier royal violet carapace, her pale bone spines, and a tall swept-back crest
+> of spiny tendril-like bone quills on the head echoing her segmented dreadlock hair, with glowing
+> violet-pink eyes and a few small glowing violet vein lights along the wing struts and back. Slightly more
+> ornate and elegant than a normal Raptor, still fierce, not cute. Do NOT add the woman herself, no rider.
+> No lettering or logos. Front three-quarter view. Exactly ONE single creature, centred.
+
+corpser (edit, roach.png + Corpser photo attached):
+> Generate an image: start from the FIRST attached image (our SD armoured burrowing beast) and keep its MGSD
+> style, squat chunky toy-like shapes, violet carapace and pale bone palette, round black base and white
+> background. Change the subject to the Corpser strain for a 50mm base: the same squat beast with a low wide
+> head with bone tusks, but its back carries a big swollen, bulging corpse-sac (a fleshy, lumpy egg-sac
+> blister in dark violet and mottled pink, bound by bone ribs) where the domed shell was, plus a few tall
+> purple crystal-like chitin spikes; its front legs end in big heavy shovel-like burrowing claws. Short
+> stubby legs. SECOND attached image = anatomy and spike shapes only. Compact, inside the base. Fierce, not
+> cute, not gory. No lettering or logos. Front three-quarter view. Exactly ONE single creature, centred.
+
+vile (edit, roach.png + Vile photo attached):
+> Generate an image: start from the FIRST attached image (our SD armoured burrowing beast) and keep its MGSD
+> style, squat chunky toy-like shapes, violet carapace and pale bone palette, domed shell, round black base
+> and white background. Change the subject to the Vile strain for a 50mm base: the same squat beast with a
+> low wide head and bone tusks, but with big glowing toxic-green acid glands bulging between the shell
+> plates, a cluster of translucent green crystal-like acid spines on top of the shell dripping green slime,
+> and green acid drooling from its fanged jaw. Short stubby clawed legs, two short scythe forearms. SECOND
+> attached image = anatomy and gland shapes only. Compact, inside the base. Fierce, not cute. No lettering
+> or logos. Front three-quarter view. Exactly ONE single creature, centred.
+
+roachling (edit, refers back to the attached roach.png):
+> Generate an image: start from the armoured burrowing beast image I attached with my last message (our SD
+> roach, not the green one you just made) and keep its MGSD style, violet carapace and pale bone palette,
+> round black base and white background. Change the subject to a Roachling: a tiny newborn baby of that beast
+> for a 32mm base, VERY chunky and round, like a little armoured pill bug. A big round domed shell that is
+> most of the figure, a big blunt head with two tiny bone tusks and a small fanged jaw, four very short
+> stubby clawed legs, two tiny stubby scythe nubs, a few small rounded bone spines. No green, no acid, no
+> crystals. Toy-like and chunky but still a fierce little beast, not cute. No lettering or logos. Front
+> three-quarter view. Exactly ONE single creature, centred on the base.
+
+omega-worm (new subject in the same chat, Omega Worm photo attached):
+> Generate an image: keep the same SD model kit (MGSD) style, chunky toy-like shapes, violet carapace and
+> pale bone palette, plain round black base and white background as the swarm beasts in this chat. New
+> subject: the swarm's giant tunnel worm, a living burrow structure for a big 80mm base. A huge, thick,
+> squat segmented worm rising straight up out of a low lumpy burrow mound of violet flesh and bone ridges
+> that covers the base; the top of the worm is the SD 'head' (about half the figure height): one enormous
+> round open mouth facing forward, ringed with rows of pale bone teeth, with a dark throat. Two short thick
+> tendril-jaws curl up beside it, smaller than the main mouth. Thick bony plates and pale bone spikes around
+> the mound. Squat, wide and chunky, not tall and thin. Attached image = anatomy only. Fierce, not cute, not
+> gory. No lettering or logos. Front three-quarter view, whole worm and mound inside the round black base.
+> Exactly ONE single creature, centred.
+
+### Protoss chat (images: style, adept.png, adept set photo)
+nerazim-watchers (first prompt):
+> Generate an image: an SD Gundam style model kit figure (Bandai MGSD line) of a Nerazim Watcher, a shadowy
+> dark templar variant of our light agile alien warrior. Match the style, huge-head proportions (the head is
+> the biggest part, about 40-45% of the height, as wide as the shoulders), stubby legs, crescent glaive on
+> the right forearm, panel lines and framing of the SECOND image (our warrior) closely; FIRST image = style
+> reference only; THIRD image = armour and weapon shapes only. Changes: a big deep hood and short wrapped
+> scarf over the head, two glowing green eyes in the shadow of the hood, sleek DARK VIOLET-black armour
+> plates with small muted gold trims, and the crescent warp glaive on the right forearm glowing green instead
+> of cyan, reaching past the fist. Both hands empty fists, nothing held, no blade on the left arm, no cape.
+> No lettering or logos. Front three-quarter view, plain round black base (40mm), white background. Exactly
+> ONE single figure, centred.
+
+pylon (try 1, pylon crop attached):
+> Generate an image: use the SECOND image I uploaded in my first message (our SD gold warrior) only for the
+> model kit style, polished gold and deep royal blue palette with cyan glow, and Master Grade panel lines;
+> keep the plain round black base and white background. New subject: an alien crystal energy pylon, a power
+> structure for a big 80mm base, chunky and toy-like (SD model kit style, squat and wide, not tall and thin).
+> A low wide ornate gold frame of four curved upright gold claw-ribs with deep blue panels and small cyan gem
+> lights, standing on a short round gold plinth, cradling one big faceted glowing blue-cyan energy crystal
+> that floats in the middle of the frame, its pointed tip rising above the ribs. The crystal is the SD
+> 'head': about half the height. Attached image = part shapes only. No figure, no creature, no people. No
+> lettering, glyphs or logos. Front three-quarter view, whole structure inside the round black base. Exactly
+> ONE single structure, centred.
+
+pylon (try 2, kept):
+> Generate an image: start from the previous image (the gold pylon) and keep EVERYTHING the same (the
+> floating crystal, the curved gold ribs, the ring, the plinth, the palette, the base, the background), but
+> make it a little squatter and wider, and remove every symbol: the deep blue panels on the ribs must be
+> plain and smooth, with only a small round cyan gem, and NO emblems, arcs, icons, glyphs, engraved marks,
+> lettering or logos anywhere. Exactly ONE single structure, centred.
+
+### Terran chat (images: style, goliath.png, drone photo)
+point-defense-drone (first prompt):
+> Generate an image: an SD Gundam style model kit figure (Bandai MGSD line) of a small hovering
+> point-defense drone. Match the style, steel blue and dark gunmetal palette, chunky toy-like shapes, Master
+> Grade panel lines and framing of the SECOND image (our walker) closely; FIRST image = style reference only;
+> THIRD image = part shapes only. A squat round domed saucer body (the SD 'head', about half the figure
+> height, big and chunky) with a small round sensor dish on top and two short antennae, a small chunky laser
+> turret with a short barrel under the front edge, and three short stubby landing fins below. It hovers on
+> ONE thin clear stand rising from the centre of a plain flat round black base (32mm); a small soft cyan
+> thruster glow under the body, no flames, no smoke. No crew, no lettering, numbers, stripes or logos. Front
+> three-quarter view, white background, even soft lighting. Exactly ONE single drone, centred.
+
+### Lessons (batch 5)
+- Retailer Shopify feeds (`/collections/<x>/products.json`) list every product photo; one curl gave the
+  miniature shots for variants that have no product page of their own.
+- A variant edit can grow a second head on the back of a quadruped (swarmling try 1). For small beasts say
+  "exactly ONE head ... a tail with NO face, jaw or teeth" up front.
+- Structures pick up faction-like emblems on flat panels even with "no logos" in the prompt; a follow-up
+  edit naming the panel ("plain and smooth, only a small round gem, NO emblems, arcs, icons") fixed it.
+- In this Gemini build a click on "+" can land on the generated image and open its sketch editor. Use
+  `find` for the "Upload & tools" button and click it by ref, take a screenshot, hover "Upload files", then
+  tag the `accept="image/*"` input with an aria-label so `find` returns exactly one ref.
+- An image served from an `lh3 ... gg-dl` URL cannot be drawn to a canvas directly: `fetch(src + '?alr=yes')`
+  returns a text body holding the real URL, and fetching that returns the image blob.
