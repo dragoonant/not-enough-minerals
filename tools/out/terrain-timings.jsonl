@@ -184,3 +184,44 @@
 {"stage": "cutout", "slug": "creep-spine-ridge", "seconds": 18.4, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:33:14", "pick": "art/terrain/concepts/creep-spine-ridge.png"}
 {"stage": "cutout", "slug": "creep-chitin-wall", "seconds": 17.6, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:33:31", "pick": "art/terrain/concepts/creep-chitin-wall.png"}
 {"stage": "cutout", "slug": "creep-pods", "seconds": 17.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:33:49", "pick": "art/terrain/concepts/creep-pods.png"}
+{"stage": "cutout", "slug": "creep-tumour", "seconds": 17.5, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:34:06", "pick": "art/terrain/concepts/creep-tumour.png"}
+{"stage": "cutout", "slug": "creep-mound", "seconds": 16.8, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:34:23", "pick": "art/terrain/concepts/creep-mound.png"}
+{"stage": "cutout", "slug": "creep-spore-spire", "seconds": 15.7, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:34:39", "pick": "art/terrain/concepts/creep-spore-spire.png"}
+{"stage": "shape-load", "slug": "-", "seconds": 34.3, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:35:31"}
+{"stage": "shape", "slug": "crystal-geode", "seconds": 85.1, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:36:56", "faces": 6000, "octree": 256, "offload": true, "peak_gb": 6.9}
+{"stage": "shape", "slug": "crystal-rock-outcrop", "seconds": 84.9, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:38:21", "faces": 6000, "octree": 256, "offload": true, "peak_gb": 6.9}
+{"stage": "shape", "slug": "creep-hive-hall", "seconds": 79.6, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:39:40", "faces": 6000, "octree": 256, "offload": true, "peak_gb": 6.9}
+{"stage": "shape", "slug": "creep-brood-chamber", "seconds": 84.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:41:04", "faces": 6000, "octree": 256, "offload": true, "peak_gb": 6.9}
+{"stage": "shape", "slug": "creep-spore-nest", "seconds": 82.0, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:42:26", "faces": 6000, "octree": 256, "offload": true, "peak_gb": 6.9}
+{"stage": "shape", "slug": "creep-sac-hall", "seconds": 81.1, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:43:48", "faces": 6000, "octree": 256, "offload": true, "peak_gb": 6.9}
+{"stage": "shape", "slug": "creep-spine-ridge", "seconds": 74.5, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:45:02", "faces": 6000, "octree": 256, "offload": true, "peak_gb": 6.9}
+{"stage": "shape", "slug": "creep-chitin-wall", "seconds": 74.1, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:46:16", "faces": 6000, "octree": 256, "offload": true, "peak_gb": 6.9}
+{"stage": "shape", "slug": "creep-pods", "seconds": 81.8, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:47:38", "faces": 6000, "octree": 256, "offload": true, "peak_gb": 6.9}
+{"stage": "shape", "slug": "creep-tumour", "seconds": 79.5, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:48:58", "faces": 6000, "octree": 256, "offload": true, "peak_gb": 6.9}
+{"stage": "shape", "slug": "creep-mound", "seconds": 81.7, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:50:19", "faces": 6000, "octree": 256, "offload": true, "peak_gb": 6.9}
+{"stage": "shape", "slug": "creep-spore-spire", "seconds": 77.7, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:51:37", "faces": 6000, "octree": 256, "offload": true, "peak_gb": 6.9}
+{"stage": "paint-load", "slug": "-", "seconds": 18.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:52:17"}
+{"stage": "paint", "slug": "crystal-geode", "seconds": 72.4, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:53:29", "peak_gb": 9.7}
+{"stage": "paint", "slug": "crystal-rock-outcrop", "seconds": 71.6, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:54:41", "peak_gb": 9.7}
+{"stage": "paint", "slug": "creep-hive-hall", "seconds": 160.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:57:22", "peak_gb": 9.7}
+{"stage": "paint", "slug": "creep-brood-chamber", "seconds": 67.9, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:58:30", "peak_gb": 9.7}
+{"stage": "paint", "slug": "creep-spore-nest", "seconds": 69.0, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T00:59:40", "peak_gb": 9.7}
+{"stage": "paint", "slug": "creep-sac-hall", "seconds": 71.0, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T01:00:51", "peak_gb": 9.7}
+{"stage": "paint", "slug": "creep-spine-ridge", "seconds": 68.6, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T01:02:00", "peak_gb": 9.7}
+{"stage": "paint", "slug": "creep-chitin-wall", "seconds": 69.8, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T01:03:11", "peak_gb": 9.7}
+{"stage": "paint", "slug": "creep-pods", "seconds": 71.9, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T01:04:23", "peak_gb": 9.7}
+{"stage": "paint", "slug": "creep-tumour", "seconds": 67.3, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T01:05:31", "peak_gb": 9.7}
+{"stage": "paint", "slug": "creep-mound", "seconds": 68.8, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T01:06:40", "peak_gb": 9.7}
+{"stage": "paint", "slug": "creep-spore-spire", "seconds": 70.6, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T01:07:51", "peak_gb": 9.7}
+{"stage": "fit", "slug": "crystal-geode", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T01:08:20", "faces": 6000, "stretch": 1.04, "turned": false}
+{"stage": "fit", "slug": "crystal-rock-outcrop", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T01:08:20", "faces": 6000, "stretch": 1.05, "turned": false}
+{"stage": "fit", "slug": "creep-hive-hall", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T01:08:30", "faces": 6000, "stretch": 1.4, "turned": false}
+{"stage": "fit", "slug": "creep-brood-chamber", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T01:08:30", "faces": 6000, "stretch": 1.57, "turned": false}
+{"stage": "fit", "slug": "creep-spore-nest", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T01:08:30", "faces": 6000, "stretch": 1.67, "turned": false}
+{"stage": "fit", "slug": "creep-sac-hall", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T01:08:30", "faces": 6000, "stretch": 1.71, "turned": false}
+{"stage": "fit", "slug": "creep-spine-ridge", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T01:08:30", "faces": 6000, "stretch": 1.5, "turned": false}
+{"stage": "fit", "slug": "creep-chitin-wall", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T01:08:31", "faces": 6000, "stretch": 1.74, "turned": false}
+{"stage": "fit", "slug": "creep-pods", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T01:08:31", "faces": 6000, "stretch": 1.31, "turned": false}
+{"stage": "fit", "slug": "creep-tumour", "seconds": 0.1, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T01:08:31", "faces": 6000, "stretch": 1.11, "turned": false}
+{"stage": "fit", "slug": "creep-mound", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T01:08:31", "faces": 6000, "stretch": 1.48, "turned": false}
+{"stage": "fit", "slug": "creep-spore-spire", "seconds": 0.2, "host": "Alteisen", "gpu": "NVIDIA GeForce RTX 3080", "at": "2026-10-14T01:08:31", "faces": 6000, "stretch": 1.52, "turned": false}

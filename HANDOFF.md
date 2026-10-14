@@ -111,7 +111,12 @@ so ask the owner only if a value exists nowhere else.
   smooth, the barricade and gate fence are stretched ~2.2x in height to the 1.6 in rules height.
 - **Done: temple set (11)**, 2026-10-13 late: `art/terrain/contact-temple-v2.png`, `screenshots/terrain-v2-temple-board.png`.
   The texture grade in `t_fit.py` is per theme now (sandstone went orange with the outpost grade).
-- **Next, same pipeline, one Gemini chat per set**: crystal (mining camp: rigs, scaffolds and plate barricades among mineral clusters), creep (overrun
+- **Done: crystal (11) and creep (10)**, 2026-10-14 early. **All 44 terrain slugs are now Hunyuan models**; the
+  procedural v1 files are in `art/archive/terrain-v1/`. Contact sheets `art/terrain/contact-{outpost,temple,crystal,creep}
+  -v2.png`, boards `screenshots/terrain-v2-*-board.png`. Owner gate: does the whole pass land? Known soft spots:
+  `creep-sac-hall` is a near-twin of `creep-spore-nest`; crystal walls stretch 2.6-3.5x in height; some bases render
+  with pale speckle (paint de-lighting). Gemini caps image generation at roughly 30 images per evening.
+- **How the sets were made (for redos)**: crystal (mining camp: rigs, scaffolds and plate barricades among mineral clusters), creep (overrun
   Terran fortifications grown over with creep). Slugs and footprints are the existing ones in `manifest.json`; add each
   to `tools/models/terrain/pieces.json` with a prompt, then follow `tools/models/terrain/` stage order: concepts
   (Gemini + `receiver.mjs`) -> `t_cutout` -> `t_shape --offload` -> `t_paint` -> `t_fit <art/terrain/staging>` ->
