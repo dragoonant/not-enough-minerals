@@ -39,6 +39,16 @@ export const MATCHUPS: readonly Matchup[] = [
 export const DEFAULT_MATCHUP: MatchupId = 'founders'
 export const matchupOf = (id: string | null | undefined): Matchup | undefined => MATCHUPS.find((m) => m.id === id)
 
+export const RACES: readonly Race[] = ['terran', 'zerg', 'protoss']
+const isStarter = (m: Matchup) => !m.preset && m.armies.every((a) => a.endsWith('-starter'))
+/** The starter-force matchup for a race pairing, and the seat the first race sits in (the start screen's race pickers). */
+export function matchupForRaces(mine: Race, theirs: Race): { matchup: MatchupId; side: 0 | 1 } {
+  const same = MATCHUPS.find((m) => isStarter(m) && m.races[0] === mine && m.races[1] === theirs)
+  if (same) return { matchup: same.id, side: 0 }
+  const flipped = MATCHUPS.find((m) => isStarter(m) && m.races[0] === theirs && m.races[1] === mine)
+  return flipped ? { matchup: flipped.id, side: 1 } : { matchup: 'tvz', side: 0 }
+}
+
 // ---------------------------------------------------------------- options
 /** Pick a card at random (seeded, so the same seed gives the same card). */
 export const RANDOM = 'random'

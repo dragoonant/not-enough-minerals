@@ -1,10 +1,10 @@
 // Start screen (start chunk: imports only store/launch.ts, store/settingsStore.ts, store/storage.ts and ui/start/*, no engine).
-// Pick a matchup, a mission and deployment (or leave them to chance), who plays which side, and the bot tier; a briefing
+// Pick your race and the opponent's, a mission and deployment (or leave them to chance), who plays, and the bot tier; a briefing
 // preview shows what the choice means before the game starts. Continue resumes the autosave.
 import { useMemo, useState } from 'react'
 import {
-  DEFAULT_MATCHUP, MATCHUPS, RANDOM, continueGame, deploymentChoices, hasAutosave, launchGame, matchupOf, missionChoice, missionChoices,
-  readAutosaveSummary, type MatchupId, type SeatController,
+  RACES, RANDOM, continueGame, deploymentChoices, hasAutosave, launchGame, matchupForRaces, matchupOf, missionChoice, missionChoices,
+  readAutosaveSummary, type Race, type SeatController,
 } from '../store/launch'
 import { SPEED_PRESETS, useSettingsStore } from '../store/settingsStore'
 import { readJson, writeJson } from '../store/storage'
@@ -25,7 +25,17 @@ const TIERS: { id: string; label: string; blurb: string }[] = [
   { id: 'easy', label: 'Easy', blurb: 'Goes for objectives, ignores enemy threats.' },
   { id: 'normal', label: 'Normal', blurb: 'Weighs threats, cover and tempo.' },
 ]
-interface Prefs { mode: PlayMode; tier: string; matchup: MatchupId; mission: string; deployment: string; side: 0 | 1 }
+interface Prefs { mode: PlayMode; tier: string; race: Race; foe: Race; mission: string; deployment: string; matchup?: string; side?: 0 | 1 }
+const RACE_HEADS: Record<PlayMode, [string, string]> = { bot: ['Your race', 'Opponent race'], hotseat: ['Player 1 race', 'Player 2 race'], watch: ['Bot 1 race', 'Bot 2 race'] }
+
+/** Saved race picks, or (older prefs) the races of the saved matchup seen from the saved side. */
+function savedRaces(saved: Partial<Prefs>): [Race, Race] {
+  const ok = (r: unknown): r is Race => RACES.includes(r as Race)
+  if (ok(saved.race) && ok(saved.foe)) return [saved.race, saved.foe]
+  const m = matchupOf(saved.matchup)
+  if (m) return saved.side === 1 ? [m.races[1], m.races[0]] : [m.races[0], m.races[1]]
+  return ['terran', 'zerg']
+}
 
 export function seatsFor(mode: PlayMode, side: 0 | 1): SeatController[] {
   if (mode === 'hotseat') return ['human', 'human']
@@ -44,8 +54,8 @@ export function StartScreen() {
   const saved = useMemo(() => readJson<Partial<Prefs>>(PREF_KEY) ?? {}, [])
   const [mode, setMode] = useState<PlayMode>(MODES.some((m) => m.id === saved.mode) ? saved.mode! : 'bot')
   const [tier, setTier] = useState<string>(TIERS.some((t) => t.id === saved.tier) ? saved.tier! : 'normal')
-  const [matchupId, setMatchupId] = useState<MatchupId>(matchupOf(saved.matchup)?.id ?? DEFAULT_MATCHUP)
-  const [side, setSide] = useState<0 | 1>(saved.side === 1 ? 1 : 0)
+  const [race, setRace] = useState<Race>(() => savedRaces(saved)[0])
+  const [foe, setFoe] = useState<Race>(() => savedRaces(saved)[1])
   const [mission, setMission] = useState<string>(saved.mission ?? RANDOM)
   const [deployment, setDeployment] = useState<string>(saved.deployment ?? RANDOM)
   const [draft, setDraft] = useState(false)
@@ -54,19 +64,19 @@ export function StartScreen() {
   const setSettings = useSettingsStore((s) => s.set)
   const autosave = hasAutosave() ? readAutosaveSummary() : null
 
-  const matchup = matchupOf(matchupId) ?? matchupOf(DEFAULT_MATCHUP)!
+  const { matchup: matchupId, side } = matchupForRaces(race, foe)
+  const matchup = matchupOf(matchupId)!
   const missions = missionChoices(matchup.scale)
   const deployments = deploymentChoices(matchup.scale)
   const missionId = missions.some((m) => m.id === mission) ? mission : RANDOM
   const deploymentId = deployments.some((d) => d.id === deployment) ? deployment : RANDOM
-  const fixed = !!matchup.preset
-  const picks = !fixed && !draft
+  const picks = !draft
 
   const start = () => {
-    writeJson(PREF_KEY, { mode, tier, matchup: matchup.id, mission: missionId, deployment: deploymentId, side })
+    writeJson(PREF_KEY, { mode, tier, race, foe, mission: missionId, deployment: deploymentId })
     launchGame({
       matchup: matchup.id, seats: seatsFor(mode, side), tier,
-      ...(fixed ? {} : draft ? { draft: true } : { missionId, deploymentId }),
+      ...(draft ? { draft: true } : { missionId, deploymentId }),
       ...(seed.trim() ? { seed: seed.trim() } : {}),
     })
   }
@@ -82,17 +92,22 @@ export function StartScreen() {
 
         <div className="sc-cols">
          <div className="sc-col">
-          <section className="sc-sec" aria-label="Matchup">
-            <h2 className="sc-h">Who fights</h2>
-            <div className="sc-matchups" data-testid="matchup-picker" role="radiogroup" aria-label="Matchup">
-              {MATCHUPS.map((m) => (
-                <button key={m.id} className="sc-match" role="radio" aria-checked={m.id === matchup.id} aria-pressed={m.id === matchup.id} data-testid={`matchup-${m.id}`} onClick={() => setMatchupId(m.id)}>
-                  <span className="sc-emb"><Emblem race={m.races[0]} size={26} /><i>v</i><Emblem race={m.races[1]} size={26} /></span>
-                  <span className="sc-mt">{m.label}</span>
-                  <small>{m.blurb}</small>
-                </button>
+          <section className="sc-sec" aria-label="Races">
+            <div className="sc-races" data-testid="race-picker">
+              {([[race, setRace, 'race'], [foe, setFoe, 'foe']] as const).map(([value, set, key], i) => (
+                <div key={key}>
+                  <h2 className="sc-h">{RACE_HEADS[mode][i]}</h2>
+                  <div className="sc-row" role="radiogroup" aria-label={RACE_HEADS[mode][i]}>
+                    {RACES.map((r) => (
+                      <button key={r} className="sc-chip sc-race" role="radio" aria-checked={r === value} aria-pressed={r === value} data-testid={`${key}-${r}`} onClick={() => set(r)}>
+                        <Emblem race={r} size={28} /><span>{RACE_LABEL[r]}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
+            <p className="sc-note" data-testid="matchup-blurb">{matchup.blurb}</p>
           </section>
           <section className="sc-sec" aria-label="Bot">
             {mode !== 'hotseat' && (
@@ -121,10 +136,7 @@ export function StartScreen() {
          <div className="sc-col">
           <section className="sc-sec" aria-label="Scenario">
             <h2 className="sc-h">Where and why</h2>
-            {fixed ? (
-              <p className="sc-note">The learning game plays a fixed mission on a fixed map.</p>
-            ) : (
-              <>
+            <>
                 <label className="sc-lab" htmlFor="mission-select">Mission</label>
                 <select id="mission-select" data-testid="mission-select" value={missionId} disabled={draft} onChange={(e) => setMission(e.target.value)}>
                   <option value={RANDOM}>Random mission</option>
@@ -136,9 +148,8 @@ export function StartScreen() {
                   {deployments.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
                 </select>
                 <label className="sc-check"><input type="checkbox" data-testid="draft-toggle" checked={draft} onChange={(e) => setDraft(e.target.checked)} /> Draft them in play (advanced)</label>
-              </>
-            )}
-            <BriefingPreview missionId={picks && missionId !== RANDOM ? missionId : null} deploymentId={picks && deploymentId !== RANDOM ? deploymentId : null} locked={fixed} />
+            </>
+            <BriefingPreview missionId={picks && missionId !== RANDOM ? missionId : null} deploymentId={picks && deploymentId !== RANDOM ? deploymentId : null} />
           </section>
           <section className="sc-sec" aria-label="Players">
             <h2 className="sc-h">Players</h2>
@@ -149,16 +160,6 @@ export function StartScreen() {
                 </button>
               ))}
             </div>
-            {mode === 'bot' && (
-              <div className="sc-row sc-gap" data-testid="side-picker" role="radiogroup" aria-label="Your side">
-                {([0, 1] as const).map((s) => (
-                  <button key={s} className="sc-chip" role="radio" aria-checked={side === s} aria-pressed={side === s} data-testid={`side-${s}`} onClick={() => setSide(s)}>
-                    <span className="sc-sidel"><Emblem race={matchup.races[s]} size={18} /> Play {RACE_LABEL[matchup.races[s]]}</span>
-                    <small>{s === 0 ? 'Near edge, moves from the bottom.' : 'Far edge, moves from the top.'}</small>
-                  </button>
-                ))}
-              </div>
-            )}
           </section>
          </div>
         </div>

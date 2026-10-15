@@ -2,16 +2,16 @@
 import { expect, test } from '@playwright/test'
 import { captureErrors, playToEnd } from './helpers'
 
-test('start screen -> Founders T v Z vs bot -> briefing -> full game -> game over with a result', async ({ page }) => {
+test('start screen -> Terran v Zerg vs bot -> briefing -> full game -> game over with a result', async ({ page }) => {
   test.setTimeout(420_000)
   const errors = captureErrors(page)
   await page.setViewportSize({ width: 1280, height: 800 })
   await page.goto('./?test=1&menu=1&speed=fast')
   await expect(page.getByTestId('start-screen')).toBeVisible()
   await expect(page.getByTestId('fan-notice')).toContainText('not affiliated with Archon Studio or Blizzard Entertainment')
-  await page.getByTestId('matchup-founders').click()
+  await page.getByTestId('race-terran').click()
+  await page.getByTestId('foe-zerg').click()
   await page.getByTestId('mode-bot').click()
-  await page.getByTestId('side-0').click()
   await page.getByTestId('seed-input').fill('e2e-founders')
   await page.getByTestId('start-button').click()
 
@@ -25,7 +25,7 @@ test('start screen -> Founders T v Z vs bot -> briefing -> full game -> game ove
   await expect(page.getByTestId('briefing')).toHaveCount(0)
 
   const launch = await page.evaluate(() => (window as unknown as { __game: { launch(): { matchup: string } | null } }).__game.launch())
-  expect(launch?.matchup).toBe('founders')
+  expect(launch?.matchup).toBe('tvz')
   await expect(page.getByTestId('objective-tracker')).toBeVisible()
   await expect(page.getByTestId('supply-hud')).toBeVisible()
 
