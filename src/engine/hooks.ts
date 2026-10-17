@@ -208,7 +208,8 @@ export function runHook(state: GameState, bundle: EditionBundle, point: HookPoin
     if (point === 'endOfRound') {
       const d = runDelayedStep(s, bundle, 'endOfRound')
       s = d.state
-      if (d.suspended) { res.state = s; res.raised = true; return res }
+      // `done`: the delayed effects (and the rest of the pipeline behind them) finished at once; nothing is waiting
+      if (d.suspended && !d.done) { res.state = s; res.raised = true; return res }
     }
     if (point === 'cleanup') {
       for (const clock of ['endOfRound', 'endOfPhase', 'endOfActivation', 'thisAttack', 'thisRoll'] as const) s = expireEffects(s, bundle, clock)

@@ -15,7 +15,7 @@ export const DECISION_KINDS = [
   'deploy.entry', 'deploy.path', 'deploy.drop',
   'shoot.batch', 'shoot.template',
   'charge.targets', 'charge.path', 'charge.impact',
-  'melee.closeRanks', 'melee.split',
+  'melee.closeRanks', 'melee.split', 'melee.keywords',
   'atk.reroll', 'atk.precision', 'atk.tough', 'atk.casualty',
   'ability.window', 'ability.target', 'ability.pay', 'ability.react',
   'mission.claim', 'mission.choose',

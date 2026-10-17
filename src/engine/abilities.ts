@@ -166,6 +166,13 @@ export function canPay(state: GameState, _bundle: EditionBundle, seat: SeatId, r
   return n <= 0 || readyWith(state, seat, res).reduce((s, c) => s + c.resource!.n, 0) >= n
 }
 
+/** The one payment rule: `picks` (Ready cards) pay `n` exactly when they are worth at least n and none of them is spare.
+ *  payCandidates() lists the options and resolvePay() checks the answer with this same function. */
+const paysExactly = (picks: readonly CardState[], n: number): boolean => {
+  const sum = picks.reduce((t, c) => t + c.resource!.n, 0)
+  return sum >= n && !picks.some((c) => sum - c.resource!.n >= n)
+}
+
 interface PayCandidate { ids: Id[]; waste: number; sig: string; opp: number }
 /** Minimal subsets of Ready cards worth at least n, best first: least waste, then lowest opportunity cost (the number
  *  of usable abilities printed on the exhausted cards), then card order (CARD-004). */
@@ -175,8 +182,8 @@ function payCandidates(state: GameState, bundle: EditionBundle, seat: SeatId, re
   const total = ready.length
   for (let mask = 1; mask < 1 << Math.min(total, 12); mask++) {
     const pick = ready.filter((_, i) => mask & (1 << i))
+    if (!paysExactly(pick, n)) continue
     const sum = pick.reduce((s, c) => s + c.resource!.n, 0)
-    if (sum < n || pick.some((c) => sum - c.resource!.n >= n)) continue
     out.push({
       ids: pick.map((c) => c.id), waste: sum - n, sig: pick.map((c) => c.id).sort().join('+'),
       opp: pick.reduce((s, c) => s + (cardDef(bundle, c.id)?.abilities.filter((a) => a.type !== 'passive').length ?? 0), 0),
@@ -419,13 +426,16 @@ function storeEffect(state: GameState, unitId: UnitId, rec: DataEffect, ctx: Eff
 const STORED_OPS = new Set(['setChar', 'rollMod', 'weaponMod', 'canEvade', 'damageCap', 'damageReduce', 'impactBonus', 'supplyOverride', 'coherency',
   'moveThrough', 'ignoreDisengage', 'targetRestriction', 'abilityMod', 'chargeAgain', 'denyStatus', 'costMod', 'altEntry'])
 
-type Exec = { state: GameState; suspended?: boolean } | Rejection
+/** `done`: a suspending verb (a `hits` attack) that finished without raising a decision already ran the rest of its flow, so the
+ *  ActionDone that flow ended with travels up to apply(). */
+type Exec = { state: GameState; suspended?: boolean; done?: ActionDone } | Rejection
+const held = (r: { state: GameState; done?: ActionDone }): StepResult => ({ state: r.state, ...(r.done ? { done: r.done } : {}) })
 
 /** Run a data effect list in order (the interpreter). May raise decisions (targets, placements) and resume later. */
 export function runEffects(state: GameState, bundle: EditionBundle, effects: readonly DataEffect[], ctx: EffectCtx): StepResult {
   const r = execList(state, bundle, [...effects], ctx)
   if (isRejection(r)) return r
-  if (r.suspended) return { state: r.state }
+  if (r.suspended) return held(r)
   const fin = finishAfter(r.state, bundle, ctx.after)
   return fin
 }
@@ -438,7 +448,7 @@ function execList(state: GameState, bundle: EditionBundle, effects: DataEffect[]
     const r = execOne(s, bundle, rec, ctx, effects.slice(i + 1), posts)
     if (isRejection(r)) return r
     s = r.state
-    if (r.suspended) return { state: s, suspended: true }
+    if (r.suspended) return { state: s, suspended: true, ...(r.done ? { done: r.done } : {}) }
     if (rec.op === 'setToken' && !ctx.tokenId) ctx = { ...ctx, tokenId: s.tokens[s.tokens.length - 1]?.id }
   }
   // Reactions to what this list did (debuffReceived), offered after the list; a raised window suspends the flow.
@@ -588,7 +598,7 @@ export function runDelayed(state: GameState, bundle: EditionBundle, event: Trigg
 
 /** Like runDelayed, but also says whether a delayed effect stopped to ask for a decision (an optional PLACE): the caller
  *  then reports `raised` and the answer continues through `after: { k: 'delayed' }`. */
-export function runDelayedStep(state: GameState, bundle: EditionBundle, event: TriggerEvent, phase?: string): { state: GameState; suspended: boolean } {
+export function runDelayedStep(state: GameState, bundle: EditionBundle, event: TriggerEvent, phase?: string): { state: GameState; suspended: boolean; done?: ActionDone } {
   let s = state
   for (const u of Object.values(state.units)) {
     for (const e of s.units[u.id]?.effects ?? []) {
@@ -599,17 +609,19 @@ export function runDelayedStep(state: GameState, bundle: EditionBundle, event: T
       const r = execList(s, bundle, [d.rec], c)
       if (isRejection(r)) continue
       s = r.state
-      if (r.suspended) return { state: s, suspended: true }
+      if (r.suspended) return { state: s, suspended: true, ...(r.done ? { done: r.done } : {}) }
     }
   }
   return { state: s, suspended: false }
 }
 
 /** A delayed effect's decision was answered: run the ones still waiting. At the End of the Round the scoring pipeline
- *  is waiting for control back (it continues through afterAction), so the last one reports `done`. */
+ *  is waiting for control back (it continues through afterAction), so the last one reports `done`; so does the Phase change ('phase:end:' turn step). */
 function delayedStep(state: GameState, bundle: EditionBundle, event: TriggerEvent, phase?: string): StepResult {
   const r = runDelayedStep(state, bundle, event, phase)
-  if (r.suspended || event !== 'endOfRound') return { state: r.state }
+  if (r.suspended) return held(r)
+  // the pipeline that ran the delayed effects (End of the Round scoring, the Phase change) waits for control back via afterAction
+  if (event !== 'endOfRound' && !(event === 'endOfPhase' && r.state.turn?.step.startsWith('phase:end:'))) return { state: r.state }
   return { state: r.state, done: windowDone('', 'ability.react') }
 }
 
@@ -619,12 +631,15 @@ function execHits(state: GameState, bundle: EditionBundle, rec: DataEffect, ctx:
   const subs = targets.length ? targets : subjectsOf(state, bundle, rec, ctx)
   if (subs.length === 0) return { state }
   const batches: AttackBatch[] = subs.map((u) => hitsBatch(state, bundle, { seat: ctx.seat, sourceId: ctx.sourceId, targetUnitId: u, x: Number(rec.x) || 0, dmg: Number(rec.y) || 1 }))
-  const holder = ctx.unitId ?? subs[0]!
+  // The parked continuation lives on a Unit's effect list, and a destroyed Unit loses its effects (GEN-007): never park it on a
+  // Unit the hits may destroy (Corrosive Bile's holder is its own target).
+  const safe = (id: UnitId | null | undefined): id is UnitId => !!id && !subs.includes(id) && !!state.units[id] && state.units[id]!.location !== 'destroyed'
+  const holder = [ctx.unitId, ...Object.values(state.units).filter((u) => u.owner === ctx.seat).map((u) => u.id), ...Object.values(state.units).map((u) => u.id)].find(safe) ?? ctx.unitId ?? subs[0]!
   const cont: Cont = { k: 'effects', rest, ctx }
   const s = stashCont(state, holder, ctx.seat, cont)
   const r = resolveBatch(s, bundle, batches[0]!, 'armour', 'ability', batches.slice(1))
   if (isRejection(r)) return r
-  return { state: r.state, suspended: true }
+  return { state: r.state, suspended: true, ...(r.done ? { done: r.done } : {}) }
 }
 
 type Cont =
@@ -1254,7 +1269,7 @@ function runFlow(state: GameState, bundle: EditionBundle, ref: AbilityRef, a: Ab
   if (flow.v === 'use' && !ctx.targetUnitId && a.target?.kind === 'activeUnit' && s.activeUnit) ctx.targetUnitId = s.activeUnit
   const r = execList(s, bundle, [...effects], ctx)
   if (isRejection(r)) return r
-  if (r.suspended) return { state: r.state }
+  if (r.suspended) return held(r)
   return finishAfter(r.state, bundle, ctx.after)
 }
 
@@ -1469,14 +1484,14 @@ function resolveTarget(state: GameState, bundle: EditionBundle, action: Action):
       if (mode === 'skip' && cont.optional) {
         const r = execList(state, bundle, cont.rest, ctx)
         if (isRejection(r)) return r
-        return r.suspended ? { state: r.state } : finishAfter(r.state, bundle, ctx.after)
+        return r.suspended ? held(r) : finishAfter(r.state, bundle, ctx.after)
       }
       if (mode !== 'point') return reject('E_BAD_PARAM', 'Give a point {x, z}.')
       const pt = answerPoint(state, action)
       if (isRejection(pt)) return pt
       const r = execPoint(state, bundle, cont.rec, ctx, { x: pt.x, z: pt.z }, cont.rest)
       if (isRejection(r)) return r
-      return r.suspended ? { state: r.state } : finishAfter(r.state, bundle, ctx.after)
+      return r.suspended ? held(r) : finishAfter(r.state, bundle, ctx.after)
     }
     case 'recall': {
       if (mode === 'return') return { state: returnToReserves(state, bundle, cont.unitId, cont.source) }
@@ -1545,8 +1560,7 @@ function resolvePay(state: GameState, bundle: EditionBundle, action: Action): St
   const ready = readyWith(state, action.seat, ctx.res)
   const picked = cards.map((id) => ready.find((c) => c.id === id))
   if (picked.some((c) => !c) || new Set(cards).size !== cards.length) return reject('E_COST', 'Those cards cannot be exhausted for this cost.')
-  const sum = picked.reduce((s, c) => s + c!.resource!.n, 0)
-  if (sum < ctx.n || picked.some((c) => sum - c!.resource!.n >= ctx.n)) return reject('E_COST', `That does not pay exactly ${ctx.n} ${ctx.res} with no spare card.`)
+  if (!paysExactly(picked as CardState[], ctx.n)) return reject('E_COST', `That does not pay exactly ${ctx.n} ${ctx.res} with no spare card.`)
   const s = (cards as Id[]).reduce((st, id) => exhaustCard(st, action.seat, id), state)
   const cont = ctx.then?.cont
   if (cont?.k === 'pay' && cont.flow) return advance(s, bundle, cont.flow)
@@ -1603,7 +1617,7 @@ export const abilities: ModuleDef = {
     }
     const r = execList(from, bundle, p.cont.rest, p.cont.ctx)
     if (isRejection(r)) return r
-    return r.suspended ? { state: r.state } : finishAfter(r.state, bundle, p.cont.ctx.after)
+    return r.suspended ? held(r) : finishAfter(r.state, bundle, p.cont.ctx.after)
   },
 }
 

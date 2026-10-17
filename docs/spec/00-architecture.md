@@ -94,7 +94,7 @@ Imports flow one way: services never import rules modules; rules modules import 
 | `deploy` | reserves.ts | a `deploy.go` (menu); k `deploy.entry` (edge segment or alternate entry), `deploy.path`; end-of-round drops reuse these |
 | `shoot` | shooting.ts | a `shoot.go` (menu); k `shoot.batch` (weapon profile + target, or done), `shoot.template` (template position) |
 | `charge` | charge.ts | a `charge.go` (menu); k `charge.targets`, `charge.path` (after the roll) |
-| `melee` | melee.ts | a `melee.go` (Combat activation); k `melee.closeRanks`, `melee.split` |
+| `melee` | melee.ts | a `melee.go` (Combat activation); k `melee.closeRanks`, `melee.split`, `melee.keywords` (PRECISION / CRITICAL HIT target choice; added to DECISION_KINDS 2026-10-17, contract note: the list is the kinds the engine raises) |
 | `atk` | attack.ts + damage.ts | k `atk.reroll`, `atk.precision`, `atk.tough`, `atk.casualty` (defender picks a removal) |
 | `ability` | abilities.ts | k `ability.window` (before/after the action), `ability.target`, `ability.pay`, `ability.react` |
 | `mission` | missions.ts | a `mission.<verb>` from the Mission Card (e.g. `mission.gather`, `mission.claim`); k `mission.choose` |

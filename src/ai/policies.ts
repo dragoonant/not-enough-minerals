@@ -476,7 +476,7 @@ export const POLICIES: PolicyTable = {
   'deploy.entry': deployEntry, 'deploy.path': capped('deploy.path', deployPath), 'deploy.drop': deployDrop,
   'shoot.batch': capped('shoot.batch', shootBatch), 'shoot.template': shootTemplate,
   'charge.targets': capped('charge.targets', chargeTargets), 'charge.path': capped('charge.path', chargePath), 'charge.impact': chargeImpact,
-  'melee.closeRanks': meleeCloseRanks, 'melee.*': meleeKeywords, // melee.keywords is not in the frozen DECISION_KINDS: it uses the namespace entry 'melee.split': meleeSplit,
+  'melee.closeRanks': meleeCloseRanks, 'melee.split': meleeSplit, 'melee.keywords': meleeKeywords,
   'atk.reroll': diceChoice, 'atk.precision': diceChoice, 'atk.tough': diceChoice, 'atk.casualty': casualty,
   'ability.window': abilityWindow, 'ability.target': abilityTarget, 'ability.pay': abilityPay, 'ability.react': abilityReact,
   'mission.*': missionAction,

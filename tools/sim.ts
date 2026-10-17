@@ -120,6 +120,15 @@ async function playOne(bundle: EditionBundle, g: number): Promise<GameOut> {
           if (!r.ok) err(state, `legal option ${o.type} ${JSON.stringify(o).slice(0, 160)} rejected: ${r.rejection.code} ${r.rejection.message}`)
         }
       }
+      // Purity: 1 in 20 decisions try every option on a cloned state; the live state must come out unchanged.
+      if (decisions % 20 === 0) {
+        const before = fingerprint(state)
+        for (const o of legal) {
+          const r = apply(structuredClone(state), bundle, o)
+          if (!r.ok) err(state, `legal option ${o.type} rejected on a cloned state: ${r.rejection.code} ${r.rejection.message}`)
+        }
+        if (fingerprint(state) !== before) err(state, 'trying the legal options changed the live state')
+      }
       const seat = p.seat === 'all' ? state.seatOrder[0]! : p.seat
       const action = await bots[seat]!.decide(view(state, seat), p, legal)
       const t0 = performance.now()
@@ -129,6 +138,8 @@ async function playOne(bundle: EditionBundle, g: number): Promise<GameOut> {
       if (ms > STEP_MS) err(state, `slow step ${action.type}: ${ms.toFixed(0)} ms`)
       if (!r.ok) { err(state, `chosen ${action.type} rejected: ${r.rejection.code} ${r.rejection.message}`); break }
       if (r.state.log.length !== state.log.length + 1) err(state, 'accepted action was not logged')
+      // An accepted answer must settle the decision: the same id staying open is the stuck-Reaction / stuck-pay class.
+      if (r.state.phase !== 'over' && r.state.pending.id === p.id) { err(state, `accepted ${action.type} left decision ${p.id} open`); break }
       state = r.state
       decisions++
     } catch (e) {

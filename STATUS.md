@@ -1,8 +1,10 @@
 # Status: what exists
 
-Milestone reached: **M4 AI opponent** (generated snapshot, 2026-10-13; this file lists only what is real; plans live
-in PLAN.md). Gate reports: `tools/out/m1-data-report.md` (M1), `tools/out/m2-followups.md` (M2 open items),
-`tools/out/m3-followups.md` (M3 open items), `tools/out/m4-bench.md` (M4 AI bench). The specs
+Milestones reached: M0-M4, M5 art, M6 audio, M7 polish, M8 terrain, M9 Wave 2 armies (snapshot 2026-10-17; this
+file lists only what is real; plans live in PLAN.md). Gate reports: `tools/out/m1-data-report.md` (M1),
+`tools/out/m2-followups.md` and `tools/out/m3-followups.md` (resolved in the 2026-10-16 follow-up pass),
+`tools/out/m4-bench.md` (AI bench, with a follow-up section), `tools/out/rules-check-pass.md` (rules-check pass),
+`tools/out/music-report.md` (audio). The specs
 under `docs/spec/` (00 architecture, 10-19 rules, 20-21 data, 30 AI, 50 client, 60 testing) are not listed here.
 
 ## Repo and tooling
@@ -30,7 +32,11 @@ under `docs/spec/` (00 architecture, 10-19 rules, 20-21 data, 30 AI, 50 client, 
   casualties, Supply drops), `charge` (Charge and IMPACT), `melee` (Close Combat, Close Ranks), `supply`, `control`
   (marker control), `missions`, `scoring` (VP, End of Round, Cleanup, game end), `abilities` + `code-hooks` (unit
   abilities, Reactions, faction and tactical cards, the 20 `{"code": ...}` hooks).
-- Rules decisions: `docs/needs-rules-check.md` (142 RULING lines; the M2 engine set is appended under its own heading).
+- Rules decisions: `docs/needs-rules-check.md`. Rules-check pass 2026-10-16: 83 Confirmed, 50 Unsourced (free
+  sources silent; literal reading kept), 9 Corrected in code (summoned Supply VP, Orders/Wild Mutation grants,
+  coherency past enemies, melee keyword allocation, IMPACT split, Advanced Training, RESPAWN, MORPH).
+- Maps: the TER-001 roll (D3 skirmish / D6 standard) picks generated maps; `terrain-maps.ts` adds the original
+  "Sunken Shrine" temple layout (skirmish and standard), opt-in through the launch `map` option.
 
 ## Data (`src/data/`, `data/`; schema FROZEN)
 - Schema `docs/spec/20-data-schema.md` (types `src/data/types.ts`), entry guide `docs/spec/21-data-entry-guide.md`.
@@ -49,16 +55,22 @@ under `docs/spec/` (00 architecture, 10-19 rules, 20-21 data, 30 AI, 50 client, 
 - Budget: `AI_MS` / `VITE_AI_MS` (default 150 ms) maps to a work cap, so answers are deterministic; a wall-clock
   hard stop is the safety net. The client runs the AI in a Web Worker (`src/client/bot/aiWorkerClient.ts`, 3 s
   timeout) driven by `botDriver.ts`.
-- Bench (`npm run bench:ai`, `tools/out/m4-bench.md`): normal beats random 99/100, easy 97/100, normal beats easy
-  37/40; normal won 42/42 across all 7 matchups; 32 ms mean per decision, 0 errors or fallbacks.
+- Objectives are mission-aware (`markerWorth`: no pull toward markers the Mission does not score); a ramping enemy
+  pull; activation prices shots and charges before moves. Policies cover melee keyword allocation, cost Reactions,
+  MORPH removals and RESPAWN spots.
+- Bench (`npm run bench:ai`, flags `--rotate`, `--matchups all`, `--offset`, `--trace`; `tools/out/m4-bench.md`
+  follow-up section): normal beats random 239/240 rotating all 12 Missions x 12 Deployments (every Mission 39-40/40),
+  normal beats easy 201/240, founders 240/240; solo run mean 8.4 ms, max 171 ms per decision, 0 fallbacks.
+  Open items: `tools/out/ai-followups.md`.
 
 ## Client (`src/client/`; spec `docs/spec/50-client.md`)
 - `contract.ts` is the only door to the engine: hooks over presented state, `query.ts` previews, `focus` UI state.
   `store/gameStore.ts` is the only apply caller; `store/launch.ts` resolves menu or URL launches (seeded random
   mission and deployment).
-- Start screen (`ui/StartScreen.tsx`, `ui/start/`): matchups including Founders Edition and a First Battle learning
-  game, mission and deployment pickers with a briefing preview, players (vs bot, hot-seat, watch bots), side, bot
-  tier, speed, seed; our own geometric faction emblems; fan notice.
+- Start screen (`ui/StartScreen.tsx`, `ui/start/`): your race and the opponent's race (Terran/Zerg/Protoss), Forces
+  (Starter or Expanded with the Wave 2 units: Siege Tank, Ravager, Zeratul + Immortal under the Nerazim), mission,
+  deployment and map pickers with a briefing preview, players (vs bot, hot-seat, watch bots), bot tier, speed, seed;
+  our own geometric faction emblems; fan notice. Founders Edition and First Battle remain URL-only (`?matchup=`).
 - Game screen: briefing modal (mission, Phases, Supply pool table, scoring, mini-map with Entry Edges, first-turn
   tips) through `ui/ModalLayer.tsx`; collapsible rails with objective tracker, score, Supply table, Reserves, unit
   card with weapon panel and statuses, odds panel, "What happened" feed (`ui/feedView.ts`); PhaseBar, hint strip,
@@ -73,20 +85,28 @@ under `docs/spec/` (00 architecture, 10-19 rules, 20-21 data, 30 AI, 50 client, 
   ghost formation, weapon and target picks with odds, abilities, Roll-Offs), docked beside the rails.
 - Presentation (`presentation/`): director and beats pace engine events into cues; dice tray (`dice/`, Working and
   Quick modes, dice log); Web Audio SFX and music (`audio/`).
+- Figures: 31 units have GLBs; siege tank, goliath, hydralisk, queen, ravager and omega worm are split into
+  `lower`/`upper` nodes (`tools/models/split.mjs`, planes in `split-planes.json`) and rigged (`figures/rig.ts`: turret
+  yaw, Zerg lunge); base rings and unrigged GLBs are instanced (152 -> 87 draw calls on the test board).
+- Audio: decoded-buffer seamless loops, music director (calm / battle / tense when 3+ VP behind or last round /
+  victory and defeat stingers, crossfades), measured trims, `public/sounds.html` audition page (`tools/gen-sfx.ts`).
 - Test hooks `?test=1` (`window.__game`), `?seats=`, `?seed=`, `?tier=`, `?speed=`, `?matchup=`, `?mission=`,
-  `?menu=1`, `?gallery`, `?fps`.
+  `?menu=1`, `?map=sunken-shrine`, `?gallery`, `?fps`.
 
-## Verification (2026-10-13, M4 gate)
-- `npm run typecheck`: clean. `npm test`: 458 tests in 45 files, all pass (engine checklist IDs, AI, client UI-,
-  INT-, DICE-, board and start-screen tests).
-- `npm run validate:data`: ok, 15 warnings. `npm run build`: ok. `npm run sim -- --games 30`: 30 finished, 0 errors,
-  avg 4.63 rounds, 8219 decisions, max step 184 ms (winners B 14, A 8, draws 8).
-- `npm run e2e`: 11 pass (boot, human answer, a full Founders game vs bot from the menu, bot-vs-bot per matchup,
-  screenshots). Screenshots: `screenshots/m3-{start,briefing,board,dice,gallery,gameover,rings}.png` at 1280x800.
-- `npm run bench:ai`: see the AI section and `tools/out/m4-bench.md`.
+## Verification (2026-10-17, follow-up pass)
+- `npm run typecheck`: clean. `npm test`: 555 tests in 60 files, all pass.
+- `npm run validate:data`: ok, 15 warnings (CT rows with no card, by design). `npm run build`: ok.
+- `npm run sim -- --games 40` over all matchups incl. Expanded: 40/40 finished, 0 errors. The sim now also checks that
+  an accepted answer settles its decision and that every listed option is accepted (1 in 20 decisions, on a clone).
+  100 mirror games: A 42, B 38, draws 20 (no seat bias).
+- `npm run bench:ai -- --rotate --matchups all`: 0 engine-blocked games, 0 E_COST, 0 errors (see the AI section).
+- `npm run e2e`: 24 pass (run through msedge; this PC's Playwright chromium build is older than the one the
+  config expects). Screenshots: `screenshots/m7-{start,start-phone,rig}.png`, `m8-temple-{layout,standard}.png`.
 
 ## Not yet
-The owner playtest gate for the AI; AI tail latency (slowest move decisions reach 450 to 650 ms under load); bench
-coverage beyond one Mission and Deployment; most figure art, real terrain, query additions the client is waiting on
-(shoot options, contest radii, coherency links, placement-aware visibility). Open items: `tools/out/m2-followups.md`,
-`tools/out/m3-followups.md`, `tools/out/m4-bench.md` (known weaknesses).
+- The owner playtest gate for the AI (3 games) and an owner listen of `sounds.html` (loop seams, the tense variant).
+- Turret yaw on the Siege Tank and Goliath not yet seen in a live game (the Ravager lunge was). Shrine ramps are
+  plain-coloured steps with no texture; split-plane heights are eyeballed.
+- First-weapon grants are spent per action, not per Batch (needs `effects.ts`). Respawn/morph DEP-003 Leading Model
+  search is a sampled check. The decision panel can cover a squad at the table's lower right.
+- No standard-scale (36 x 54) army presets yet. Open items: `tools/out/ai-followups.md`.

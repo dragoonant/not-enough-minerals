@@ -57,7 +57,7 @@ that throws, is a **fallback**: the random policy answers, and the fallback is c
 | `move.path`, `move.place` | `movePath`, `movePlace` | Destination (section 6). For `move.place`, `moves.placeGoal` then `random.completePlace`. |
 | `shoot.batch`, `shoot.template` | `shootBatch`, `shootTemplate` | Weapon and target, or done; template spot (section 7.2). |
 | `charge.targets`, `charge.path`, `charge.impact` | `chargeTargets`, `chargePath`, `chargeImpact` | Section 7.3. |
-| `melee.closeRanks`, `melee.split` | `meleeCloseRanks`, `meleeSplit` | Section 7.3. |
+| `melee.closeRanks`, `melee.split`, `melee.keywords` | `meleeCloseRanks`, `meleeSplit`, `meleeKeywords` | Section 7.3. `melee.keywords` joined the kind list 2026-10-17. |
 | `atk.reroll`, `atk.precision`, `atk.tough` | `diceChoice` | Spend a re-roll or keyword where it changes kill odds or a bracket most. |
 | `atk.casualty` | `casualty` | Section 7.4. |
 | `ability.window`, `ability.target`, `ability.pay`, `ability.react` | `abilityWindow`, `abilityTarget`, `abilityPay`, `abilityReact` | Section 7.5. |

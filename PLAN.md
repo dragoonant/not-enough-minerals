@@ -42,6 +42,14 @@ working summary. Do not re-ask anything listed here.
 - **M8 terrain.**
 - **M9+ Protoss and Wave 2** (Siege Tank, Immortal, Ravager, Zeratul), then a rules-check pass once factions land.
 
-## Open source gaps
+## Progress (2026-10-17)
+M0-M4 done; M5 art, M6 audio, M7 polish and M8 terrain done pending the owner's look and listen; M9 Wave 2 armies
+playable (Expanded forces) and the rules-check pass applied. See STATUS.md "Not yet" for what remains.
+
+## Open source gaps (answered 2026-10-16, `tools/out/rules-check-pass.md`)
+Game length is on each Mission Card (R p.79 9.2.1); detection exists only on cards (plus F p.5); there is no general
+transport rule, only forward-deploy cards; morale does not exist in this game.
+
+## Open source gaps (original note)
 Detection, transports, game length and morale were not found in the free rules summary yet; confirm after
 extraction, log RULINGs, and ask the owner only if a value exists nowhere else.
