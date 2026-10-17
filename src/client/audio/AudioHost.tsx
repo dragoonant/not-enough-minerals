@@ -1,10 +1,11 @@
 // Mount once inside GameScreen: unlocks audio on first click, plays sounds from presentation cues, sets the music scene
-// (battle loop in game, victory/defeat stinger on game over, title theme again on leaving),
+// (battle loop in game, tense variant when behind or in the last round, victory/defeat stinger on game over, title theme again on leaving),
 // and shows the sound toggle + volume popover (data-testid audio-toggle).
 import { useEffect, useRef, useState } from 'react'
 import { audio, type AudioSettings } from './manager'
 import { soundsForCue, type CueWho } from './cueSounds'
-import { data, onCue, useGame, usePresentedUnits } from '../contract'
+import { directScene, vpLeadOf } from './music'
+import { data, onCue, useGame, usePresented, usePresentedUnits } from '../contract'
 
 const box: React.CSSProperties = { position: 'fixed', right: 12, bottom: 12, zIndex: 6, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }
 const panel: React.CSSProperties = { background: 'rgba(15,20,27,.94)', border: '1px solid #46515c', borderRadius: 4, padding: '8px 10px', fontSize: 12, color: '#dfe6ee', display: 'grid', gridTemplateColumns: 'auto 110px', gap: '6px 8px', alignItems: 'center' }
@@ -19,6 +20,18 @@ export function AudioHost() {
   const { controllers } = useGame()
   const controllersRef = useRef(controllers)
   controllersRef.current = controllers
+
+  // Music director: battle by default, tense when the human side is 3+ VP behind or in the last round.
+  const presented = usePresented()
+  const humanSeat = Object.entries(controllers).find(([, c]) => c === 'human')?.[0]
+  const playing = presented && presented.phase === 'play' && humanSeat
+  const vpLead = playing ? vpLeadOf(presented.seats, humanSeat) : 0
+  const round = presented?.round ?? 0
+  const maxRounds = presented?.maxRounds ?? null
+  useEffect(() => {
+    if (!playing) return
+    audio.setMood(directScene({ screen: 'game', vpLead, round, maxRounds, prev: audio.currentMood }))
+  }, [playing, vpLead, round, maxRounds])
 
   useEffect(() => {
     audio.attachAutoUnlock()

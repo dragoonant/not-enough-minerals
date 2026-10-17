@@ -1,5 +1,5 @@
 // apply(): the single entry point that advances a game (spec 00 s3). Pure; never throws on bad input.
-// 1. game over / stale decision id / wrong seat / not matching any legal option -> Rejection, state unchanged.
+// 1. game over (the one exception: the listed turn.over option is accepted as a no-op) / stale decision id / wrong seat / not matching any legal option -> Rejection, state unchanged.
 // 2. dispatch to the module owning state.pending.kind's namespace (registry.ts).
 // 3. a step that reports `done` goes through the controller's afterAction() (reactions, next menu, end of activation).
 // 4. the accepted action is appended to state.log (modules never append it themselves).
@@ -33,7 +33,12 @@ export function matchesOption(action: Action, template: Action): boolean {
 
 export function apply(state: GameState, bundle: EditionBundle, action: Action): ApplyResult {
   const no = (rejection: Rejection): ApplyResult => ({ ok: false, state, rejection })
-  if (state.phase === 'over') return no(reject('E_GAME_OVER', 'The game is over.'))
+  if (state.phase === 'over') {
+    // ENG-OVER: the open turn.over decision lists one option; accepting it changes nothing but is logged (spec 00 s3.1)
+    const o = state.pending
+    if (action && action.type === 'turn.over' && o.kind === 'turn.over' && action.decisionId === o.id && action.seat === o.seat) return { ok: true, state: { ...state, log: [...state.log, action] } }
+    return no(reject('E_GAME_OVER', 'The game is over.'))
+  }
   const p = state.pending
   if (!action || typeof action !== 'object' || typeof action.type !== 'string') return no(reject('E_BAD_PARAM', 'Malformed action.'))
   if (action.decisionId !== p.id) return no(reject('E_STALE_DECISION', `Decision ${String(action.decisionId)} is not the open one (${p.id}).`))

@@ -3,7 +3,7 @@
 // event payloads); anything else waits for the batch-end snap to the true state, so the screen lags but never lies.
 import type { DiceRolled } from '../../engine/rng'
 import type { Action, AttackBatch, GameState, ModelId, ModelState, RoundPhase, SeatId, UnitId, Vec2 } from '../../engine/types'
-import type { AtkStageData, Cue, RolledDie, SeqEvent } from './cues'
+import type { AtkStageData, Cue, MoveHow, RolledDie, SeqEvent } from './cues'
 import { phaseLabel, seatLabel } from './labels'
 
 export interface Beat {
@@ -67,8 +67,24 @@ export function anchorModel(s: GameState, unitId: UnitId | null | undefined): Mo
 }
 
 // ---------------------------------------------------------------- moves (models that stayed on the table)
+/** The move kind an answer carries: move.path has kind move/run/disengage; other answer types name it themselves. */
+export function moveHowOf(action: Action | null): MoveHow {
+  const t = typeof action?.type === 'string' ? action.type : ''
+  const k = action?.['kind']
+  if (t === 'move.path' && (k === 'move' || k === 'run' || k === 'disengage')) return k
+  if (t === 'move.run') return 'run'
+  if (t === 'move.go') return 'move'
+  if (t === 'move.disengage') return 'disengage'
+  if (t.startsWith('deploy.')) return 'deploy'
+  if (t.startsWith('charge.')) return 'charge'
+  if (t === 'move.place') return 'place'
+  return 'other'
+}
+
 function moveBeats(before: GameState, after: GameState, action: Action | null): Beat[] {
   const out: Beat[] = []
+  const how = moveHowOf(action)
+  const led = new Set<string>()
   const leader = typeof action?.['leaderId'] === 'string' ? (action['leaderId'] as string) : null
   const path = Array.isArray(action?.['path']) ? (action!['path'] as unknown[]).filter(isVec) : null
   for (const [id, a] of Object.entries(after.models)) {
@@ -77,8 +93,10 @@ function moveBeats(before: GameState, after: GameState, action: Action | null): 
     let points: Vec2[] = [b.pos, a.pos]
     if (path && path.length && id === leader) points = [b.pos, ...path.slice(0, -1), a.pos]
     const ms = Math.min(BEAT_MS.moveMax, BEAT_MS.moveBase + BEAT_MS.movePerInch * pathLen(points))
+    const firstOfUnit = !led.has(a.unitId)
+    led.add(a.unitId)
     out.push({
-      cue: { kind: 'move', modelId: id, points, unitId: a.unitId }, baseMs: ms, events: [], applyAt: 'end',
+      cue: { kind: 'move', modelId: id, points, unitId: a.unitId, how, lead: firstOfUnit }, baseMs: ms, events: [], applyAt: 'end',
       patch: (s) => withModel(s, id, (m) => ({ ...m, pos: a.pos, elev: a.elev })),
     })
   }

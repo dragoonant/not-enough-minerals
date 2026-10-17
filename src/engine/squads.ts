@@ -164,7 +164,7 @@ export function tokenBodies(state: GameState, bundle: EditionBundle): TokenBody[
     const mm = def.baseMm ?? rule(bundle, 'markerDiameterMm')
     out.push({
       id: t.id, pos: t.pos, r: baseRadius(mm), blocksMax: def.blocks ? def.blocks.maxSize : null,
-      removedBy: def.removedBy ?? (def.blocks?.removedByLarger ? 'movement' : null), displacement: def.displacement === true,
+      removedBy: def.removedBy ?? (def.blocks?.removedByLarger ? 'movement' : null), displacement: def.displacement === true || effects.tokenGrants(state, bundle, t, 'DISPLACEMENT'),
     })
   }
   return out

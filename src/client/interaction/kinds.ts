@@ -84,7 +84,7 @@ export const isPathKind = (kind: string): boolean => (PATH_KINDS as readonly str
 export interface Verb { label: string; hint: string }
 const VERBS: Record<string, Verb> = {
   'move.go': { label: 'Move', hint: 'Advance the squad up to its Speed.' },
-  'move.run': { label: 'Run', hint: 'Cover more ground at a cost; see the rules card.' },
+  'move.run': { label: 'Run', hint: 'Move again in the Assault Phase, up to the squad Speed.' },
   'move.disengage': { label: 'Disengage', hint: 'Break away from an enemy squad in contact.' },
   'deploy.go': { label: 'Deploy', hint: 'Bring this squad in from Reserves.' },
   'shoot.go': { label: 'Ranged Attack', hint: 'Fire the squad weapons at enemies in sight.' },
@@ -93,7 +93,21 @@ const VERBS: Record<string, Verb> = {
   'turn.hold': { label: 'Hold', hint: 'Stand fast; the squad is activated without moving.' },
 }
 export function verbOf(opt: DecisionOption): Verb {
-  return VERBS[opt.action.type] ?? { label: opt.label, hint: '' }
+  const hit = VERBS[opt.action.type]
+  if (hit) return hit
+  // Mission actions (mission.gather...) are the mission's own action, offered when the squad stands at a qualifying marker.
+  if (opt.action.type.startsWith('mission.')) return { label: opt.label, hint: 'A Mission action the squad can take at this marker. It uses the squad action.' }
+  return { label: opt.label, hint: '' }
+}
+
+/** The help line under the title. When every squad that can act is still in Reserves, the glowing-squad advice would be
+ *  wrong (nothing glows on the table), so the line points at the list instead. */
+export function hintFor(p: PendingDecision, onTable: (id: UnitId) => boolean): string {
+  const base = kindInfo(p.kind).hint
+  if (p.kind !== 'turn.activate') return base
+  const units = activationMenu(p).units
+  if (units.length > 0 && !units.some((u) => onTable(u.unitId))) return 'All of your squads are in Reserves. Pick one from the list below to bring it onto the table, or Pass.'
+  return base
 }
 
 export interface ActivationUnit { unitId: UnitId; options: DecisionOption[] }

@@ -1,0 +1,67 @@
+{
+ "id": "terran-expanded",
+ "name": "Terran Expanded (Wave 2)",
+ "scale": "skirmish",
+ "faction": "terran-armed-forces",
+ "units": [
+  {
+   "unit": "marine",
+   "models": 6,
+   "upgrades": [
+    {
+     "id": "combat-shield"
+    },
+    {
+     "id": "grenades-frag"
+    }
+   ]
+  },
+  {
+   "unit": "marauder",
+   "models": 2,
+   "upgrades": [
+    {
+     "id": "laser-targeting-systems"
+    }
+   ]
+  },
+  {
+   "unit": "medic",
+   "models": 3,
+   "upgrades": [
+    {
+     "id": "stabilizer-medpacks"
+    }
+   ]
+  },
+  {
+   "unit": "goliath",
+   "models": 1,
+   "upgrades": [
+    {
+     "id": "scatter-missiles"
+    }
+   ]
+  },
+  {
+   "unit": "siege-tank",
+   "models": 1,
+   "upgrades": [
+    {
+     "id": "mode-transformation"
+    }
+   ]
+  }
+ ],
+ "cards": [
+  "barracks",
+  "factory",
+  "armory"
+ ],
+ "source": [
+  "R p.108",
+  "CT p.2-3",
+  "CS2-T p.1",
+  "Starter force plus the Siege Tank, trimmed to the 1000 mineral and 100 gas skirmish limits"
+ ]
+}

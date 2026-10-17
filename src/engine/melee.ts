@@ -11,7 +11,7 @@ import { buildBatch, hasKw, resolveBatch } from './attack'
 import { isRejection, reject } from './errors'
 import { dist, EPS } from './geometry'
 import { modelDistance } from './measure'
-import { reposition } from './movement'
+import { firePending, reposition, type PendingHook } from './movement'
 import { option, pushEvents, raiseDecision, updateUnit, type ActionDone, type ModuleDef, type StepResult } from './registry'
 import { unitModels } from './squads'
 import type { Action, AttackBatch, GameState, ModelId, ModelState, UnitId, UnitState, Vec2 } from './types'
@@ -119,9 +119,12 @@ function doCloseRanks(state: GameState, b: EditionBundle, action: Action): StepR
     leaderId = best.m.id
     path = [{ x: best.m.pos.x + (best.e.pos.x - best.m.pos.x) * k, z: best.m.pos.z + (best.e.pos.z - best.m.pos.z) * k }]
   }
-  const r = reposition(state, b, unitId, { kind: 'closeRanks', leaderId, path, maxDist, mustCloseOn: engaged, allowEngage: engaged })
+  const r = reposition(state, b, unitId, { kind: 'closeRanks', leaderId, path, maxDist, mustCloseOn: engaged, allowEngage: engaged, returnTo: 'melee' })
   if (isRejection(r)) return explicit ? r : burrowed ? finish(state, unitId, false) : attackers(state, b, unitId)
-  return attackers(afterMove(pushEvents(r.state, r.events)), b, unitId)
+  const moved = afterMove(pushEvents(r.state, r.events))
+  // a Reaction window opened at the end of the move: park on an event, resume() carries on to the attackers
+  if (r.raised) return { state: pushEvents(moved, [{ type: 'melee.closeRanksWindow', unitId, ...(r.pending?.length ? { pending: r.pending } : {}) }]) }
+  return attackers(moved, b, unitId)
 }
 
 // ---------------------------------------------------------------- attackers and the split (CC-020..040)
@@ -253,9 +256,19 @@ export const melee: ModuleDef = {
     }
   },
   /** Every Batch of the split is resolved: the activation is over. */
-  resume(state) {
+  resume(state, bundle) {
     const unitId = state.activeUnit
     if (!unitId || !state.units[unitId]) return reject('E_BAD_TARGET', 'No active unit to finish the Close Combat Attack.')
+    const last = [...state.events].reverse().find((e) => e.type === 'melee.closeRanksWindow' || e.type === 'melee.closeRanksDone') as { type: string; pending?: PendingHook[] } | undefined
+    if (last?.type === 'melee.closeRanksWindow' && !state.attack) {
+      let s = state
+      if (last.pending?.length) {
+        const f = firePending(s, bundle, last.pending, 'melee')
+        if (f.raised) return { state: pushEvents(f.state, [{ type: 'melee.closeRanksWindow', unitId, ...(f.rest.length ? { pending: f.rest } : {}) }]) }
+        s = f.state
+      }
+      return attackers(pushEvents(s, [{ type: 'melee.closeRanksDone', unitId }]), bundle, unitId)
+    }
     return finish(state, unitId, true)
   },
 }

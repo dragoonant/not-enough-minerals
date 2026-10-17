@@ -174,6 +174,7 @@ function spend(state: GameState, unit: UnitState, profile: WeaponProfile, car: M
 }
 
 function fire(state: GameState, b: EditionBundle, unit: UnitState, profile: WeaponProfile, car: ModelState[], chk: TargetCheck, target: UnitState, aim: ModelState | null, skipHook = false): StepResult {
+  let redirectTo: UnitId | undefined
   if (!skipHook) {
     // The hook is told the draft Batch so triggers can match the attack kind, the weapon and INSTANT (ATK-021 / REA).
     const draft = buildBatch(state, b, { seat: unit.owner, attackerUnitId: unit.id, profile, kind: 'ranged', targetUnitId: target.id, contributors: chk.contributors, eligible: null })
@@ -181,12 +182,21 @@ function fire(state: GameState, b: EditionBundle, unit: UnitState, profile: Weap
     // a Reaction window opened: resume() fires this declared Batch once it closes (nothing is spent yet)
     if (hook.raised) return { state: pushEvents(hook.state, [{ type: 'shoot.declared', unitId: unit.id, weaponId: profile.id, targetUnitId: target.id, aim: aim?.id ?? null }]) }
     state = hook.state
+    redirectTo = hook.redirectTo
+    // Keywords a declare-time Reaction granted (Smart Shells, Shaped Blast) change the declared Batch: read the profile and
+    // the target check again, so far dice (LONG RANGE), INDIRECT FIRE and PINPOINT count for this volley.
+    const fresh = weaponProfile(state, b, unit.id, profile.id, { attack: 'ranged', targetUnitId: target.id })
+    if (fresh) {
+      const again = checkTarget(state, b, unit, fresh, car, target)
+      if (again.ok && (!fresh.template || (aim && again.seen.includes(aim.id)))) { profile = fresh; chk = again }
+    }
   }
   // Redirect (Hierarch's Stand): the declared Batch moves onto the redirecting Unit when it is a legal target.
   const red = effectOps(state, b, unit.id, 'redirect')[0]
-  if (red && typeof red.rec.unit === 'string') {
+  redirectTo ??= red && typeof red.rec.unit === 'string' ? red.rec.unit : undefined
+  if (redirectTo !== undefined) {
     state = removeEffects(state, unit.id, (e) => e.kind === 'mod' && (e.data as { op?: string } | undefined)?.op === 'redirect')
-    const to = state.units[red.rec.unit]
+    const to = state.units[redirectTo]
     if (to && to.id !== target.id) {
       const prof = weaponProfile(state, b, unit.id, profile.id, { attack: 'ranged', targetUnitId: to.id }) ?? profile
       const chk2 = checkTarget(state, b, unit, prof, car, to)

@@ -10,4 +10,11 @@ export const MATCHUP_OPTS: Record<string, Pick<CreateGameOpts, 'armies' | 'prese
   tz: { armies: { A: 'terran-starter', B: 'zerg-starter' } },
   tp: { armies: { A: 'terran-starter', B: 'protoss-starter' } },
   zp: { armies: { A: 'zerg-starter', B: 'protoss-starter' } },
+  // Wave 2 expanded forces (Siege Tank, Ravager, Immortal, Zeratul).
+  txtx: { armies: { A: 'terran-expanded', B: 'terran-expanded' } },
+  zxzx: { armies: { A: 'zerg-expanded', B: 'zerg-expanded' } },
+  pxpx: { armies: { A: 'protoss-expanded', B: 'protoss-expanded' } },
+  txzx: { armies: { A: 'terran-expanded', B: 'zerg-expanded' } },
+  txpx: { armies: { A: 'terran-expanded', B: 'protoss-expanded' } },
+  zxpx: { armies: { A: 'zerg-expanded', B: 'protoss-expanded' } },
 }

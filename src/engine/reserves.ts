@@ -122,6 +122,8 @@ export function arrive(state: GameState, bundle: EditionBundle, unitId: UnitId, 
   const first = spec.path[0]
   if (!first) return reject('E_BAD_PARAM', 'A path needs at least one point.')
 
+  // a table edge that is not an Entry Edge needs a card's permission (Warp In, Barracks (Proxy); DEP-004)
+  if (entry.kind === 'nonEntryEdge' && !liveAlt(state, bundle, unitId, 'nonEntryEdge').length) return reject('E_NOT_LEGAL', 'No card lets this unit arrive from a table edge that is not an Entry Edge.')
   let cap: { baseUnit: UnitId; cap: number; used: number } | null = null
   if (entry.kind === 'friendlyEdge') {
     const baseUnit = entry.ref ? state.units[entry.ref] : undefined
@@ -180,7 +182,7 @@ export function returnToReserves(state: GameState, bundle: EditionBundle, unitId
   const keep = s.tokens.filter((t) => {
     if (t.sourceId !== unitId) return true
     const owner = unitDef(bundle, u.profileId) ?? null
-    return tokenDef(bundle, owner, t.defId)?.stayInPlay === true
+    return tokenDef(bundle, owner, t.defId)?.stayInPlay === true || effects.tokenGrants(s, bundle, t, 'STAY_IN_PLAY')
   })
   s = { ...s, tokens: keep }
   // SIEGE MODE is lost (RES-002); the rest of the Effect list keeps counting down
@@ -358,8 +360,15 @@ const lastStage = (state: GameState): DeployStage | undefined => {
   return undefined
 }
 
-/** The nomination is over: a replaced entry (the Unit is on the table now) ends the Deploy; otherwise the normal entry follows. */
-function afterNomination(state: GameState, bundle: EditionBundle, unitId: UnitId): StepResult {
+/** The nomination is over: a replaced entry (the Unit is on the table now) ends the Deploy; otherwise the normal entry follows.
+ *  For an End-of-Round drop row (`rowId`) the row is spent by a replaced entry, and the row's own entry follows otherwise. */
+function afterNomination(state: GameState, bundle: EditionBundle, unitId: UnitId, rowId?: string): StepResult {
+  if (rowId !== undefined) {
+    if (state.units[unitId]?.location === 'table') return resolveArrivals({ ...state, arrivals: state.arrivals.filter((a) => a.id !== rowId) }, bundle)
+    const row = state.arrivals.find((a) => a.id === rowId)
+    if (!row) return resolveArrivals(state, bundle)
+    return { state: pathDecision(state, bundle, unitId, row.entry, { rowId }) }
+  }
   if (state.units[unitId]?.location === 'table') {
     return { state, done: { modelId: leadingModel(state, unitId)?.id ?? '', unitId, type: 'deploy.go', triggers: [{ kind: 'arrived', sourceId: unitId }] } }
   }
@@ -437,7 +446,10 @@ export const reserves: ModuleDef = {
         const rowId = action['rowId']
         const row = state.arrivals.find((a) => a.id === rowId)
         if (!row || typeof unitId !== 'string' || !state.units[unitId]) return reject('E_BAD_PARAM', 'That drop is not queued.')
-        return { state: pathDecision(state, bundle, unitId, row.entry, { rowId: row.id }) }
+        // the dropped Unit is nominated like any Deploy (Burrow Ambush, Rapid Reinforcements may replace the entry)
+        const h = runHook(state, bundle, 'onArrive', { seat: state.units[unitId]!.owner, unitId, cause: 'nominatedToDeploy', phase: state.roundPhase ?? undefined, returnTo: 'deploy' })
+        if (h.raised) return { state: pushEvents(h.state, [{ type: 'deploy.stage', stage: 'nominated', unitId, rowId: row.id }]) }
+        return afterNomination(h.state, bundle, unitId, row.id)
       }
       case 'deploy.skip': {
         const s = { ...state, arrivals: state.arrivals.filter((a) => a.id !== action['rowId']) }
@@ -451,7 +463,7 @@ export const reserves: ModuleDef = {
   resume(state, bundle): StepResult {
     const st = lastStage(state)
     if (!st) return { state, done: { modelId: '', ...(state.activeUnit ? { unitId: state.activeUnit } : {}), type: 'deploy.resume', triggers: [] } }
-    if (st.stage === 'nominated') return afterNomination(state, bundle, st.unitId)
+    if (st.stage === 'nominated') return afterNomination(state, bundle, st.unitId, st.rowId)
     let s = state
     if (st.pending?.length) {
       const f = firePending(s, bundle, st.pending, 'deploy')

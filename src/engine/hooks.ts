@@ -191,7 +191,7 @@ export function runHook(state: GameState, bundle: EditionBundle, point: HookPoin
         const q = u.effects.find((e) => e.source === LOSE_HIDDEN_QUEUE)
         if (!q) continue
         s = removeEffects(s, u.id, (e) => e.id === q.id)
-        const r = dispatch(s, bundle, 'loseHidden', { unitId: u.id, seat: u.owner, reactionsOnly: true }, 'onLoseHidden')
+        const r = dispatch(s, bundle, 'loseHidden', { unitId: u.id, seat: u.owner, reactionsOnly: true, ...(ctx.returnTo ? { returnTo: ctx.returnTo } : {}) }, 'onLoseHidden')
         s = r.state
         if (r.raised) { res.state = s; res.raised = true; return res }
       }

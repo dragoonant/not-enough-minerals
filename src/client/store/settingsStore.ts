@@ -7,6 +7,8 @@ export interface Settings {
   speed: number
   /** Narration lines in the feed. */
   narration: boolean
+  /** Answer optional ability windows with Done for the human seat (no prompt). */
+  skipAbilityWindows?: boolean
 }
 
 export const SPEED_PRESETS: readonly { id: string; label: string; speed: number }[] = [
@@ -17,7 +19,7 @@ export const SPEED_PRESETS: readonly { id: string; label: string; speed: number 
 ]
 
 const KEY = 'nem.settings'
-const DEFAULTS: Settings = { speed: 1, narration: true }
+const DEFAULTS: Settings = { speed: 1, narration: true, skipAbilityWindows: false }
 
 interface SettingsStore extends Settings { set(patch: Partial<Settings>, persist?: boolean): void }
 
@@ -26,7 +28,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
   ...(readJson<Partial<Settings>>(KEY) ?? {}),
   set(patch, persist = true) {
     set(patch)
-    if (persist) { const { speed, narration } = get(); writeJson(KEY, { speed, narration }) }
+    if (persist) { const { speed, narration, skipAbilityWindows } = get(); writeJson(KEY, { speed, narration, skipAbilityWindows }) }
   },
 }))
 

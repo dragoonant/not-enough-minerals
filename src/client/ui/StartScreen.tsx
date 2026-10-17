@@ -3,8 +3,8 @@
 // preview shows what the choice means before the game starts. Continue resumes the autosave.
 import { useMemo, useState } from 'react'
 import {
-  RACES, RANDOM, continueGame, deploymentChoices, hasAutosave, launchGame, matchupForRaces, matchupOf, missionChoice, missionChoices,
-  readAutosaveSummary, type Race, type SeatController,
+  FORCES, RACES, RANDOM, continueGame, deploymentChoices, hasAutosave, launchGame, matchupForRaces, matchupOf, missionChoice, missionChoices,
+  readAutosaveSummary, type Forces, type Race, type SeatController,
 } from '../store/launch'
 import { SPEED_PRESETS, useSettingsStore } from '../store/settingsStore'
 import { readJson, writeJson } from '../store/storage'
@@ -25,7 +25,8 @@ const TIERS: { id: string; label: string; blurb: string }[] = [
   { id: 'easy', label: 'Easy', blurb: 'Goes for objectives, ignores enemy threats.' },
   { id: 'normal', label: 'Normal', blurb: 'Weighs threats, cover and tempo.' },
 ]
-interface Prefs { mode: PlayMode; tier: string; race: Race; foe: Race; mission: string; deployment: string; matchup?: string; side?: 0 | 1 }
+interface Prefs { mode: PlayMode; tier: string; race: Race; foe: Race; mission: string; deployment: string; matchup?: string; side?: 0 | 1; forces?: Forces }
+const FORCE_LABEL: Record<Forces, string> = { starter: 'Starter forces', expanded: 'Expanded (Wave 2)' }
 const RACE_HEADS: Record<PlayMode, [string, string]> = { bot: ['Your race', 'Opponent race'], hotseat: ['Player 1 race', 'Player 2 race'], watch: ['Bot 1 race', 'Bot 2 race'] }
 
 /** Saved race picks, or (older prefs) the races of the saved matchup seen from the saved side. */
@@ -56,6 +57,8 @@ export function StartScreen() {
   const [tier, setTier] = useState<string>(TIERS.some((t) => t.id === saved.tier) ? saved.tier! : 'normal')
   const [race, setRace] = useState<Race>(() => savedRaces(saved)[0])
   const [foe, setFoe] = useState<Race>(() => savedRaces(saved)[1])
+  // Older saved prefs have no forces key: they meant the starter forces.
+  const [forces, setForces] = useState<Forces>(FORCES.includes(saved.forces as Forces) ? saved.forces! : 'starter')
   const [mission, setMission] = useState<string>(saved.mission ?? RANDOM)
   const [deployment, setDeployment] = useState<string>(saved.deployment ?? RANDOM)
   const [draft, setDraft] = useState(false)
@@ -64,7 +67,7 @@ export function StartScreen() {
   const setSettings = useSettingsStore((s) => s.set)
   const autosave = hasAutosave() ? readAutosaveSummary() : null
 
-  const { matchup: matchupId, side } = matchupForRaces(race, foe)
+  const { matchup: matchupId, side } = matchupForRaces(race, foe, forces)
   const matchup = matchupOf(matchupId)!
   const missions = missionChoices(matchup.scale)
   const deployments = deploymentChoices(matchup.scale)
@@ -73,7 +76,7 @@ export function StartScreen() {
   const picks = !draft
 
   const start = () => {
-    writeJson(PREF_KEY, { mode, tier, race, foe, mission: missionId, deployment: deploymentId })
+    writeJson(PREF_KEY, { mode, tier, race, foe, forces, mission: missionId, deployment: deploymentId })
     launchGame({
       matchup: matchup.id, seats: seatsFor(mode, side), tier,
       ...(draft ? { draft: true } : { missionId, deploymentId }),
@@ -105,6 +108,12 @@ export function StartScreen() {
                     ))}
                   </div>
                 </div>
+              ))}
+            </div>
+            <h2 className="sc-h">Forces</h2>
+            <div className="sc-row" role="radiogroup" aria-label="Forces" data-testid="forces-picker">
+              {FORCES.map((f) => (
+                <button key={f} className="sc-chip sc-chip-sm" role="radio" aria-checked={f === forces} aria-pressed={f === forces} data-testid={`forces-${f}`} onClick={() => setForces(f)}>{FORCE_LABEL[f]}</button>
               ))}
             </div>
             <p className="sc-note" data-testid="matchup-blurb">{matchup.blurb}</p>

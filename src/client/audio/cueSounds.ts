@@ -65,7 +65,32 @@ export function soundsForCue(cue: Cue, durationMs: number, humanWon?: boolean, w
       return cue.stage === 'arrived' ? [{ id: arrivalSoundFor(who.raceOf?.(cue.unitId)), volume: 0.9 }] : []
     case 'marker':
       return cue.change === 'claimed' || (cue.change === 'control' && cue.to) ? [{ id: 'marker-claim', volume: 0.8 }] : []
+    case 'charge':
+      return cue.stage === 'impact' ? [{ id: 'wpn-strike', volume: 0.6 }] : cue.stage === 'failed' ? [{ id: 'ui-click', volume: 0.4 }] : []
+    case 'activation':
+      return [{ id: 'ui-select', volume: 0.35 }]
+    case 'passed':
+      return [{ id: 'ui-click', volume: 0.4 }]
+    case 'score':
+      return cue.vp > 0 ? [{ id: 'marker-claim', volume: 0.6 }] : []
     default:
       return []
   }
 }
+
+/** The one table of cue kind -> sound, for sounds.html and the tests. Edit soundsForCue and this together. */
+export const CUE_SOUND_TABLE: readonly { cue: string; when: string; sounds: string }[] = [
+  { cue: 'banner', when: 'round / turn (human) / turn (other) / phase / game over', sounds: 'round-start / ui-turn / ui-confirm / ui-confirm / victory or defeat (music stinger when the file loads)' },
+  { cue: 'move', when: 'every move, 2-8 steps along the path', sounds: 'step (synth)' },
+  { cue: 'dice', when: 'any roll', sounds: 'dice-roll' },
+  { cue: 'attack', when: 'weapon fires', sounds: 'wpn-<flavour> via weaponFlavour (17 flavours)' },
+  { cue: 'attackStage', when: 'impact / damage 0 / damage on Protoss / damage', sounds: 'dice-roll / armor-clink / shield-hit / hit (synth)' },
+  { cue: 'casualties', when: 'a model dies', sounds: 'death-terran | death-zerg | death-protoss | death (race)' },
+  { cue: 'arrival', when: 'arrived', sounds: 'arrive-drop | arrive-burrow | arrive-warp (race)' },
+  { cue: 'marker', when: 'claimed or taken', sounds: 'marker-claim' },
+  { cue: 'charge', when: 'impact / failed', sounds: 'wpn-strike / ui-click' },
+  { cue: 'activation', when: 'a unit activates', sounds: 'ui-select' },
+  { cue: 'passed', when: 'a seat passes', sounds: 'ui-click' },
+  { cue: 'score', when: 'VP gained', sounds: 'marker-claim' },
+  { cue: 'initiative, note', when: '-', sounds: 'silent by design' },
+]

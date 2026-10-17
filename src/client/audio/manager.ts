@@ -1,9 +1,9 @@
 // Web Audio manager. Buses: sfx -> master; music -> master (MUSIC_DB under sfx at equal sliders). Unlocked on the first
 // click, tap or key. Volumes and mute persist in localStorage (try/catch). Throttling: retrigger gap and a concurrency cap
 // per sound id, plus a little random pitch jitter. SFX are synthesized (synth.ts). Music plays the generated files
-// (music.ts: title, battle loop, victory/defeat stingers) with 1.8 s crossfades; a missing file falls back to the synth mood.
+// (music.ts: title, battle loop, tense variant, victory/defeat stingers; decoded buffers, looped without a seam) with 1.8 s crossfades; a missing file falls back to the synth mood.
 import { RECIPES, MoodPlayer } from './synth'
-import { MUSIC_TRACKS, MusicTrack, type MusicScene } from './music'
+import { MUSIC_TRACKS, MusicTrack, musicUrl, type MusicScene } from './music'
 import { SFX, SFX_BY_ID, sfxUrl } from './sfx'
 
 export type Mood = MusicScene
@@ -53,6 +53,7 @@ export class AudioManager {
   private players: MoodPlayer[] = []
   private track: MusicTrack | null = null
   private missingMusic = new Set<string>()
+  private musicBuf: { id: string; buf: Promise<AudioBuffer> } | null = null
   private buffers = new Map<string, AudioBuffer>()
   private sfxLoading = false
   private timer: ReturnType<typeof setInterval> | null = null
@@ -181,7 +182,7 @@ export class AudioManager {
     if (!m) return
     const spec = MUSIC_TRACKS[m]
     if (!this.missingMusic.has(spec.id)) {
-      const t = new MusicTrack(this.ctx, this.musicBus, spec.id, spec.loop, CROSSFADE_S, () => {
+      const t = new MusicTrack(this.ctx, this.musicBus, m, (id) => this.loadMusic(id), CROSSFADE_S, () => {
         this.missingMusic.add(spec.id)
         if (this.track === t) { this.track = null; this.stats.track = ''; this.startSynth(m) }
       })
@@ -192,10 +193,20 @@ export class AudioManager {
     this.startSynth(m)
   }
 
+  /** Fetch + decode one music file. One-entry cache: only the latest file stays decoded (battle and tense share it). */
+  private loadMusic(id: string): Promise<AudioBuffer> {
+    if (this.musicBuf?.id === id) return this.musicBuf.buf
+    const ctx = this.ctx!
+    const buf = fetch(musicUrl(id)).then((r) => { if (!r.ok) throw new Error(`music ${id}: ${r.status}`); return r.arrayBuffer() }).then((a) => ctx.decodeAudioData(a))
+    this.musicBuf = { id, buf }
+    buf.catch(() => { if (this.musicBuf?.buf === buf) this.musicBuf = null })
+    return buf
+  }
+
   private startSynth(m: Mood): void {
     if (!this.ctx || !this.musicBus || this.mood !== m) return
-    if (m !== 'calm' && m !== 'battle') return // stingers fall back to the synth jingle SFX instead
-    this.players.push(new MoodPlayer(this.ctx, this.musicBus, m, CROSSFADE_S))
+    if (m !== 'calm' && m !== 'battle' && m !== 'tense') return // stingers fall back to the synth jingle SFX instead
+    this.players.push(new MoodPlayer(this.ctx, this.musicBus, m === 'tense' ? 'battle' : m, CROSSFADE_S))
     if (!this.timer) this.timer = setInterval(() => this.pump(), 120)
   }
 

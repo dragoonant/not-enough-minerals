@@ -188,7 +188,9 @@ function quarterVP(state: GameState, bundle: EditionBundle, seat: SeatId, vp: nu
     if (!q) continue
     const controls = state.markers.some((m) => m.onTable && m.controller === u.owner && canContest(state, bundle, u.id, m.n))
     const t = (totals[q] ??= Object.fromEntries(state.seatOrder.map((s) => [s, 0])))
-    t[u.owner]! += supplyFor(state, bundle, u.id, 'vp') + (controls ? bonus : 0)
+    // RULING: a quarter is an objective, so the Supply counted is the 'control' reading (Commander / Domineering Presence
+    // "markers and objectives" +1 included), plus the Mission's 1 for a Unit that controls a Marker.
+    t[u.owner]! += supplyFor(state, bundle, u.id, 'control') + (controls ? bonus : 0)
   }
   return Object.values(totals).filter((t) => state.seatOrder.every((o) => o === seat || t[seat]! > t[o]!)).length * vp
 }

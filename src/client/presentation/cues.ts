@@ -20,6 +20,9 @@ export interface RolledDie {
   purpose?: string
 }
 
+/** What kind of move a path answer was (the engine's `kind`): lets cues, sounds and narration tell Run from Move. */
+export type MoveHow = 'move' | 'run' | 'disengage' | 'deploy' | 'charge' | 'place' | 'other'
+
 export type BannerTone = 'round' | 'phase' | 'turn' | 'gameOver'
 
 /** The atk.stage payload per step (spec 00 s6), as the engine logged it. */
@@ -36,7 +39,7 @@ export type Cue =
   /** Big centred text: a new Round, a new Phase, the turn passing to another seat, game over. */
   | { kind: 'banner'; tone: BannerTone; text: string; round: number; phase: RoundPhase | null; seat: SeatId | null; winner?: SeatId | null }
   /** A figure slides along `points` (first = start, last = engine end position). */
-  | { kind: 'move'; modelId: ModelId; points: Vec2[]; unitId?: UnitId }
+  | { kind: 'move'; modelId: ModelId; points: Vec2[]; unitId?: UnitId; how?: MoveHow; lead?: boolean }
   /** A roll outside an attack (charge, initiative Roll-Off, map, draft...), grouped by purpose and owner. */
   | { kind: 'dice'; purpose: string; ownerId?: string; dice: RolledDie[]; rolls: DiceRolled[] }
   /** A Batch is fired: attacker and target are each unit's Leading Model (for tracers and sounds). `success` is always

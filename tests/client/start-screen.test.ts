@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { StartScreen, seatsFor } from '../../src/client/ui/StartScreen'
-import { DEFAULT_MATCHUP, MATCHUPS, RACES, deploymentChoices, matchupForRaces, matchupOf, missionChoices } from '../../src/client/store/launch'
+import { DEFAULT_MATCHUP, FORCES, MATCHUPS, RACES, deploymentChoices, matchupForRaces, matchupOf, missionChoices } from '../../src/client/store/launch'
 import { deploymentPreview, missionPreview } from '../../src/client/ui/start/scenarioPreview'
 
 describe('start screen', () => {
@@ -38,6 +38,25 @@ describe('start screen', () => {
       expect(m.armies.every((a) => a.endsWith('-starter'))).toBe(true)
       expect(m.races[side]).toBe(mine)
       expect(m.races[1 - side]).toBe(theirs)
+    }
+  })
+  it('START-006 every race pairing x forces maps to a matchup with your race on your side; expanded presets muster legally', async () => {
+    const { loadBundle } = await import('../../tools/sim-core')
+    const { validateArmy, musterArmy } = await import('../../src/engine/army')
+    const { presetDef } = await import('../../src/engine/edition')
+    const bundle = loadBundle()
+    for (const forces of FORCES) for (const mine of RACES) for (const theirs of RACES) {
+      const { matchup, side } = matchupForRaces(mine, theirs, forces)
+      const m = matchupOf(matchup)!
+      expect(m.armies.every((a) => a.endsWith(forces === 'expanded' ? '-expanded' : '-starter')), `${forces} ${mine} v ${theirs}`).toBe(true)
+      expect(m.races[side]).toBe(mine)
+      expect(m.races[1 - side]).toBe(theirs)
+    }
+    for (const id of ['terran-expanded', 'zerg-expanded', 'protoss-expanded']) {
+      const list = presetDef(bundle, id)!
+      expect(list, id).toBeTruthy()
+      expect(validateArmy(bundle, list), id).toEqual([])
+      expect(musterArmy(bundle, 'A', list, 'u').units.length).toBe(list.units.length)
     }
   })
   it('START-003 seats follow the mode and the chosen side', () => {

@@ -15,7 +15,7 @@ import { baseRadius, dist } from './geometry'
 import { runHook } from './hooks'
 import { fightingRank, meleeTargets, supportingRank } from './melee'
 import { modelDistance } from './measure'
-import { reposition, type RepositionSpec } from './movement'
+import { firePending, reposition, type PendingHook, type RepositionSpec } from './movement'
 import { option, pushEvents, raiseDecision, type ActionDone, type ModuleDef, type StepResult } from './registry'
 import { unitModels } from './squads'
 import type { Action, AttackBatch, EngineEvent, GameState, ModelState, UnitId, UnitState, Vec2 } from './types'
@@ -65,7 +65,7 @@ const DETOUR_OFFSETS = [3, 6] as const
 const PLAN_TRIES = 60
 
 const stepSpec = (leaderId: string, path: Vec2[], distance: number, targets: UnitId[], again: boolean): RepositionSpec & { ignoreEngaged?: boolean } =>
-  ({ kind: 'charge', leaderId, path, maxDist: distance, allowEngage: targets, mustEngage: targets, ...(again ? { ignoreEngaged: true } : {}) })
+  ({ kind: 'charge', leaderId, path, maxDist: distance, allowEngage: targets, mustEngage: targets, returnTo: 'charge', ...(again ? { ignoreEngaged: true } : {}) })
 
 /** Complete, dry-run-checked Charge answers: leader x target model x (straight | one-waypoint detour either side), each
  *  ending 0.01" short of contact. A Charge succeeds when ANY legal Leading Model end exists, so the first valid one wins. */
@@ -241,7 +241,28 @@ function resolvePath(state: GameState, b: EditionBundle, action: Action): StepRe
   }
   const r = reposition(state, b, unitId, stepSpec(leaderId, path, distance, targets, again))
   if (isRejection(r)) return explicit ? r : fail(state, unitId, r.code)
-  return succeeded(pushEvents(r.state, r.events), b, unitId, targets)
+  return afterMove(pushEvents(r.state, r.events), b, unitId, targets, r)
+}
+
+/** The Leading Model has moved: a Reaction window opened at an end hook (onMoveEnd) parks the Charge on a 'charge.moved'
+ *  event (with the hooks still to fire); resume() carries on. Otherwise the Charge has succeeded. */
+function afterMove(state: GameState, b: EditionBundle, unitId: UnitId, targets: UnitId[], r: { raised?: boolean; pending?: PendingHook[] }): StepResult {
+  if (!r.raised) return succeeded(state, b, unitId, targets)
+  return { state: pushEvents(state, [{ type: 'charge.moved', unitId, targets, ...(r.pending?.length ? { pending: r.pending } : {}) }]) }
+}
+
+/** Back from a window opened while the Charge move ended: fire the end hooks left, then the Charge succeeds. */
+function afterMoveWindow(state: GameState, b: EditionBundle, unitId: UnitId): StepResult {
+  const ev = lastOfType(state, unitId, 'charge.moved') ?? lastChargeEvent(state, unitId)
+  const targets = (ev?.targets as UnitId[] | undefined) ?? []
+  const pending = (ev?.pending as PendingHook[] | undefined) ?? []
+  let s = state
+  if (pending.length) {
+    const f = firePending(s, b, pending, 'charge')
+    if (f.raised) return afterMove(f.state, b, unitId, targets, { raised: true, pending: f.rest })
+    s = f.state
+  }
+  return succeeded(s, b, unitId, targets)
 }
 
 /** The Charge succeeded: log it, offer the chargeSucceeded Reactions (Lightning Dash), then IMPACT. */
@@ -438,6 +459,7 @@ export const charge: ModuleDef = {
     const last = lastChargeEvent(state, unitId)
     switch (last?.type) {
       case 'charge.declared': return rollStep(state, bundle, unitId)
+      case 'charge.moved': return afterMoveWindow(state, bundle, unitId)
       case 'charge.rolled': return afterRollWindow(state, bundle, unitId)
       case 'charge.succeeded': return afterSuccess(state, bundle, unitId)
       case 'charge.impact': return chargeAgainStep(state, bundle, unitId)

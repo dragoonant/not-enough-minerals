@@ -11,7 +11,7 @@ import { isFiguresReady, useFocusStore } from '../store/uiStore'
 import { skipAll } from '../presentation/director'
 import { isPresentationIdle, usePresentedStore } from '../presentation/presentedStore'
 import { dispatch, isBotDecision, legalFor, ownerSeat, preview, useGameStore } from '../store/gameStore'
-import { scaled } from '../store/settingsStore'
+import { getSettings, scaled, useSettingsStore } from '../store/settingsStore'
 import { createAiBrain } from './aiWorkerClient'
 import { completeAction, PARAMETERISED, randomBrain, type BotBrain, type BotContext } from './randomBot'
 
@@ -165,7 +165,23 @@ export function createBotDriver(opts: BotDriverOptions = {}): BotDriver {
       })
   }
 
+  /** Setting "skip ability windows": answer the human's optional ability window with Done once the table is idle. */
+  function autoPassWindow(): boolean {
+    if (!running || paused || !getSettings().skipAbilityWindows) return false
+    const s = useGameStore.getState()
+    const p = s.state?.pending
+    if (!s.state || !p || p.kind !== 'ability.window' || isBotDecision(s) || !botMayAct(requireFigures)) return false
+    const done = p.options.find((o) => o.action.type === 'ability.done')
+    return done ? dispatch(done.action, 'human') === null : false
+  }
+  function scheduleAutoPass(): void {
+    if (!running || !getSettings().skipAbilityWindows) return
+    const p = useGameStore.getState().state?.pending
+    if (p?.kind === 'ability.window') setT(() => { autoPassWindow() }, 0)
+  }
+
   function tick(): TickResult {
+    if (autoPassWindow()) return 'answered'
     note()
     const s = useGameStore.getState()
     if (!isBotDecision(s)) return 'notBot'
@@ -202,11 +218,13 @@ export function createBotDriver(opts: BotDriverOptions = {}): BotDriver {
       running = true
       note()
       unsubs = [
-        useGameStore.subscribe((s, prev) => { if (s.state !== prev.state || s.controllers !== prev.controllers) { schedule(); armWatchdog() } }),
-        usePresentedStore.subscribe((s, prev) => { if (s.idle && !prev.idle) schedule() }),
-        useFocusStore.subscribe((s, prev) => { if (s.figuresReady && !prev.figuresReady) schedule() }),
+        useGameStore.subscribe((s, prev) => { if (s.state !== prev.state || s.controllers !== prev.controllers) { schedule(); armWatchdog(); scheduleAutoPass() } }),
+        useSettingsStore.subscribe((s, prev) => { if (s.skipAbilityWindows && !prev.skipAbilityWindows) scheduleAutoPass() }),
+        usePresentedStore.subscribe((s, prev) => { if (s.idle && !prev.idle) { schedule(); scheduleAutoPass() } }),
+        useFocusStore.subscribe((s, prev) => { if (s.figuresReady && !prev.figuresReady) { schedule(); scheduleAutoPass() } }),
       ]
       schedule()
+      scheduleAutoPass()
       armWatchdog()
     },
     stop() {

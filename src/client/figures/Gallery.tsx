@@ -26,7 +26,7 @@ export function GalleryLabels() {
         const shipped = !!manifest?.[u.id]
         return (
           <Anchored key={u.id} at={[x, 0.02, z + 2.1]} align="center" testid={`gallery-${u.id}`}>
-            <div style={{ font: '600 10px/1.1 "Segoe UI", system-ui, sans-serif', color: shipped ? '#bfe9c8' : '#dfe6ee', background: 'rgba(15,20,27,0.75)', padding: '2px 5px', borderRadius: 3 }}>
+            <div style={{ font: '600 10px/1.1 "Segoe UI", system-ui, sans-serif', color: shipped ? '#bfe9c8' : '#dfe6ee', background: 'rgba(15,20,27,0.75)', padding: '2px 5px', borderRadius: 3, width: 'max-content', maxWidth: 104, whiteSpace: 'normal', overflowWrap: 'anywhere', textAlign: 'center', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
               {dataName(u.id) || u.id}{shipped ? ' (GLB)' : ''}
             </div>
           </Anchored>

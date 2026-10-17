@@ -11,7 +11,8 @@ export { deploymentChoices, missionChoices, missionChoice, deploymentChoice, typ
 
 // ---------------------------------------------------------------- matchups
 export type Race = 'terran' | 'zerg' | 'protoss'
-export type MatchupId = 'founders' | 'tvz' | 'tvp' | 'zvp' | 'tvt' | 'zvz' | 'pvp' | 'first-battle'
+export type MatchupId = 'founders' | 'tvz' | 'tvp' | 'zvp' | 'tvt' | 'zvz' | 'pvp'
+  | 'tvz-x' | 'tvp-x' | 'zvp-x' | 'tvt-x' | 'zvz-x' | 'pvp-x' | 'first-battle'
 export interface Matchup {
   id: MatchupId
   /** Short label, our words. */
@@ -34,18 +35,28 @@ export const MATCHUPS: readonly Matchup[] = [
   { id: 'tvt', label: 'Terran mirror', blurb: 'Both players field the Terran starter force.', races: ['terran', 'terran'], armies: ['terran-starter', 'terran-starter'], scale: 'skirmish' },
   { id: 'zvz', label: 'Zerg mirror', blurb: 'Both players field the Zerg starter force.', races: ['zerg', 'zerg'], armies: ['zerg-starter', 'zerg-starter'], scale: 'skirmish' },
   { id: 'pvp', label: 'Protoss mirror', blurb: 'Both players field the Protoss starter force.', races: ['protoss', 'protoss'], armies: ['protoss-starter', 'protoss-starter'], scale: 'skirmish' },
+  // Expanded (Wave 2) forces: the starter army plus that race's Wave 2 unit (Siege Tank, Ravager, Immortal and Zeratul).
+  { id: 'tvz-x', label: 'Terran vs Zerg (Expanded)', blurb: 'Wave 2 forces: Siege Tanks against Ravagers.', races: ['terran', 'zerg'], armies: ['terran-expanded', 'zerg-expanded'], scale: 'skirmish' },
+  { id: 'tvp-x', label: 'Terran vs Protoss (Expanded)', blurb: 'Wave 2 forces: Siege Tanks against Zeratul and an Immortal.', races: ['terran', 'protoss'], armies: ['terran-expanded', 'protoss-expanded'], scale: 'skirmish' },
+  { id: 'zvp-x', label: 'Zerg vs Protoss (Expanded)', blurb: 'Wave 2 forces: Ravagers against Zeratul and an Immortal.', races: ['zerg', 'protoss'], armies: ['zerg-expanded', 'protoss-expanded'], scale: 'skirmish' },
+  { id: 'tvt-x', label: 'Terran mirror (Expanded)', blurb: 'Both players field the Terran Wave 2 force.', races: ['terran', 'terran'], armies: ['terran-expanded', 'terran-expanded'], scale: 'skirmish' },
+  { id: 'zvz-x', label: 'Zerg mirror (Expanded)', blurb: 'Both players field the Zerg Wave 2 force.', races: ['zerg', 'zerg'], armies: ['zerg-expanded', 'zerg-expanded'], scale: 'skirmish' },
+  { id: 'pvp-x', label: 'Protoss mirror (Expanded)', blurb: 'Both players field the Protoss Wave 2 force.', races: ['protoss', 'protoss'], armies: ['protoss-expanded', 'protoss-expanded'], scale: 'skirmish' },
   { id: 'first-battle', label: 'First Battle (learning game)', blurb: 'Small fixed forces on a fixed mission: the gentlest start.', races: ['terran', 'zerg'], armies: ['first-battle-terran', 'first-battle-zerg'], scale: 'skirmish', preset: 'first-battle' },
 ]
 export const DEFAULT_MATCHUP: MatchupId = 'founders'
 export const matchupOf = (id: string | null | undefined): Matchup | undefined => MATCHUPS.find((m) => m.id === id)
 
 export const RACES: readonly Race[] = ['terran', 'zerg', 'protoss']
-const isStarter = (m: Matchup) => !m.preset && m.armies.every((a) => a.endsWith('-starter'))
-/** The starter-force matchup for a race pairing, and the seat the first race sits in (the start screen's race pickers). */
-export function matchupForRaces(mine: Race, theirs: Race): { matchup: MatchupId; side: 0 | 1 } {
-  const same = MATCHUPS.find((m) => isStarter(m) && m.races[0] === mine && m.races[1] === theirs)
+export type Forces = 'starter' | 'expanded'
+export const FORCES: readonly Forces[] = ['starter', 'expanded']
+const suffixOf = (f: Forces) => (f === 'expanded' ? '-expanded' : '-starter')
+const isForces = (m: Matchup, f: Forces) => !m.preset && m.armies.every((a) => a.endsWith(suffixOf(f)))
+/** The matchup for a race pairing and a force choice (starter by default), and the seat the first race sits in (the start screen's pickers). */
+export function matchupForRaces(mine: Race, theirs: Race, forces: Forces = 'starter'): { matchup: MatchupId; side: 0 | 1 } {
+  const same = MATCHUPS.find((m) => isForces(m, forces) && m.races[0] === mine && m.races[1] === theirs)
   if (same) return { matchup: same.id, side: 0 }
-  const flipped = MATCHUPS.find((m) => isStarter(m) && m.races[0] === theirs && m.races[1] === mine)
+  const flipped = MATCHUPS.find((m) => isForces(m, forces) && m.races[0] === theirs && m.races[1] === mine)
   return flipped ? { matchup: flipped.id, side: 1 } : { matchup: 'tvz', side: 0 }
 }
 

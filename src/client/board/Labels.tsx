@@ -22,6 +22,17 @@ export function contestLabel(order: readonly SeatId[], totals: Partial<Record<Se
   return ranked.length > 1 && ranked[0]![1] > ranked[1]![1] ? `Contested (${name(ranked[0]![0])} ahead)` : 'Contested'
 }
 
+/** Where an Entry Edge caption sits. A caption on a left or right edge would slide under the side rails, so it moves inward
+ *  (toward the table centre) by RAIL_INSET inches; top and bottom edges move in a little to clear the bars. */
+export const RAIL_INSET = 4.5
+export const BAR_INSET = 1.4
+export function edgeLabelAt(mid: { x: number; z: number }, table: { w: number; d: number }): [number, number, number] {
+  const onSide = Math.abs(mid.x) / (table.w / 2) >= Math.abs(mid.z) / (table.d / 2)
+  const x = onSide ? mid.x - Math.sign(mid.x) * RAIL_INSET : mid.x
+  const z = onSide ? mid.z : mid.z - Math.sign(mid.z) * BAR_INSET
+  return [x, 0.2, z]
+}
+
 export function BoardLabels() {
   const geo = useBoardGeometry()
   const state = usePresented()
@@ -36,7 +47,7 @@ export function BoardLabels() {
         const seg = e.segments[0]
         if (!seg) return null
         return (
-          <Anchored key={e.seat} at={[(seg[0].x + seg[1].x) / 2, 0.2, (seg[0].z + seg[1].z) / 2]} align="center" testid={`edge-label-${e.colour}`}>
+          <Anchored key={e.seat} at={edgeLabelAt({ x: (seg[0].x + seg[1].x) / 2, z: (seg[0].z + seg[1].z) / 2 }, geo.table)} align="center" testid={`edge-label-${e.colour}`}>
             <div style={{ font: '700 10px/1 "Segoe UI", system-ui, sans-serif', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '3px 7px', borderRadius: 3, color: '#0f141b', background: SIDE_HEX[e.colour], opacity: 0.85 }}>
               {e.colour} edge · {seatLabel(e.seat)}
             </div>

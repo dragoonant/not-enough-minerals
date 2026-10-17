@@ -4,7 +4,7 @@
 // The defender's casualty picks are atk.casualty decisions, resolved via attack.ts's ModuleDef.
 import type { EditionBundle } from '../data/types'
 import { tokenDef, unitDef } from './edition'
-import { statOf } from './effects'
+import { statOf, tokenGrants } from './effects'
 import { modelsEngaged } from './engage'
 import { EPS } from './geometry'
 import { runHook } from './hooks'
@@ -58,7 +58,7 @@ export function removeModels(state: GameState, bundle: EditionBundle, unitId: Un
     patch.shielded = false
     patch.damage = 0
     const def = unitDef(bundle, unit.profileId)
-    s = { ...s, tokens: s.tokens.filter((t) => t.sourceId !== unitId || tokenDef(bundle, def ?? null, t.defId)?.stayInPlay === true) }
+    s = { ...s, tokens: s.tokens.filter((t) => t.sourceId !== unitId || tokenDef(bundle, def ?? null, t.defId)?.stayInPlay === true || tokenGrants(s, bundle, t, 'STAY_IN_PLAY')) }
   }
   s = updateUnit(s, unitId, patch)
   s = recordSupplyLoss(s, bundle, unitId, before) // every bracket drop counts, a Morph removal too (VP-002, F p.5)

@@ -19,8 +19,8 @@ import { addEffect, abilitiesOf, conditionHolds, hasStatus, keywordOf, liveEffec
 import { engagedWith } from './engage'
 import type { HookCtx } from './hooks'
 import { modelDistance } from './measure'
-import { reposition } from './movement'
-import { arrive, queueArrival, returnToReserves } from './reserves'
+import { firePending, reposition, type PendingHook, type RepositionResult } from './movement'
+import { arrive, queueArrival, raiseDeployNow, returnToReserves } from './reserves'
 import { hitsBatch, resolveBatch } from './attack'
 import { removeModels, heal, addNonLethal } from './damage'
 import { option, pushEvents, raiseDecision, reject, resumeIn, updateUnit, type ActionDone, type ModuleDef, type StepResult } from './registry'
@@ -520,11 +520,19 @@ function execOne(state: GameState, bundle: EditionBundle, rec: DataEffect, ctx: 
       return runCodeEffect(s, bundle, rec, ctx)
     }
     case 'respawn': {
-      for (const u of subs()) s = respawnModels(s, bundle, u, evalNum(s, bundle, rec.x, ctx, u), ctx.sourceId)
+      for (const u of subs()) {
+        const r = respawnStep(s, bundle, u, evalNum(s, bundle, rec.x, ctx, u), ctx.sourceId)
+        s = r.state
+        if (r.raised) return parkRaised(s, rest, ctx, r.pending)
+      }
       return { state: s }
     }
     case 'morph': {
-      for (const u of subs()) s = morphModels(s, bundle, u, String(rec.unit), evalNum(s, bundle, rec.x, ctx, u), ctx.sourceId)
+      for (const u of subs()) {
+        const r = morphStep(s, bundle, u, String(rec.unit), evalNum(s, bundle, rec.x, ctx, u), ctx.sourceId)
+        s = r.state
+        if (r.raised) return parkRaised(s, rest, ctx, r.pending)
+      }
       return { state: s }
     }
     case 'aura': case 'setChar': case 'weaponMod': case 'costMod': case 'supplyOverride': case 'coherency': case 'moveThrough': case 'ignoreDisengage':
@@ -540,6 +548,13 @@ function execOne(state: GameState, bundle: EditionBundle, rec: DataEffect, ctx: 
         return { state: s }
       }
       if (STORED_OPS.has(rec.op)) for (const u of subs()) s = storeEffect(s, u, rec, ctx)
+      if (rec.op === 'altEntry' && rec.kind === 'deployNow') {
+        // Personal Transport: back in Reserves with a deployNow permission, the Unit redeploys at once (DEP-014)
+        for (const u of subs()) {
+          const d = raiseDeployNow(s, bundle, u)
+          if (d) return { state: d, suspended: true }
+        }
+      }
       return { state: s }
     }
     default: return { state: s }
@@ -615,7 +630,7 @@ function execHits(state: GameState, bundle: EditionBundle, rec: DataEffect, ctx:
 }
 
 type Cont =
-  | { k: 'effects'; rest: DataEffect[]; ctx: EffectCtx }
+  | { k: 'effects'; rest: DataEffect[]; ctx: EffectCtx; pending?: PendingHook[] }
   | { k: 'point'; rec: DataEffect; ctx: EffectCtx; rest: DataEffect[]; optional: boolean }
   | { k: 'option' | 'unit' | 'edge' | 'usePoint'; flow: Flow; cands?: string[] }
   | { k: 'pay'; flow: Flow }
@@ -632,6 +647,15 @@ function popCont(state: GameState): { state: GameState; cont: Cont } | null {
     if (e) return { state: removeEffects(state, u.id, (x) => x.id === e.id), cont: (e.data as { cont: Cont }).cont }
   }
   return null
+}
+
+/** A reposition / arrival opened a Reaction window at an end hook (`raised`): park the rest of the list (and the end hooks
+ *  still to fire) and suspend. The window closes through resumeIn('ability'), which runs abilities.resume(). */
+function parkRaised(state: GameState, rest: DataEffect[], ctx: EffectCtx, pending?: PendingHook[]): Exec {
+  const holder = ctx.unitId ?? Object.values(state.units).find((u) => u.owner === ctx.seat)?.id
+  if (!holder) return { state, suspended: true }
+  const cont: Cont = { k: 'effects', rest, ctx, ...(pending?.length ? { pending } : {}) }
+  return { state: stashCont(state, holder, ctx.seat, cont), suspended: true }
 }
 
 // ---------------------------------------------------------------- ready-made spots for point decisions
@@ -721,8 +745,9 @@ function execPoint(state: GameState, bundle: EditionBundle, rec: DataEffect, ctx
     const id = `${ctx.seat}-s${Object.keys(s.units).length + 1}`
     const m = musterUnit(bundle, ctx.seat, unitDefId, 1, id)
     s = { ...s, units: { ...s.units, [id]: m.unit }, models: { ...s.models, ...Object.fromEntries(m.models.map((x) => [x.id, x])) } }
-    const r = arrive(s, bundle, id, { kind: 'place', ref: ctx.unitId ?? undefined }, { leaderId: m.unit.leadingModelId!, path: [point], maxDist: Infinity, ...(minEnemy !== undefined ? { minEnemyDist: minEnemy } : {}) })
+    const r = arrive(s, bundle, id, { kind: 'place', ref: ctx.unitId ?? undefined }, { leaderId: m.unit.leadingModelId!, path: [point], maxDist: Infinity, returnTo: 'ability', ...(minEnemy !== undefined ? { minEnemyDist: minEnemy } : {}) })
     if (isRejection(r)) return r
+    if (r.raised) return parkRaised(r.state, rest, { ...ctx, summonedUnitId: id, point }, r.pending)
     return continueList(r.state, bundle, rest, { ...ctx, summonedUnitId: id, point })
   }
   // place / move of the acting (or target) Unit
@@ -730,12 +755,13 @@ function execPoint(state: GameState, bundle: EditionBundle, rec: DataEffect, ctx
   const u = who ? s.units[who] : undefined
   if (!who || !u?.leadingModelId) return reject('E_BAD_TARGET', 'There is no Unit to move.')
   const spec = {
-    leaderId: u.leadingModelId, path: [point], maxDist: typeof rec.x === 'number' && rec.x > 0 ? rec.x : Infinity,
+    leaderId: u.leadingModelId, path: [point], maxDist: typeof rec.x === 'number' && rec.x > 0 ? rec.x : Infinity, returnTo: 'ability',
     ...(minEnemy !== undefined ? { minEnemyDist: minEnemy } : rec.notInEngagement ? { minEnemyDist: rule(bundle, 'engagementRange') + 1e-6 } : {}),
     ...(rec.allowEngage ? { allowEngage: Object.keys(s.units).filter((x) => s.units[x]!.owner !== ctx.seat) } : {}),
   }
   const r = u.location === 'reserves' ? arrive(s, bundle, who, { kind: 'place' }, spec) : reposition(s, bundle, who, { ...spec, kind: rec.op === 'move' ? (rec.kind === 'run' ? 'run' : 'move') : 'place' })
   if (isRejection(r)) return r
+  if (r.raised) return parkRaised(r.state, rest, { ...ctx, point }, r.pending)
   return continueList(r.state, bundle, rest, { ...ctx, point })
 }
 
@@ -745,38 +771,53 @@ function execPoint(state: GameState, bundle: EditionBundle, rec: DataEffect, ctx
  *  one repositioning mechanism (a `place` that keeps the Leading Model where it stands), so coherency is stored and the
  *  move-end hooks run. */
 export function respawnModels(state: GameState, bundle: EditionBundle, unitId: UnitId, x: number, source: Id): GameState {
+  return respawnStep(state, bundle, unitId, x, source).state
+}
+
+/** What a respawn / morph step reports: the state, and when a Reaction window opened at an end hook, `raised` + the hooks left. */
+interface StepRaise { state: GameState; raised?: boolean; pending?: PendingHook[] }
+const raiseOf = (r: RepositionResult): Pick<StepRaise, 'raised' | 'pending'> => r.raised ? { raised: true, ...(r.pending ? { pending: r.pending } : {}) } : {}
+
+/** respawnModels, also reporting a raised Reaction window (the interpreter parks the rest of its list on it). */
+export function respawnStep(state: GameState, bundle: EditionBundle, unitId: UnitId, x: number, source: Id): StepRaise {
+  const none: StepRaise = { state }
   const u = state.units[unitId]
   const def = u ? unitDef(bundle, u.profileId) : undefined
   const lead = u?.leadingModelId ? state.models[u.leadingModelId] : undefined
-  if (!u || !def || u.location !== 'table' || !lead || lead.life === 'dead' || x <= 0) return state
+  if (!u || !def || u.location !== 'table' || !lead || lead.life === 'dead' || x <= 0) return none
   const dead = u.modelIds.filter((id) => state.models[id]?.life === 'dead')
   const live = u.modelIds.length - dead.length
   const csv = bracketSupply(def, live)
   let k = Math.min(Math.floor(x), dead.length)
   while (k > 0 && bracketSupply(def, live + k) > csv) k--
-  if (k <= 0) return state
+  if (k <= 0) return none
   const lost = dead.slice(0, k)
   const revive = (ids: readonly string[]): GameState => ({
     ...state, models: { ...state.models, ...Object.fromEntries(ids.map((id) => [id, { ...state.models[id]!, life: 'active' as const, offTable: true, hp: def.stats.hp }])) },
   })
   const fixed = Object.fromEntries(tableModels(state, unitId).filter((m) => m.id !== lead.id).map((m) => [m.id, m.pos]))
   const form = placeFormation(revive(lost), bundle, unitId, { leaderId: lead.id, leaderPos: lead.pos, fixed })
-  if (!form) return state
+  if (!form) return none
   const back = lost.filter((id) => form.placement[id] && !form.casualties.includes(id))
-  if (!back.length) return state
+  if (!back.length) return none
   const placement = { ...fixed, ...Object.fromEntries(back.map((id) => [id, form.placement[id]!])) }
-  const r = reposition(revive(back), bundle, unitId, { kind: 'place', leaderId: lead.id, path: [lead.pos], maxDist: Infinity, placement })
-  if (isRejection(r)) return state
-  return pushEvents(r.state, [{ type: 'respawn', unitId, modelIds: back, source }])
+  const r = reposition(revive(back), bundle, unitId, { kind: 'place', leaderId: lead.id, path: [lead.pos], maxDist: Infinity, placement, returnTo: 'ability' })
+  if (isRejection(r)) return none
+  return { state: pushEvents(r.state, [{ type: 'respawn', unitId, modelIds: back, source }]), ...raiseOf(r) }
 }
 
 /** MORPH: X models of a Unit each become a new one-model Unit of `into`, set where the old model stood (removed with
  *  cause 'morph', which is not a Supply loss). The new Unit counts as already activated like the old one.
  *  RULING: if the new Unit's Supply does not fit or its base has no room, nothing changes for that model. */
 export function morphModels(state: GameState, bundle: EditionBundle, unitId: UnitId, into: Id, x: number, source: Id): GameState {
+  return morphStep(state, bundle, unitId, into, x, source).state
+}
+
+/** morphModels, also reporting a raised Reaction window; the models still to morph are skipped once one opens. */
+export function morphStep(state: GameState, bundle: EditionBundle, unitId: UnitId, into: Id, x: number, source: Id): StepRaise {
   let s = state
   const u0 = s.units[unitId]
-  if (!u0 || u0.location !== 'table' || !unitDef(bundle, into)) return s
+  if (!u0 || u0.location !== 'table' || !unitDef(bundle, into)) return { state: s }
   const picks = tableModels(s, unitId).filter((m) => m.id !== u0.leadingModelId).reverse()
   const lead = tableModels(s, unitId).find((m) => m.id === u0.leadingModelId)
   if (lead) picks.push(lead)
@@ -785,11 +826,12 @@ export function morphModels(state: GameState, bundle: EditionBundle, unitId: Uni
     const mu = musterUnit(bundle, u0.owner, into, 1, id)
     let t: GameState = { ...s, units: { ...s.units, [id]: { ...mu.unit, summoned: false } }, models: { ...s.models, ...Object.fromEntries(mu.models.map((x2) => [x2.id, x2])) } }
     t = removeModels(t, bundle, unitId, [m.id], 'morph')
-    const r = arrive(t, bundle, id, { kind: 'place' }, { leaderId: mu.unit.leadingModelId!, path: [m.pos], maxDist: Infinity })
+    const r = arrive(t, bundle, id, { kind: 'place' }, { leaderId: mu.unit.leadingModelId!, path: [m.pos], maxDist: Infinity, returnTo: 'ability' })
     if (isRejection(r)) continue
     s = pushEvents(updateUnit(r.state, id, { activation: u0.activation }), [{ type: 'morph', unitId, modelId: m.id, into: id, source }])
+    if (r.raised) return { state: s, ...raiseOf(r) }
   }
-  return s
+  return { state: s }
 }
 
 function continueList(state: GameState, bundle: EditionBundle, rest: DataEffect[], ctx: EffectCtx): Exec {
@@ -1332,7 +1374,14 @@ export const abilities: ModuleDef = {
   resume(state, bundle) {
     const p = popCont(state)
     if (!p || p.cont.k !== 'effects') return { state }
-    const r = execList(p.state, bundle, p.cont.rest, p.cont.ctx)
+    let from = p.state
+    // end hooks that a raised Reaction window cut short fire first; another window parks the rest again
+    if (p.cont.pending?.length) {
+      const f = firePending(from, bundle, p.cont.pending, 'ability')
+      if (f.raised) return parkRaised(f.state, p.cont.rest, p.cont.ctx, f.rest)
+      from = f.state
+    }
+    const r = execList(from, bundle, p.cont.rest, p.cont.ctx)
     if (isRejection(r)) return r
     return r.suspended ? { state: r.state } : finishAfter(r.state, bundle, p.cont.ctx.after)
   },

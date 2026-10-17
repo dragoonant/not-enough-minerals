@@ -4,6 +4,7 @@ import type { EditionBundle } from '../../data/types'
 import { allWeapons } from '../../engine/edition'
 import type { GameEvent, GameState, ModelId, RoundPhase, SeatId, UnitId } from '../../engine/types'
 import type { Cue } from './cues'
+import { findAbility } from '../ui/skillInfo'
 
 export type SeatControllerLabel = 'human' | 'bot'
 interface LabelContext { bundle: EditionBundle | null; controllers: Record<SeatId, SeatControllerLabel>; seatOrder: SeatId[] }
@@ -62,7 +63,11 @@ export function narrate(state: GameState | null, cue: Cue): string | null {
   const un = (id: UnitId | null | undefined) => unitName(state, id)
   switch (cue.kind) {
     case 'banner': return cue.text
-    case 'move': return null // one line per unit comes from the activation; per-model moves would flood the feed
+    case 'move': { // one line per unit (its first moving model); Move, Run and Disengage read differently, others stay quiet
+      if (!cue.lead) return null
+      const verb = cue.how === 'run' ? 'runs' : cue.how === 'disengage' ? 'breaks away' : cue.how === 'move' ? 'advances' : null
+      return verb ? `${un(cue.unitId)} ${verb}.` : null
+    }
     case 'dice': return `${rollLabel(cue.purpose)}: ${cue.dice.map((d) => d.face).join(', ')}.`
     case 'attack': return `${un(cue.attackerUnitId)} fires ${dataName(cue.weaponId)} at ${un(cue.targetUnitId)}.`
     case 'attackStage': return stageLine(cue)
@@ -90,7 +95,7 @@ export function narrate(state: GameState | null, cue: Cue): string | null {
       return `${un(cue.unitId)} ${cue.change === 'claimed' ? 'claims' : 'drops'} marker ${cue.n}.`
     case 'score':
       return cue.source === 'round' ? `${seatLabel(cue.seat)} scores ${cue.vp} VP this round.` : `${seatLabel(cue.seat)} gains ${cue.vp} VP.`
-    case 'note': return noteLine(cue.event)
+    case 'note': return noteLine(state, cue.event)
   }
 }
 
@@ -109,8 +114,20 @@ function stageLine(cue: Extract<Cue, { kind: 'attackStage' }>): string | null {
 /** Condition and status ids to words. */
 export const conditionWord = (c: string): string => c.replace(/_/g, ' ')
 
-function noteLine(_event: GameEvent): string | null {
-  return null
+/** Ability-use notes: tolerant of the event shape (type 'ability.use' / 'ability.action' / 'abilityUsed', ability id under
+ *  abilityId, ability or id; holder under source, unitId or cardId). Anything else stays quiet. */
+function noteLine(state: GameState | null, event: GameEvent): string | null {
+  const e = event as Record<string, unknown>
+  const type = typeof e['type'] === 'string' ? (e['type'] as string) : ''
+  if (!/^(ability[.:_]?(use|used|action)|abilityUsed|usesAbility)/i.test(type)) return null
+  const str = (...ks: string[]): string | null => { for (const k of ks) if (typeof e[k] === 'string' && e[k]) return e[k] as string; return null }
+  const abilityId = str('abilityId', 'ability', 'id')
+  if (!abilityId) return null
+  const holder = str('source', 'unitId', 'cardId', 'holder')
+  const hit = ctx.bundle ? findAbility(ctx.bundle, state, abilityId, holder) : null
+  const name = hit?.ability.name ?? dataName(abilityId)
+  if (holder && state?.units[holder]) return `${unitName(state, holder)} uses ${name}.`
+  return hit?.cardName ? `${hit.cardName}: ${name}.` : `${name} is used.`
 }
 
 /** Roll purpose to a short label for the dice tray. */

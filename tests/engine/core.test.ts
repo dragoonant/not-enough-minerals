@@ -75,6 +75,11 @@ describe('engine core (M0 skeleton)', () => {
     let again = createDemoGame('flow')
     for (const a of g.log) { const r = apply(again, bundle, a); expect(r.ok).toBe(true); again = r.state }
     expect(JSON.stringify(again)).toBe(JSON.stringify(g))
-    expect(apply(g, bundle, legalActions(g)[0]!).ok).toBe(false)
+    // ENG-OVER: the listed turn.over option is accepted as a no-op; any other action is E_GAME_OVER
+    const over = apply(g, bundle, legalActions(g)[0]!)
+    expect(over.ok).toBe(true)
+    if (over.ok) expect({ ...over.state, log: g.log }).toEqual(g)
+    const stray = apply(g, bundle, { type: 'turn.pass', decisionId: g.pending.id, seat: g.pending.seat as string })
+    expect(stray.ok).toBe(false)
   })
 })

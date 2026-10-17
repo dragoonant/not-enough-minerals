@@ -8,7 +8,7 @@
 import type { EditionBundle } from '../data/types'
 import { cardDef, rule, tokenDef, unitDef } from './edition'
 import { reject } from './errors'
-import { expireEffects } from './effects'
+import { expireEffects, tokenGrants } from './effects'
 import { updateControl } from './control'
 import { runHook } from './hooks'
 import { claimOptions, missionOf, raiseClaim, scoreRules } from './missions'
@@ -180,7 +180,7 @@ export function stepCleanup(state: GameState, bundle: EditionBundle): GameState 
     tokens: state.tokens.filter((t) => {
       const src = t.sourceId ? state.units[t.sourceId] : undefined
       const owner = src ? unitDef(bundle, src.profileId) : t.sourceId ? cardDef(bundle, t.sourceId) : undefined
-      return tokenDef(bundle, owner ?? null, t.defId)?.stayInPlay === true
+      return tokenDef(bundle, owner ?? null, t.defId)?.stayInPlay === true || tokenGrants(state, bundle, t, 'STAY_IN_PLAY')
     }),
     detectors: state.detectors.filter((d) => d.expires === 'permanent' || d.expires === 'whileCondition' || d.expires === 'burrowLinked'),
     cards: Object.fromEntries(Object.entries(state.cards).map(([seat, cs]) => [seat, cs.map((c) => ({ ...c, exhausted: false }))])),

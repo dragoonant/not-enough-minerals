@@ -16,9 +16,9 @@ import { attentionPoints, dockSide, midOf, sideName } from './attention'
 import { activeWeapon } from './highlights'
 import { useDraftFor } from './hooks'
 import {
-  activationMenu, batchMenu, chargeOptionFor, classify, kindInfo, mentionedUnits, modelRef, pathPlan, sideOptions, verbOf, type Mode,
+  activationMenu, batchMenu, chargeOptionFor, classify, hintFor, kindInfo, mentionedUnits, modelRef, pathPlan, sideOptions, verbOf, type Mode,
 } from './kinds'
-import { abilityHeading, oneDp, percent, prettify, unitTag } from './text'
+import { abilityHeading, firstChoiceWords, firstSentence, oneDp, payCardsWords, percent, poolLine, prettify, unitTag } from './text'
 import { draft } from './store'
 
 const HINT_KEY = 'nem.interaction.hints'
@@ -36,22 +36,30 @@ function SkillLabel({ info }: { info: SkillInfo }): ReactElement {
 
 /** Engine option label in player words: ids become names, card ids in payments become card names. */
 function optionText(state: GameState | null, o: DecisionOption): string {
-  return o.action.type === 'ability.pay' ? cardListWords(getBundle(), o.label) : prettify(state, o.label)
+  if (o.action.type === 'ability.pay') {
+    const cards = o.action['cards']
+    return Array.isArray(cards) && state ? `Exhaust ${payCardsWords(state, state.pending.seat, cards.filter((x): x is string => typeof x === 'string'))}` : cardListWords(getBundle(), o.label)
+  }
+  if (o.action.type === 'turn.first' && typeof o.action['first'] === 'string' && state) return firstChoiceWords(state.pending.seat, o.action['first'])
+  return prettify(state, o.label)
 }
+
+const EFFECT_KINDS = new Set(['ability.window', 'ability.react'])
 
 /** One engine option as a button. Ability options show the ability name and cost, and explain it on hover. */
 function OptionButton({ o, index, primary, suffix }: { o: DecisionOption; index?: number; primary?: boolean; suffix?: string }): ReactElement {
   const { state } = useGame()
   const skill = optionSkill(getBundle(), state, o.action)
+  const effect = skill && state && EFFECT_KINDS.has(state.pending.kind) ? firstSentence(skill.text) : ''
   return (
     <SkillTip info={skill}>
       <button
-        className={`ix-btn${primary ? ' primary' : ''}`} data-testid={`opt-${o.id}`}
+        className={`ix-btn${primary ? ' primary' : ''}${effect ? ' has-effect' : ''}`} data-testid={`opt-${o.id}`}
         onMouseEnter={() => { draft.hoverOption(o.id); glow(mentionedUnits(o.action)) }}
         onMouseLeave={() => { draft.hoverOption(null); focus.hover(null) }}
         onClick={() => answerOption(o)}
       >
-        {index !== undefined && <kbd>{index + 1}</kbd>}{skill ? <SkillLabel info={skill} /> : optionText(state, o)}{suffix ? <span className="dim"> ({suffix})</span> : null}
+        {index !== undefined && <kbd>{index + 1}</kbd>}{skill ? <SkillLabel info={skill} /> : optionText(state, o)}{suffix ? <span className="dim"> ({suffix})</span> : null}{effect ? <span className="ix-effect" data-testid="ix-effect">{effect}</span> : null}
       </button>
     </SkillTip>
   )
@@ -82,7 +90,8 @@ function ActivateBody({ pending }: { pending: PendingDecision }): ReactElement {
             {open.options.map((o, i) => {
               const v = verbOf(o)
               const skill = optionSkill(getBundle(), state, o.action)
-              const hint = skill ? skill.text : v.hint
+              const reach = o.action.type === 'move.run' ? queries.reachOf(open.unitId) : null
+              const hint = skill ? skill.text : reach && reach.run !== null ? `Move again, up to ${oneDp(reach.run)}" (the squad Speed).` : v.hint
               return (
                 <SkillTip key={`${o.id}:${i}`} info={skill}>
                   <button className="ix-btn primary" data-testid={`act-${o.id}`} onMouseEnter={() => setTip(hint)} onMouseLeave={() => setTip('')}
@@ -96,7 +105,7 @@ function ActivateBody({ pending }: { pending: PendingDecision }): ReactElement {
           <div className="ix-tip" aria-live="polite">{tip}</div>
         </div>
       ) : (
-        <div className="ix-note">Select a glowing squad to see what it can do.</div>
+        <div className="ix-note">{menu.units.some((u) => state?.units[u.unitId]?.location === 'table') ? 'Select a glowing squad to see what it can do.' : 'Select a squad above to see what it can do.'}</div>
       )}
       {menu.pass && <PassButton option={menu.pass} />}
     </div>
@@ -275,7 +284,7 @@ function ListBody({ pending, mode }: { pending: PendingDecision; mode: Mode }): 
   return (
     <div className="ix-body" data-testid={mode === 'list' ? 'ix-list' : `ix-${mode}`}>
       <div className="ix-row ix-wrap">
-        {opts.map((o, i) => <OptionButton key={`${o.id}:${i}`} o={o} index={i < 9 ? i : undefined} suffix={edgeOf(o)} primary={o.id !== 'pass' && o.id !== 'skip' && o.id !== 'decline' && o.id !== 'done'} />)}
+        {opts.map((o, i) => <OptionButton key={`${o.id}:${i}`} o={o} index={i < 9 ? i : undefined} suffix={edgeOf(o)} primary={pending.kind !== 'turn.first' && o.id !== 'pass' && o.id !== 'skip' && o.id !== 'decline' && o.id !== 'done'} />)}
       </div>
     </div>
   )
@@ -311,6 +320,24 @@ function PointBody({ pending }: { pending: PendingDecision }): ReactElement {
       <div className="ix-row">{rest.map((o, i) => <OptionButton key={`${o.id}:${i}`} o={o} />)}</div>
     </div>
   )
+}
+
+// ------------------------------------------------------------------ ability prompts: what is asked, what it costs, what you hold
+function AbilityStatus({ pending }: { pending: PendingDecision }): ReactElement | null {
+  const { state } = useGame()
+  if (!state || (pending.kind !== 'ability.window' && pending.kind !== 'ability.react' && pending.kind !== 'ability.pay')) return null
+  const ctx = pending.context
+  let lead = ''
+  if (pending.kind === 'ability.window') {
+    const u = typeof ctx['unitId'] === 'string' ? unitTag(state, ctx['unitId']) : 'the squad'
+    lead = ctx['window'] === 'before' ? `Before ${u} acts.` : `After ${u} has acted.`
+  } else if (pending.kind === 'ability.react') {
+    lead = 'Something just happened that one of your abilities can answer.'
+  } else {
+    lead = typeof ctx['n'] === 'number' && typeof ctx['res'] === 'string' ? `This costs ${ctx['n']} ${ctx['res']}. Pick which cards to exhaust; any surplus is lost.` : ''
+  }
+  const only = pending.kind === 'ability.pay' && typeof ctx['res'] === 'string' ? (ctx['res'] as Resource) : undefined
+  return <p className="ix-status-line" data-testid="ix-ability-status">{lead} {poolLine(state, pending.seat, only)}</p>
 }
 
 // ------------------------------------------------------------------ the panel
@@ -383,7 +410,8 @@ export function Prompt({ pending }: { pending: PendingDecision }): ReactElement 
       {!collapsed && (
         <>
           {ability && ability.line && <p className="ix-hint" data-testid="ix-ability">{ability.line}</p>}
-          {hints && !ability && <p className="ix-hint" data-testid="ix-hint">{info.hint}</p>}
+          {hints && !ability && <p className="ix-hint" data-testid="ix-hint">{hintFor(pending, (id) => state?.units[id]?.location === 'table')}</p>}
+          <AbilityStatus pending={pending} />
           <HintStrip pending={pending} />
           {mode === 'activate' ? <ActivateBody pending={pending} />
             : mode === 'path' ? <PathBody pending={pending} />

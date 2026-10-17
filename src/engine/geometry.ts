@@ -251,6 +251,9 @@ export function findPlacementNear(
   return null
 }
 
+/** Default "within" distance (inches) of placeWithin when the caller names none; callers pass the rule's own number. */
+const PLACE_WITHIN_DEFAULT = 2
+
 /**
  * Place models within `distIn` (base edge; "completely" = whole base) of the anchor, simultaneously.
  * Each goes to the legal spot closest to its preferred position (default: where it stands now).
@@ -261,7 +264,7 @@ export function placeWithin(
   opts: { dist?: number; completely?: boolean; preferred?: Record<Id, Vec2>; visible?: (pos: Vec2, id: Id) => boolean } = {},
 ): { placed: Record<Id, Vec2>; failed: Id[] } {
   const anchor = state.models[anchorId]!
-  const d = opts.dist ?? 2
+  const d = opts.dist ?? PLACE_WITHIN_DEFAULT
   const ra = baseRadius(anchor.base)
   const placed: Record<Id, Vec2> = {}
   const failed: Id[] = []

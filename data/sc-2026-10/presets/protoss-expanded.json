@@ -1,0 +1,49 @@
+{
+ "id": "protoss-expanded",
+ "name": "Protoss Expanded (Wave 2)",
+ "scale": "skirmish",
+ "faction": "nerazim",
+ "units": [
+  {
+   "unit": "zeratul",
+   "models": 1,
+   "upgrades": []
+  },
+  {
+   "unit": "immortal",
+   "models": 1,
+   "upgrades": [
+    {
+     "id": "shield-overcharge"
+    }
+   ]
+  },
+  {
+   "unit": "zealot",
+   "models": 3,
+   "upgrades": [
+    {
+     "id": "leg-enhancements"
+    }
+   ]
+  },
+  {
+   "unit": "stalker",
+   "models": 1,
+   "upgrades": [
+    {
+     "id": "path-of-shadows"
+    }
+   ]
+  }
+ ],
+ "cards": [
+  "robotics-facility"
+ ],
+ "source": [
+  "R p.112",
+  "CT p.7-8",
+  "CS2-P p.1",
+  "Nerazim force (the only Faction Card with a Hero slot) holding Zeratul and an Immortal within the skirmish limits"
+ ]
+}

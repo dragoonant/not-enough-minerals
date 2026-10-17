@@ -82,6 +82,8 @@ Imports flow one way: services never import rules modules; rules modules import 
   (a path, a placement, a dice pick) that the owning module validates. Parameterised types are listed in
   `PARAMETERISED` (`src/ai/random.ts`) so the AI and the sim know to dry-run them.
 - Roll-Offs and other pure dice steps are not decisions. Only a choice is a decision.
+- Exception (ENG-OVER): once `phase` is `'over'`, `apply` rejects every action with `E_GAME_OVER` except the listed
+  `turn.over` option, which is accepted as a no-op (state unchanged, the action is appended to `log`).
 
 ### 3.2 Namespaces (`<namespace>.<verb>`, one owner each)
 | Namespace | Owner | Decision kinds (k) and action types (a) |
@@ -107,7 +109,7 @@ Spec 11 `activate` = `turn.activate`; `chooseFirstActivator` = `turn.first`; spe
 `state.phase` values become `state.roundPhase` (section 4.1); `state.phase` stays the game lifecycle.
 
 ### 3.4 Flow
-`apply` checks game over, decision id, seat and template match, then calls `moduleFor(pending.kind).resolve()`.
+`apply` checks game over (accepting only the listed `turn.over`, s3.1), decision id, seat and template match, then calls `moduleFor(pending.kind).resolve()`.
 A step returns `{state}` with a new decision raised by `raiseDecision`, or `{state, done}`; `done` goes to
 `turnflow.afterAction`, which opens the after-action ability window, then the next turn (or ends the Phase when
 both seats have passed). Turnflow forwards a menu pick (`move.go`, `shoot.go`...) to `moduleFor(action.type)`.

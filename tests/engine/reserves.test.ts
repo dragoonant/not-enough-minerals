@@ -66,7 +66,10 @@ describe('reserves and arrival', () => {
     expect(inEnemyZone(arena([]), b, 'A', { x: -10.9, z: 0 }, 32)).toBe(false)
     expect(inEnemyZone(arena([]), b, 'A', { x: 0, z: 0 }, 32)).toBe(false)
     expect(inEnemyZone(arena([]), b, 'B', { x: -15, z: 0 }, 32)).toBe(false) // its own zone is no ban
-    const s = arena([inReserves('r')])
+    // a table-edge arrival needs the card's nonEntryEdge permission (Warp In); without it arrive() refuses
+    const bare = arena([inReserves('r')])
+    expect(rej(arrive(bare, b, 'r', { kind: 'nonEntryEdge', segment: 'N' }, { leaderId: 'r.0', path: [{ x: 0, z: -15.5 }], maxDist: 4 })).code).toBe('E_NOT_LEGAL')
+    const s = addEffect(bare, 'r', { source: 'warp-in', kind: 'mod', expires: 'permanent', bySeat: 'A', round: 1, data: { op: 'altEntry', kind: 'nonEntryEdge' } })
     const into = arrive(s, b, 'r', { kind: 'nonEntryEdge', segment: 'W' }, { leaderId: 'r.0', path: [{ x: -15.8, z: 0 }], maxDist: 4 })
     expect(rej(into).code).toBe('E_ZONE')
     const fine = arrive(s, b, 'r', { kind: 'nonEntryEdge', segment: 'N' }, { leaderId: 'r.0', path: [{ x: 0, z: -15.5 }], maxDist: 4 })
