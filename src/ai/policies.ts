@@ -7,7 +7,7 @@ import * as query from '../engine/query'
 import { attackPreview, unitSupply } from '../engine/query'
 import type { Action, UnitId } from '../engine/types'
 import { activationValue, attackValue, bestAttack, bestCharge, casualtyCost, chargeValue, deployValue, passValue } from './eval'
-import { bestChargeEnd, bestDeploySpot, bestEntry, bestMove, choose, deployPlan, localTerm, placeGoal } from './moves'
+import { AGG, bestChargeEnd, bestDeploySpot, bestEntry, bestMove, choose, deployPlan, localTerm, placeGoal } from './moves'
 import { completePlace } from './random'
 import { chargeOddsOf, reachOfUnit, edgeDist, longestReach, threatAt, threatsFor, weaponsOf } from './threat'
 import { timeUp, type AiContext, type Policy, type PolicyTable, type Scored } from './types'
@@ -179,8 +179,13 @@ export const firstPlayer: Policy = (ctx) => ctx.legal.find((a) => a.holder === c
 /** turn.first: activate first ourselves (first grab of markers, first shots). */
 export const firstActivator: Policy = (ctx) => ctx.legal.find((a) => a.first === ctx.seat) ?? null
 
+const CAP_SHARE_ACTIVATE = AGG.capShare!
+const CAP_SHARE_MOVE = AGG.capShare!
+
 /** A charge below this chance is not worth the stranded exposure. */
-const MIN_CHARGE_CHANCE = 0.34
+const MIN_CHARGE_CHANCE = () => AGG.minCharge!
+/** Units whose Move / Run gets a full position search per turn.activate decision. */
+const MOVE_EVALS = 4
 
 /** turn.activate: which unit and which menu action, or Pass. Deploy first, then moves; shoot before charge before run;
  *  Hold and Pass only when nothing productive is left (Pass takes the First Player Marker in Phases 1-2). */
@@ -194,32 +199,57 @@ export const activationMenu: Policy = (ctx) => {
   // Shooting, charging and Running are alternatives of one activation: they share one value scale (20 + their gain in the
   // Assault Phase; in the Movement Phase a Run competes with Move on the 10 + scale).
   const group = phase === 'movement' ? 10 : 20
-  const best = bestOf(ctx, (a) => {
+  // Attacks, charges, deploys and the rest are priced first; a Move / Run / Disengage is priced by a full position search
+  // (several previews per spot), so only the MOVE_EVALS units closest to an enemy get one and the others keep the base
+  // score. Pricing every move first spent the whole work cap on the first units listed and left the shots unseen.
+  const known = new Map<string, number>()
+  const foeDist = (id: UnitId): number => {
+    const lead = leaderOf(ctx.q, id)
+    if (!lead) return Infinity
+    let d = Infinity
+    for (const e of enemyUnitsOf(ctx.q, ctx.seat)) { const l = leaderOf(ctx.q, e.id); if (l) d = Math.min(d, dist(lead.pos, l.pos)) }
+    return d
+  }
+  const isMove = (t: string): boolean => t === 'move.go' || t === 'move.run' || t === 'move.disengage'
+  const rank = (t: string): number => (t === 'turn.pass' ? 2 : isMove(t) ? 1 : 0) // Pass is priced last, from what the moves were found worth
+  const order = [...ctx.legal].map((a, i) => ({ a, i, m: isMove(a.type), d: isMove(a.type) && unitIdOf(a) ? foeDist(unitIdOf(a)!) : 0 }))
+    .sort((x, y) => rank(x.a.type) - rank(y.a.type) || x.d - y.d || x.i - y.i).map((x) => x.a)
+  const scored: Scored[] = []
+  const moveUnits = new Set<UnitId>()
+  for (const a of order) {
+    if (scored.length && timeUp(ctx)) break
     const u = unitIdOf(a)
     const t = a.type
-    if (t === 'turn.pass') return sc(tempo ? 2 + passValue(ctx, threats).value : -1)
-    if (t === 'turn.hold') return sc(1)
-    if (!u) return sc(0.5)
-    if (t === 'deploy.go') {
+    let score: Scored['score'] | null = null
+    if (t === 'turn.pass') score = sc(tempo ? 2 + passValue(ctx, threats, known).value : -1)
+    else if (t === 'turn.hold') score = sc(1)
+    else if (!u) score = sc(0.5)
+    else if (t === 'deploy.go') {
       const i = plan.indexOf(u)
-      return sc(i >= 0 ? 100 - i * 0.1 + deployValue(ctx, u, threats) * 0.01 : lastRound(ctx) ? 90 : -5)
-    }
-    if (t === 'move.go') return sc(10 + activationValue(ctx, u, t, threats).value)
-    if (t === 'move.disengage') return sc(0.5 + activationValue(ctx, u, t, threats).value)
-    if (t === 'move.run') return sc(group + activationValue(ctx, u, t, threats).value - (phase === 'movement' ? 0.3 : 0))
-    if (t === 'shoot.go') return sc(20 + Math.max(0, bestAttack(ctx, u)?.score.value ?? 0))
-    if (t === 'charge.go') {
+      score = sc(i >= 0 ? 100 - i * 0.1 + deployValue(ctx, u, threats) * 0.01 : lastRound(ctx) ? 90 : -5)
+    } else if (isMove(t)) {
+      if (!moveUnits.has(u) && moveUnits.size >= MOVE_EVALS) { score = sc(t === 'move.go' ? 10 : t === 'move.disengage' ? 0.5 : group - (phase === 'movement' ? 0.3 : 0)) }
+      else {
+        moveUnits.add(u)
+        const v = activationValue(ctx, u, t, threats).value
+        known.set(`${u}:${t}`, v)
+        score = t === 'move.go' ? sc(10 + v) : t === 'move.disengage' ? sc(0.5 + v) : sc(group + v - (phase === 'movement' ? 0.3 : 0))
+      }
+    } else if (t === 'shoot.go') score = sc(20 + Math.max(0, bestAttack(ctx, u)?.score.value ?? 0))
+    else if (t === 'charge.go') {
       const c = bestCharge(ctx, u)
-      return !c || c.chance < MIN_CHARGE_CHANCE || c.value <= 0 ? sc(-1) : sc(20 + c.value)
-    }
-    if (t === 'melee.go') return sc(10 + Math.max(0, bestAttack(ctx, u)?.score.value ?? 0))
-    if (t.startsWith('mission.')) return sc(15)
-    if (t === 'ability.action') {
+      const dbg = (globalThis as { __aiTrace?: (line: string) => void }).__aiTrace // bench --trace only
+      if (dbg) dbg(`    charge? ${u} ${c ? `chance=${c.chance.toFixed(2)} value=${c.value.toFixed(2)} targets=${c.targets.join(',')}` : 'none in reach'}`)
+      score = !c || c.chance < MIN_CHARGE_CHANCE() || c.value <= 0 ? sc(-1) : sc(20 + c.value)
+    } else if (t === 'melee.go') score = sc(10 + Math.max(0, bestAttack(ctx, u)?.score.value ?? 0))
+    else if (t.startsWith('mission.')) score = sc(15)
+    else if (t === 'ability.action') {
       const net = abilityNet(ctx, String(a.abilityId), u, 'action')
-      return sc(wantAbility(ctx, net, 1.5) ? 5 + net.gain - net.cost : 0.4)
-    }
-    return sc(0.5)
-  })
+      score = sc(wantAbility(ctx, net, 1.5) ? 5 + net.gain - net.cost : 0.4)
+    } else score = sc(0.5)
+    scored.push({ action: a, score })
+  }
+  const best = choose(ctx, scored)?.action ?? null
   const bu = best ? unitIdOf(best) : null
   if (best && bu) ctx.memory.plan = { unitId: bu, round: ctx.view.round, phase: phase ?? '', steps: [best.type] }
   if (best?.type === 'turn.pass') ctx.memory.passed.add(`${ctx.view.round}:${phase}`)
@@ -319,6 +349,14 @@ export const meleeSplit: Policy = (ctx) => bestOf(ctx, (a) => {
   }
   return sc(best + 0.1 * (ctx.view.units[t]?.damage ?? 0))
 })
+/** melee.keywords: put PRECISION / CRITICAL HIT on the enemy unit worth most Supply, finishing the wounded first. */
+export const meleeKeywords: Policy = (ctx) => bestOf(ctx, (a) => {
+  const t = typeof a.to === 'string' ? a.to : null
+  if (!t) return null
+  if (t === 'even') return sc(0.1)
+  const u = ctx.view.units[t]
+  return u ? sc(supplyOf(ctx, t) + 1.5 * Math.min(u.damage, 4)) : null
+})
 /** atk.reroll / atk.precision / atk.tough: no rules-complete value is on offer yet; the random policy answers. */
 export const diceChoice: Policy = () => null
 /** atk.casualty: least casualtyCost (no leader or Shield model, keep weapon specialists, drop the outermost model). */
@@ -358,9 +396,19 @@ export const abilityWindow: Policy = (ctx) => {
 /** ability.target: units by who gains most (friendly) or loses most (enemy); points by the goal term of the mover. */
 export const abilityTarget: Policy = (ctx) => {
   const cont = (ctx.pending.context as { cont?: { ctx?: { unitId?: string; targetUnitId?: string }; flow?: { unitId?: string } } }).cont
-  const mover = cont?.ctx?.targetUnitId ?? cont?.ctx?.unitId ?? cont?.flow?.unitId
+  const mover = cont?.ctx?.targetUnitId ?? cont?.ctx?.unitId ?? cont?.flow?.unitId ?? (cont as { unitId?: string } | undefined)?.unitId
   const stay = ctx.legal.find((a) => a.mode === 'stay')
   if (stay) return stay
+  // Advanced Training: spend the Reaction when that makes the cost cheaper.
+  const react = ctx.legal.find((a) => a.mode === 'costReaction' && a.use === true)
+  if (react) return react
+  // MORPH removal: give up the model whose loss costs least (same ranking as a casualty).
+  const removal = ctx.legal.filter((a) => a.mode === 'remove' && typeof a.modelId === 'string')
+  if (removal.length) {
+    const uid = String((cont as { unitId?: string } | undefined)?.unitId ?? '')
+    const cheapest = bestOf(ctx, (a) => sc(-casualtyCost(ctx, uid, String(a.modelId))))
+    return cheapest ?? removal[0]!
+  }
   const pick = bestOf(ctx, (a) => {
     if (a.mode === 'unit' && typeof a.unitId === 'string') {
       const u = ctx.view.units[a.unitId]
@@ -370,10 +418,12 @@ export const abilityTarget: Policy = (ctx) => {
     if (a.mode === 'option' || a.mode === 'edge') return sc(0)
     return null
   })
-  return pick
+  // RESPAWN: always bring the models back (a spot beats the skip option); the spot nearest the goals is scored above.
+  return pick ?? ctx.legal.find((a) => a.mode === 'point') ?? null
 }
 /** ability.pay: exhaust the cards that carry the fewest active and reaction abilities. */
 export const abilityPay: Policy = (ctx) => bestOf(ctx, (a) => {
+  if (!ctx.accepts(a)) return null // a cost the host's dry run refuses
   const ids = Array.isArray(a.cards) ? (a.cards as string[]) : []
   let v = 0
   for (const id of ids) {
@@ -386,11 +436,15 @@ export const abilityPay: Policy = (ctx) => bestOf(ctx, (a) => {
 export const abilityReact: Policy = (ctx) => {
   const skip = ctx.legal.find((a) => a.type === 'ability.skipReaction') ?? null
   const margin = ctx.params.reactions === 'first' ? 0 : 1.5
+  // a Reaction the decision still offers after we used it is not consumed (the stream repeats per decision id): skip it then
+  const used = `react:${ctx.pending.id}`
+  if (ctx.memory.stuck.has(used)) return skip
   const pick = bestOf(ctx, (a) => {
     if (a.type !== 'ability.useReaction') return null
     const net = abilityNet(ctx, String(a.abilityId))
     return net.gain > 0 && (ctx.params.reactions === 'first' || net.gain - net.cost >= margin) ? sc(net.gain - net.cost) : null
   })
+  if (pick) ctx.memory.stuck.add(used)
   return pick ?? skip
 }
 
@@ -404,17 +458,25 @@ export const missionAction: Policy = (ctx) => {
   return claim ?? ctx.legal.find((a) => a.decline === true) ?? null
 }
 
+/** Share of the decision's work cap each search-heavy kind may spend. The cap is sized for the slowest tables; a kind whose
+ *  mean answer already spends most of it (move.path, turn.activate) is trimmed so its tail stays near the budget. */
+export const KIND_CAP_SHARE: Record<string, number> = { 'turn.activate': CAP_SHARE_ACTIVATE, 'turn.choose': CAP_SHARE_ACTIVATE, 'move.path': CAP_SHARE_MOVE, 'charge.path': CAP_SHARE_MOVE, 'charge.targets': CAP_SHARE_MOVE, 'deploy.path': CAP_SHARE_MOVE, 'shoot.batch': CAP_SHARE_MOVE }
+/** Crowded boards (swarms) cost more per query than the work meter's per-call estimates say: the cap shrinks with the models on the table. */
+const crowd = (ctx: AiContext): number => { const n = Object.values(ctx.view.models).filter((m) => m.life === 'active' && !m.offTable).length; return n <= CROWD_FROM ? 1 : Math.max(0.6, CROWD_FROM / n) }
+const CROWD_FROM = 45
+const capped = (kind: string, p: Policy): Policy => (ctx) => { ctx.work.cap = Math.max(20, Math.round(ctx.work.cap * (KIND_CAP_SHARE[kind] ?? 1) * crowd(ctx))); return p(ctx) }
+
 /** Policies by decision kind. Kinds with no entry (and turn.over) use the random policy. */
 export const POLICIES: PolicyTable = {
   'setup.colour': draftSetup, 'setup.draftControl': draftSetup, 'setup.ban': draftCard, 'setup.pick': draftCard,
   'setup.terrain': terrainPick, 'setup.firstPlayer': firstPlayer,
-  'turn.first': firstActivator, 'turn.activate': activationMenu, 'turn.choose': activationMenu, 'turn.order': orderEffects,
+  'turn.first': firstActivator, 'turn.activate': capped('turn.activate', activationMenu), 'turn.choose': capped('turn.choose', activationMenu), 'turn.order': orderEffects,
   'score.order': orderEffects,
-  'move.path': movePath, 'move.place': movePlace,
-  'deploy.entry': deployEntry, 'deploy.path': deployPath, 'deploy.drop': deployDrop,
-  'shoot.batch': shootBatch, 'shoot.template': shootTemplate,
-  'charge.targets': chargeTargets, 'charge.path': chargePath, 'charge.impact': chargeImpact,
-  'melee.closeRanks': meleeCloseRanks, 'melee.split': meleeSplit,
+  'move.path': capped('move.path', movePath), 'move.place': movePlace,
+  'deploy.entry': deployEntry, 'deploy.path': capped('deploy.path', deployPath), 'deploy.drop': deployDrop,
+  'shoot.batch': capped('shoot.batch', shootBatch), 'shoot.template': shootTemplate,
+  'charge.targets': capped('charge.targets', chargeTargets), 'charge.path': capped('charge.path', chargePath), 'charge.impact': chargeImpact,
+  'melee.closeRanks': meleeCloseRanks, 'melee.*': meleeKeywords, // melee.keywords is not in the frozen DECISION_KINDS: it uses the namespace entry 'melee.split': meleeSplit,
   'atk.reroll': diceChoice, 'atk.precision': diceChoice, 'atk.tough': diceChoice, 'atk.casualty': casualty,
   'ability.window': abilityWindow, 'ability.target': abilityTarget, 'ability.pay': abilityPay, 'ability.react': abilityReact,
   'mission.*': missionAction,

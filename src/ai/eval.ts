@@ -9,6 +9,8 @@ import { spend, timeUp } from './types'
 import { besideTarget, chargeOddsOf, edgeDist, impactOf, meleeOf, previewOf, reachOfUnit, rangedOf, threatAt, threatenedBy, toward, unitCostOf, weaponReach } from './threat'
 import { dist, enemyUnitsOf, leaderOf, modelsOf, opponentOf, unitsOf, withUnitAt } from './world'
 
+/** Enemy units previewed per bestAttack search (nearest first). */
+export const MAX_ATTACK_TARGETS = 3
 export const ZERO: Score = { value: 0, parts: {} }
 
 /** Sum parts into a Score (weights default 1). Implemented: shared by every owner. */
@@ -102,9 +104,14 @@ function searchAttack(ctx: AiContext, unitId: UnitId, q: GameState): BestAttack 
   if (!u) return null
   let best: BestAttack = null
   const weapons = [...rangedOf(ctx, q, unitId), ...meleeOf(ctx, q, unitId)]
-  for (const e of enemyUnitsOf(q, u.owner)) {
-    const d = edgeDist(q, unitId, e.id)
-    if (!Number.isFinite(d)) continue
+  // only the nearest few enemies are worth a preview each (one LoS trace per model pair is what a decision spends its time on)
+  const foes = enemyUnitsOf(q, u.owner).map((e) => ({ e, d: edgeDist(q, unitId, e.id) })).filter((x) => Number.isFinite(x.d))
+    .sort((a, b) => a.d - b.d || (a.e.id < b.e.id ? -1 : 1))
+  let tried = 0
+  for (const { e, d } of foes) {
+    if (tried >= MAX_ATTACK_TARGETS) break
+    if (!weapons.some((w) => d <= (w.phase === 'combat' ? 1.5 : weaponReach(w)) + 0.5)) continue
+    tried++
     for (const w of weapons) {
       if (timeUp(ctx)) return best
       const reach = w.phase === 'combat' ? 1.5 : weaponReach(w) // printed range or LONG_RANGE X, whichever is more
@@ -329,15 +336,17 @@ export function activationValue(ctx: AiContext, unitId: UnitId, actionType: stri
 }
 
 /** Value of Passing now (spec 30 s4): wTempo x the First Player Marker's worth next Phase - the best activation left. */
-export function passValue(ctx: AiContext, threats: ThreatMap): Score {
+export function passValue(ctx: AiContext, threats: ThreatMap, known?: ReadonlyMap<string, number>): Score {
   let left = 0, worth = 0
   const seen = new Set<string>()
   for (const a of ctx.legal) {
     const id = typeof a.unitId === 'string' ? a.unitId : null
     if (!id || a.type === 'turn.pass' || seen.has(`${id}:${a.type}`)) continue
     seen.add(`${id}:${a.type}`)
+    const k = known?.get(`${id}:${a.type}`)
+    if (known && k === undefined && /^move\./.test(a.type)) continue // not priced this decision: do not pay for it just to Pass
     if (timeUp(ctx)) break
-    left = Math.max(left, activationValue(ctx, id, a.type, threats).value)
+    left = Math.max(left, k ?? activationValue(ctx, id, a.type, threats).value)
   }
   // what moving first next Phase is worth: our best attack that exists now, and a marker we could still take
   for (const u of unitsOf(ctx.q, ctx.seat)) {

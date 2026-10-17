@@ -42,7 +42,18 @@ export function completeRandom(ctx: AiContext, pick: Action): Action | null {
 export function randomPolicy(ctx: AiContext): Action {
   let pool = ctx.legal.filter((a) => !PASSIVE.has(a.type) && !PARAMETERISED.has(a.type))
   if (!pool.length) pool = ctx.legal.filter((a) => !PARAMETERISED.has(a.type))
-  if (pool.length) return pool[Math.floor(ctx.rng() * pool.length)]!
+  if (pool.length) {
+    // ability.pay offers cost combinations the host may refuse: take the ones its dry run accepts when it accepts any.
+    if (ctx.pending.kind === 'ability.pay' && pool.length > 1) { const ok = pool.filter((a) => ctx.accepts(a)); if (ok.length) pool = ok }
+    // The stream is seeded per decision id, so a decision that stays open after an accepted answer would repeat the same
+    // pick forever: never pick the same answer twice for one decision while another is on offer.
+    const key = (a: Action): string => `rp:${ctx.pending.id}:${JSON.stringify(a)}`
+    const fresh = pool.filter((a) => !ctx.memory.stuck.has(key(a)))
+    if (fresh.length) pool = fresh
+    const pick = pool[Math.floor(ctx.rng() * pool.length)]!
+    ctx.memory.stuck.add(key(pick))
+    return pick
+  }
   for (const t of ctx.legal) {
     const a = completeRandom(ctx, t)
     if (a) return a

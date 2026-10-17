@@ -4,11 +4,13 @@
 // (random.completePlace fills it; placeGoal picks a goal). Coherency and legality are the engine's: every answer
 // returned here is one of ctx.legal.
 import { zoneRectsOf } from '../engine/measure'
+import { sideFor } from '../engine/missions'
 import { objectiveStatus, supplyStatus, unitSupply, type ObjectiveStatus } from '../engine/query'
 import type { Action, GameState, UnitId, Vec2 } from '../engine/types'
 import { deployValue, isHomeCarrier, positionValue } from './eval'
 import { pickBest } from './policies'
 import { timeUp, type AiContext, type MoveCandidate, type Scored, type ThreatMap } from './types'
+import { rangedOf } from './threat'
 import { dist, endOf, enemyUnitsOf, leaderOf } from './world'
 
 // ---------------------------------------------------------------- local terms (geometry only, no rules)
@@ -28,8 +30,36 @@ export function objectivesOf(ctx: AiContext): ObjInfo[] {
   return r
 }
 
+/** What the Mission pays for taking marker `n` (VP-ish, from the Mission Card's scoring rules for the marker's side as seen by
+ *  this seat): a marker the card never pays for is a place to stand, not a goal. Data lookup only; the engine scores it. */
+export function markerWorth(ctx: AiContext, n: number): number {
+  const mission = ctx.bundle.records.missions.find((x) => x.id === ctx.q.missionId)
+  const mk = ctx.q.markers.find((m) => m.n === n)
+  if (!mission || !mk) return 1
+  const side = sideFor(ctx.q, mk, ctx.seat)
+  const last = ctx.q.maxRounds ?? ctx.q.round
+  let w = 0
+  for (const r of mission.scoring) {
+    switch (r.kind) {
+      case 'perControlledMarker': if (r.fromRound <= last) w += r.vp[side]; break
+      case 'markerControlled': if (r.marker === n && r.fromRound <= last) w += r.vp; break
+      case 'activatedMarkerCash': w += 1.5; break
+      case 'quarters': w += 0.3 * r.controlBonus; break
+      case 'claimCarriedInZone': if (side !== 'own') w += 0.6 * r.vp; break
+      case 'ownMarkersNotClaimed': if (side === 'own') w += 0.5 * r.vp; break
+      default: break
+    }
+  }
+  return w
+}
+/** markerWorth as a pull multiplier: a marker that pays nothing keeps a small pull, one that pays 2+ VP a strong one. */
+const worthWeight = (ctx: AiContext, n: number): number => (AGG.worth ? Math.max(AGG.minPull!, Math.min(1.3, markerWorth(ctx, n))) : 1)
+
 /** How much a marker is worth walking to: 0.35 when we already hold it clearly, 1.15 when the enemy does. */
 function markerWeight(ctx: AiContext, o: ObjInfo): number {
+  return worthWeight(ctx, o.n) * markerHold(ctx, o)
+}
+function markerHold(ctx: AiContext, o: ObjInfo): number {
   const t = o.status.totals
   const mine = t[ctx.seat] ?? 0
   const theirs = Math.max(0, ...Object.entries(t).filter(([s]) => s !== ctx.seat).map(([, v]) => v))
@@ -47,6 +77,10 @@ export function goalTerm(ctx: AiContext, at: Vec2): number {
   return best === -Infinity ? 0 : best
 }
 
+/** Bench knobs (node only: AI_AGG="kEnemy=0.3,ramp=1"); the shipped values are the defaults. */
+export const AGG: Record<string, number> = { kEnemy: 0.25, ramp: 1, worth: 1, minPull: 0.15, minCharge: 0.34, meleePull: 1, capShare: 0.65 }
+if (typeof process !== 'undefined' && process.env?.AI_AGG) for (const part of process.env.AI_AGG.split(',')) { const [k, v] = part.split('='); if (k && Number.isFinite(Number(v))) AGG[k] = Number(v) }
+
 const ENEMY = new WeakMap<GameState, Vec2[]>()
 /** Leader spots of every enemy unit on the table. */
 export function enemySpots(ctx: AiContext): Vec2[] {
@@ -58,10 +92,15 @@ export function enemySpots(ctx: AiContext): Vec2[] {
   return r
 }
 /** Pull towards the nearest enemy (we want shots and charges), capped. */
-export function enemyTerm(ctx: AiContext, at: Vec2): number {
+export function enemyTerm(ctx: AiContext, at: Vec2, unitId?: UnitId): number {
   let d = Infinity
   for (const p of enemySpots(ctx)) d = Math.min(d, dist(at, p))
-  return d === Infinity ? 0 : -0.12 * Math.min(d, 30)
+  if (d === Infinity) return 0
+  const max = ctx.view.maxRounds ?? 5
+  const progress = max > 1 ? Math.min(1, Math.max(0, (ctx.view.round - 1) / (max - 1))) : 1
+  // a unit with no ranged weapon can only hurt the enemy by reaching it: it closes in harder
+  const melee = unitId && AGG.meleePull! !== 1 && rangedOf(ctx, ctx.q, unitId).length === 0 ? AGG.meleePull! : 1
+  return -AGG.kEnemy! * melee * (1 + AGG.ramp! * progress) * Math.min(d, 30)
 }
 
 /** The centre of the nearest piece of our own Zone to `from` (where a marker carrier scores), or null. */
@@ -81,7 +120,7 @@ export function localTerm(ctx: AiContext, at: Vec2, unitId?: UnitId): number {
     const home = homeSpot(ctx, at)
     if (home) return (12 - 0.5 * Math.min(dist(at, home), 24)) * (ctx.params.wObjective / 4)
   }
-  return goalTerm(ctx, at) * (ctx.params.wObjective / 4) + enemyTerm(ctx, at)
+  return goalTerm(ctx, at) * (ctx.params.wObjective / 4) + enemyTerm(ctx, at, unitId)
 }
 
 // ---------------------------------------------------------------- scoring
@@ -127,6 +166,12 @@ export function bestMove(ctx: AiContext, threats: ThreatMap): Action | null {
   const hold = ctx.legal.find((a) => a.type === 'move.hold')
   const unitId = unitOfDecision(ctx)
   const lead = unitId ? leaderOf(ctx.q, unitId) : undefined
+  const dbg = (globalThis as { __aiTrace?: (line: string) => void }).__aiTrace // bench --trace only
+  if (dbg && unitId && lead) {
+    const fmt = (c: MoveCandidate) => `${c.end?.x.toFixed(0)},${c.end?.z.toFixed(0)}=${c.score.value.toFixed(1)}{${Object.entries(c.score.parts).map(([k, v]) => `${k}:${(v as number).toFixed(1)}`).join(' ')}}`
+    const cur = positionValue(ctx, unitId, lead.pos, threats)
+    dbg(`    ${unitId} at ${lead.pos.x.toFixed(0)},${lead.pos.z.toFixed(0)} cur=${(cur.value + localTerm(ctx, lead.pos, unitId)).toFixed(1)}{${Object.entries(cur.parts).map(([k, v]) => `${k}:${(v as number).toFixed(1)}`).join(' ')}} cands ${scored.slice(0, 4).map(fmt).join(' | ')}`)
+  }
   if (hold && lead && unitId) {
     const cur = positionValue(ctx, unitId, lead.pos, threats).value + localTerm(ctx, lead.pos, unitId)
     if (pick.score.value <= cur + 0.05) return hold

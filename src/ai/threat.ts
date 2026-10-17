@@ -18,7 +18,7 @@ const MM = 25.4
 /** Slack (inches) on reach tests (edge to edge): formations are not rigid. */
 const SLACK = 1
 /** Work units one uncached chargeOdds costs (about 12 ms in a crowded game; see types.WORK_PER_MS). */
-const CHARGE_ODDS_COST = 5
+const CHARGE_ODDS_COST = 36
 
 const radius = (mm: number): number => mm / MM / 2
 
@@ -28,9 +28,12 @@ const radius = (mm: number): number => mm / MM / 2
  *  to 7 ms). Fit: ms ~ min(pairs, 10)^0.7 x (0.3 + 0.07 x distance"); one unit is 0.5 ms (types.WORK_PER_MS). A pure
  *  function of the position, so the cap stays deterministic. */
 export function previewCost(q: GameState, attacker: UnitId, target: UnitId): number {
-  const pairs = modelsOf(q, attacker).length * modelsOf(q, target).length
-  const d = Math.min(30, Math.max(0, edgeDist(q, attacker, target)))
-  return Math.max(1, 2 * Math.pow(Math.min(pairs, 10), 0.7) * (0.3 + 0.07 * d) * tableFactor(q))
+  const pairs = Math.min(150, modelsOf(q, attacker).length * modelsOf(q, target).length)
+  const d = Math.max(0, edgeDist(q, attacker, target))
+  // Measured (50k previews, desktop, node): a pair of units in Engagement range or beside each other costs ~0.5 ms; farther
+  // apart the trace grows with the model pairs: ~1.6 ms + 0.33 ms x pairs^0.8 (2 ms at 1 pair, 4.6 at 16, 10 at 60).
+  const ms = d <= 3 ? 0.5 + 0.025 * pairs : 1.6 + 0.33 * Math.pow(pairs, 0.8)
+  return Math.max(1, 2 * ms * tableFactor(q))
 }
 const TABLE_FACTORS = new WeakMap<object, number>()
 /** Line-of-sight cost of a table: every piece that blocks sight (obstruction, building) is traced for every model pair
@@ -38,7 +41,7 @@ const TABLE_FACTORS = new WeakMap<object, number>()
 function tableFactor(q: GameState): number {
   let f = TABLE_FACTORS.get(q.terrain)
   if (f === undefined) {
-    f = (0.5 + q.terrain.filter((t) => t.rulesType === 'obstruction' || t.rulesType === 'building').length) / 4.5
+    f = 0.9 + 0.15 * Math.max(0, q.terrain.filter((t) => t.rulesType === 'obstruction' || t.rulesType === 'building').length - 2)
     TABLE_FACTORS.set(q.terrain, f)
   }
   return f
@@ -211,6 +214,16 @@ export function threatenedBy(ctx: AiContext, threats: ThreatMap, at: Vec2, unitI
   return Object.values(threats.reach).filter((r) => reaches(r, at, ext)).map((r) => r.unitId).sort()
 }
 
+/** Enemy units previewed per threat query (nearest first; the rest are counted by the cheap reach test only). */
+export const MAX_THREAT_UNITS = 4
+/** threatenedBy, cut to the MAX_THREAT_UNITS nearest (edge to edge) so a crowded board does not cost a preview per enemy unit. */
+function nearestThreats(ctx: AiContext, threats: ThreatMap, at: Vec2, unitId: UnitId): UnitId[] {
+  const ids = threatenedBy(ctx, threats, at, unitId)
+  if (ids.length <= MAX_THREAT_UNITS) return ids
+  return ids.map((id) => ({ id, d: dist(threats.reach[id]!.at, at) - threats.reach[id]!.extent })).sort((a, b) => a.d - b.d || (a.id < b.id ? -1 : 1))
+    .slice(0, MAX_THREAT_UNITS).map((x) => x.id)
+}
+
 /** What the enemy could do to `unitId` with its leader at `at` next Phase: expected Supply removed, P(unit destroyed)
  *  and the enemy units that can reach it (shooting in range with LoS, or charge reach). */
 export function threatAt(ctx: AiContext, threats: ThreatMap, unitId: UnitId, at: Vec2): ThreatReport {
@@ -221,7 +234,7 @@ export function threatAt(ctx: AiContext, threats: ThreatMap, unitId: UnitId, at:
   const shim = withUnitAt(ctx.q, unitId, at)
   let exp = 0, survive = 1
   const attackers: UnitId[] = []
-  for (const eid of threatenedBy(ctx, threats, at, unitId)) {
+  for (const eid of nearestThreats(ctx, threats, at, unitId)) {
     if (timeUp(ctx)) break
     const r = threats.reach[eid]!
     const lead = leaderOf(shim, eid)
