@@ -4,7 +4,7 @@
 import { useMemo, useState } from 'react'
 import {
   FORCES, RACES, RANDOM, continueGame, deploymentChoices, hasAutosave, launchGame, matchupForRaces, matchupOf, missionChoice, missionChoices,
-  readAutosaveSummary, type Forces, type Race, type SeatController,
+  readAutosaveSummary, type Forces, type MapChoice, type Race, type SeatController,
 } from '../store/launch'
 import { SPEED_PRESETS, useSettingsStore } from '../store/settingsStore'
 import { readJson, writeJson } from '../store/storage'
@@ -25,7 +25,7 @@ const TIERS: { id: string; label: string; blurb: string }[] = [
   { id: 'easy', label: 'Easy', blurb: 'Goes for objectives, ignores enemy threats.' },
   { id: 'normal', label: 'Normal', blurb: 'Weighs threats, cover and tempo.' },
 ]
-interface Prefs { mode: PlayMode; tier: string; race: Race; foe: Race; mission: string; deployment: string; matchup?: string; side?: 0 | 1; forces?: Forces }
+interface Prefs { mode: PlayMode; tier: string; race: Race; foe: Race; mission: string; deployment: string; map?: MapChoice; matchup?: string; side?: 0 | 1; forces?: Forces }
 const FORCE_LABEL: Record<Forces, string> = { starter: 'Starter forces', expanded: 'Expanded (Wave 2)' }
 const RACE_HEADS: Record<PlayMode, [string, string]> = { bot: ['Your race', 'Opponent race'], hotseat: ['Player 1 race', 'Player 2 race'], watch: ['Bot 1 race', 'Bot 2 race'] }
 
@@ -61,6 +61,7 @@ export function StartScreen() {
   const [forces, setForces] = useState<Forces>(FORCES.includes(saved.forces as Forces) ? saved.forces! : 'starter')
   const [mission, setMission] = useState<string>(saved.mission ?? RANDOM)
   const [deployment, setDeployment] = useState<string>(saved.deployment ?? RANDOM)
+  const [map, setMap] = useState<MapChoice>(saved.map === 'sunken-shrine' ? 'sunken-shrine' : readParams().map ?? 'roll')
   const [draft, setDraft] = useState(false)
   const [seed, setSeed] = useState(() => readParams().seed ?? '')
   const speed = useSettingsStore((s) => s.speed)
@@ -76,10 +77,10 @@ export function StartScreen() {
   const picks = !draft
 
   const start = () => {
-    writeJson(PREF_KEY, { mode, tier, race, foe, forces, mission: missionId, deployment: deploymentId })
+    writeJson(PREF_KEY, { mode, tier, race, foe, forces, mission: missionId, deployment: deploymentId, map })
     launchGame({
       matchup: matchup.id, seats: seatsFor(mode, side), tier,
-      ...(draft ? { draft: true } : { missionId, deploymentId }),
+      ...(draft ? { draft: true } : { missionId, deploymentId, map }),
       ...(seed.trim() ? { seed: seed.trim() } : {}),
     })
   }
@@ -155,6 +156,11 @@ export function StartScreen() {
                 <select id="deployment-select" data-testid="deployment-select" value={deploymentId} disabled={draft} onChange={(e) => setDeployment(e.target.value)}>
                   <option value={RANDOM}>Random deployment</option>
                   {deployments.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+                </select>
+                <label className="sc-lab" htmlFor="map-select">Map</label>
+                <select id="map-select" data-testid="map-select" value={draft ? 'roll' : map} disabled={draft} onChange={(e) => setMap(e.target.value === 'sunken-shrine' ? 'sunken-shrine' : 'roll')}>
+                  <option value="roll">Rolled map (rules)</option>
+                  <option value="sunken-shrine">Sunken Shrine (temple)</option>
                 </select>
                 <label className="sc-check"><input type="checkbox" data-testid="draft-toggle" checked={draft} onChange={(e) => setDraft(e.target.checked)} /> Draft them in play (advanced)</label>
             </>

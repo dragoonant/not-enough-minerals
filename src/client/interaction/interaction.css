@@ -11,7 +11,7 @@
 /* Reserved for the odds line so hovering a target never changes the panel height (no hover feedback loop). */
 .ix-slot { height: 88px; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-start; }
 .ix-slot > .ix-note { padding: 4px 8px; }
-.ix-chip.off { opacity: .55; border-style: dashed; }
+.ix-chip.off, .ix-btn.off { opacity: .55; border-style: dashed; cursor: not-allowed; }
 .ix-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .ix-head h3 { margin: 0; font-family: "Bahnschrift", "Segoe UI Semibold", sans-serif; font-size: 15px; letter-spacing: .05em; text-transform: uppercase; color: var(--amber, #e0a03a); }
 .ix-head-tools { display: flex; gap: 4px; }

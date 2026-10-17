@@ -5,7 +5,8 @@
 import type { EditionBundle, Id, UnitDef } from '../data/types'
 import { allAbilities, rule, tokenDef, unitDef } from './edition'
 import * as effects from './effects'
-import { baseOnTable, baseRadius, dist, edgeDistance, EPS, isOnTable, segPointDist } from './geometry'
+import { modelsEngaged } from './engage'
+import { baseOnTable, baseRadius, MM_PER_INCH, dist, edgeDistance, EPS, isOnTable, segPointDist } from './geometry'
 import { endBlockers, inOpening, isSolid, scPieces, segmentCrosses, surfaceAt, type ScPiece } from './terrain'
 import type { GameState, ModelId, ModelState, UnitId, UnitState, Vec2 } from './types'
 
@@ -206,6 +207,27 @@ export function squadCtx(state: GameState, bundle: EditionBundle, unitId: UnitId
   }
 }
 
+const probes = new WeakMap<SquadCtx, { state: GameState; probe: ModelState } | null>()
+
+/** Would a model of this unit standing at `pos` (radius `r`) be Engaged with the enemy model `enemyId`? Uses the full
+ *  Engagement gates (engage.modelsEngaged) through one reusable probe model, so links agree with real Engagement. */
+function probeEngaged(ctx: SquadCtx, pos: Vec2, r: number, enemyId: ModelId): boolean {
+  let hit = probes.get(ctx)
+  if (hit === undefined) {
+    const tmpl = Object.values(ctx.state.models).find((m) => m.unitId === ctx.unitId)
+    if (!tmpl) hit = null
+    else {
+      const probe: ModelState = { ...tmpl, id: '__link_probe', life: 'active', offTable: false }
+      hit = { probe, state: { ...ctx.state, models: { ...ctx.state.models, [probe.id]: probe } } }
+    }
+    probes.set(ctx, hit)
+  }
+  if (!hit) return false
+  hit.probe.pos = pos
+  hit.probe.base = r * 2 * MM_PER_INCH
+  return modelsEngaged(hit.state, ctx.bundle, hit.probe.id, enemyId)
+}
+
 /** Valid Coherency Link between two proposed model positions (COH-005, COH-008): the straight line avoids other units'
  *  models (except enemies the unit is Engaged with), solid terrain the unit could not pass, and level changes happen
  *  only at ACCESS POINTS. Flying units' links ignore terrain and other units. */
@@ -215,9 +237,9 @@ export function linkValid(ctx: SquadCtx, aPos: Vec2, aR: number, bPos: Vec2, bR:
   for (const o of ctx.foreign) {
     if (o.flying) continue
     if (segPointDist(aPos, bPos, o.pos).d >= o.r - 1e-9) continue
-    const enemy = o.owner !== ctx.owner
-    // an enemy within Engagement Range of either end is one the unit is Engaged with (or will be): links pass through it
-    if (enemy && (Math.max(0, dist(aPos, o.pos) - aR - o.r) <= ctx.er + EPS || Math.max(0, dist(bPos, o.pos) - bR - o.r) <= ctx.er + EPS)) continue
+    // R p.37 4.4: a link may pass only through enemy models this unit is (or, ending its Charge, will be) actually Engaged
+    // with. "Within 1"" is not enough: a Size 2+ wall or another elevation blocks Engagement, so it blocks the link too.
+    if (o.owner !== ctx.owner && (probeEngaged(ctx, aPos, aR, o.id) || probeEngaged(ctx, bPos, bR, o.id))) continue
     return false
   }
   const sa = surfaceAt(ctx.state, aPos), sb = surfaceAt(ctx.state, bPos)

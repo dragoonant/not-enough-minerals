@@ -8,6 +8,7 @@ import { musterArmy } from './army'
 import * as dice from './dice'
 import { deploymentDef, missionDef, presetDef, tableOf, cardDef, rule } from './edition'
 import { initialMarkers } from './missions'
+import { HAND_LAYOUTS, handLayoutFor, placeHandLayout } from './terrain-maps'
 import { option, pushEvents, raiseDecision, reject, type ModuleDef, type StepResult } from './registry'
 import { roll, seedRng } from './rng'
 import { beginPlay, finishStartOfRound, PLACEHOLDER_ROUNDS, startRound } from './turnflow'
@@ -34,6 +35,9 @@ export interface CreateGameOpts {
   draft?: boolean
   /** The 2 Mission and 2 Deployment Cards each seat brings to the draft; default = drawn at random from the scale's pool. */
   draftCards?: Record<SeatId, { mission: Id[]; deployment: Id[] }>
+  /** Map choice: 'roll' (default, TER-001 D3 / D6) or 'sunken-shrine' (the original temple layout, replaces the roll).
+   *  Ignored with `draft` (the draft picks the map) and when the table has no shrine layout. */
+  map?: 'roll' | 'sunken-shrine'
 }
 
 /** Every generic model field with its default. M2 foundations: unitId is required; weapons/hp default to the
@@ -135,8 +139,9 @@ export function createDemoGame(seed = 'demo', bundle: SetupBundle | null = null)
 
 
 // ---------- the real game set-up (spec 17 s1-4) ----------
-/** Number of generated stand-in map layouts per scale (the official maps are only in page images, spec 17 s3 GAP);
- *  TER-001: roll D3 on a Skirmish table, D6 on a Standard one. */
+/** Number of generated map layouts per scale (the official maps are only in page images, spec 17 s3 GAP);
+ *  TER-001 (R p.80 9.3): roll D3 on a Skirmish table, D6 on a Standard one. The hand-designed Sunken Shrine (terrain-maps.ts)
+ *  is never rolled: it is an opt-in launch choice (`map: 'sunken-shrine'`) that replaces the roll. */
 const MAP_COUNT_FALLBACK: Record<string, number> = { skirmish: 3, standard: 6, 'grand-offensive': 6 }
 /** Map-roll size per scale. DATA MISFIT: rules.json `scales` has no map-count field yet, so the literal above is only the
  *  fallback; a `maps` number added to a scale entry wins (RULING TER-001 in the engine report). */
@@ -159,6 +164,8 @@ function lcg(seed: number): () => number {
 /** A stand-in map: pieces on one half, mirrored by a half turn so neither side is favoured, clear of the Markers.
  *  Cosmetic until the official layouts are digitised (spec 17 s3 GAP); the numbers are layout tuning, not rules. */
 export function generateTerrain(variant: number, table: { w: number; d: number }, markers: readonly MarkerState[]): TerrainInstance[] {
+  const hand = handLayoutFor(variant, table) // variants above the rolled range are the hand-designed temple table (opt-in only)
+  if (hand) return placeHandLayout(hand, markers)
   const rnd = lcg(variant + 1)
   const kinds: { type: TerrainInstance['rulesType']; w: number; d: number; h: number }[] = [
     { type: 'building', w: 6, d: 4, h: 4 }, { type: 'building', w: 5, d: 5, h: 4 },
@@ -187,6 +194,11 @@ export function generateTerrain(variant: number, table: { w: number; d: number }
     i++
   }
   return out
+}
+
+/** The map variant of the Sunken Shrine for this table, or null when no shrine layout is drawn for it. */
+function shrineVariant(table: { w: number; d: number }): number | null {
+  return Object.values(HAND_LAYOUTS).find((l) => l.w === table.w && l.d === table.d)?.variant ?? null
 }
 
 /** Fill in the Mission, Deployment, table, colours, Markers and terrain of a game under construction. */
@@ -235,9 +247,13 @@ export function setupGame(bundle: EditionBundle, opts: CreateGameOpts): GameStat
   if (opts.draft) return startDraft(s, bundle, opts, scale)
   const missionId = opts.missionId ?? (first ? 'frontlines-skirmish' : `frontlines-${scale}`)
   const deploymentId = opts.deploymentId ?? DEFAULT_DEPLOYMENT[scale] ?? 'abandoned-camp'
+  const colours = { [seats[0]!]: 'red' as Colour, [seats[1]!]: 'blue' as Colour }
+  const dep = deploymentDef(bundle, deploymentId)
+  const shrine = opts.map === 'sunken-shrine' && dep ? shrineVariant(tableOf(dep)) : null
+  if (shrine !== null) return startRound(configure(s, bundle, missionId, deploymentId, colours, shrine), bundle) // opt-in: the shrine replaces the roll
   const r = roll(s, { count: 1, sides: mapCount(bundle, scale), purpose: 'map' }) // TER-001: roll the map
   s = pushEvents(r.state, [r.event])
-  s = configure(s, bundle, missionId, deploymentId, { [seats[0]!]: 'red', [seats[1]!]: 'blue' }, r.event.dice[0]!)
+  s = configure(s, bundle, missionId, deploymentId, colours, r.event.dice[0]!)
   return startRound(s, bundle)
 }
 

@@ -80,16 +80,19 @@ export interface TerrainPick {
   stretch: number
 }
 
-type PieceLike = Pick<TerrainInstance, 'id' | 'rulesType' | 'footprint' | 'height'>
+type PieceLike = Pick<TerrainInstance, 'id' | 'rulesType' | 'footprint' | 'height'> & { props?: Record<string, unknown> }
 
 /**
  * The model for an engine piece, or null (procedural). Candidates share the rules type and footprint shape and stretch by at
  * most MAX_STRETCH; the theme's own set and the next one form the pool (own set weighted 2:1), near-exact fits first; the
  * choice is a hash of the seed and the piece id.
  */
-export function pickTerrainModel(models: readonly TerrainModel[], t: PieceLike, theme: BoardThemeId, seed: string): TerrainPick | null {
+export function pickTerrainModel(allModels: readonly TerrainModel[], t: PieceLike, theme: BoardThemeId, seed: string): TerrainPick | null {
+  let models = allModels
   const box = footprintBox(t.footprint)
-  if (!box || t.height <= 0.3) return null
+  if (!box || t.height <= 0.3 || t.props?.['ramp'] === true || t.props?.['plateau'] === true) return null // ramps and the raised plateau are drawn as sandstone stonework, never as a borrowed model
+  const only = t.props?.['set'] // a hand-designed layout names its set: no borrowed crystal / outpost / creep pieces
+  if (typeof only === 'string') models = models.filter((m) => m.theme === only)
   const sets = THEME_SETS[theme]
   const cands: { m: TerrainModel; quarter: boolean; stretch: number; tier: number; loose: number }[] = []
   for (const m of models) {

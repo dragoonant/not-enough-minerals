@@ -60,10 +60,11 @@ export function canArrive(state: GameState, bundle: EditionBundle, seat: SeatId,
 }
 
 /** Ledger: add the bracket drop of `unitId` (from `before` to its current CSV) to its owner's supplyLostThisRound.
- *  Summoned units add nothing (spec 15 s7). */
+ *  Summoned units count like any other drop (F p.5 "anytime Supply drops"; R p.78 9.1.9 treats them as Friendly Units;
+ *  only the 8.10 Final Score tally leaves them out). Corrected 2026-10-16. */
 export function recordSupplyLoss(state: GameState, bundle: EditionBundle, unitId: UnitId, before: number): GameState {
   const u = state.units[unitId]
-  if (!u || u.summoned) return state
+  if (!u) return state
   const drop = Math.max(0, before - supplyFor(state, bundle, unitId, 'vp'))
   if (drop === 0) return state
   const seat = state.seats[u.owner]

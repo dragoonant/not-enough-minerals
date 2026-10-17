@@ -1,9 +1,12 @@
 // ?gallery (with ?test=1): every unit profile in the data bundle stood on a 6 inch grid, front toward +z (the Near seat
 // camera), GLB where the manifest has one and the procedural MGSD figure otherwise. For checking yaw, scale and bases.
+import { useState } from 'react'
+import { useFrame, useThree } from '@react-three/fiber'
 import { Anchored } from '../board/Anchored'
 import { dataName, useBundle } from '../contract'
 import { FigureBody } from './FigureBody'
 import { useManifest } from './manifest'
+import { pulse, type GlbRig } from './rig'
 import { tintFor } from './view'
 
 const COLS = 6, CELL = 6
@@ -36,6 +39,21 @@ export function GalleryLabels() {
   )
 }
 
+/** One gallery cell: the figure, plus a slow demo of its rig (turret sweep or lunge loop) so the split nodes can be eyeballed. */
+function GalleryCell({ id, mm, color, accent }: { id: string; mm: number; color: string; accent: string }) {
+  const [rig, setRig] = useState<GlbRig | null>(null)
+  const invalidate = useThree((s) => s.invalidate)
+  const live = !!rig && (rig.caps.turret || rig.caps.lunge)
+  useFrame(() => {
+    if (!rig || !live) return
+    const t = performance.now() / 1000
+    if (rig.caps.turret) rig.apply({ turret: Math.sin(t * 0.8) * 1.4 })
+    else { const env = pulse((t % 2.4) * 1000, 800); rig.apply({ lunge: env, sway: Math.sin(t * 6) * env }) }
+    invalidate()
+  })
+  return <group userData={{ rig: rig ? { turret: rig.caps.turret, lunge: rig.caps.lunge, parts: rig.caps.parts } : null }}><FigureBody id={id} profileId={id} baseMm={mm} color={color} accent={accent} onRig={setRig} /></group>
+}
+
 export function Gallery() {
   const bundle = useBundle()
   const manifest = useManifest()
@@ -50,7 +68,7 @@ export function Gallery() {
         const mm = typeof u.baseMm === 'number' ? u.baseMm : Array.isArray(u.baseMm) ? Math.max(...u.baseMm) : 32
         return (
           <group key={u.id} position={[x, 0, z]} data-unit={u.id}>
-            <FigureBody id={u.id} profileId={u.id} baseMm={mm} color={color} accent={accent} />
+            <GalleryCell id={u.id} mm={mm} color={color} accent={accent} />
           </group>
         )
       })}

@@ -114,9 +114,12 @@ function stageLine(cue: Extract<Cue, { kind: 'attackStage' }>): string | null {
 /** Condition and status ids to words. */
 export const conditionWord = (c: string): string => c.replace(/_/g, ' ')
 
+/** An ability-use note split around the ability name, so a caller can render the name as a tooltip link:
+ *  text === before + name + after. */
+export interface AbilityNote { abilityId: string; source: string | null; name: string; before: string; after: string; text: string }
 /** Ability-use notes: tolerant of the event shape (type 'ability.use' / 'ability.action' / 'abilityUsed', ability id under
- *  abilityId, ability or id; holder under source, unitId or cardId). Anything else stays quiet. */
-function noteLine(state: GameState | null, event: GameEvent): string | null {
+ *  abilityId, ability or id; holder under source, unitId or cardId). Anything else is null (stays quiet). */
+export function abilityNote(state: GameState | null, event: GameEvent): AbilityNote | null {
   const e = event as Record<string, unknown>
   const type = typeof e['type'] === 'string' ? (e['type'] as string) : ''
   if (!/^(ability[.:_]?(use|used|action)|abilityUsed|usesAbility)/i.test(type)) return null
@@ -126,9 +129,11 @@ function noteLine(state: GameState | null, event: GameEvent): string | null {
   const holder = str('source', 'unitId', 'cardId', 'holder')
   const hit = ctx.bundle ? findAbility(ctx.bundle, state, abilityId, holder) : null
   const name = hit?.ability.name ?? dataName(abilityId)
-  if (holder && state?.units[holder]) return `${unitName(state, holder)} uses ${name}.`
-  return hit?.cardName ? `${hit.cardName}: ${name}.` : `${name} is used.`
+  const make = (before: string, after: string): AbilityNote => ({ abilityId, source: holder, name, before, after, text: before + name + after })
+  if (holder && state?.units[holder]) return make(`${unitName(state, holder)} uses `, '.')
+  return hit?.cardName ? make(`${hit.cardName}: `, '.') : make('', ' is used.')
 }
+function noteLine(state: GameState | null, event: GameEvent): string | null { return abilityNote(state, event)?.text ?? null }
 
 /** Roll purpose to a short label for the dice tray. */
 export function rollLabel(purpose: string): string {

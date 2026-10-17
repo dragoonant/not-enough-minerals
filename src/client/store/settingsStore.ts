@@ -8,7 +8,7 @@ export interface Settings {
   /** Narration lines in the feed. */
   narration: boolean
   /** Answer optional ability windows with Done for the human seat (no prompt). */
-  skipAbilityWindows?: boolean
+  skipAbilityWindows: boolean
 }
 
 export const SPEED_PRESETS: readonly { id: string; label: string; speed: number }[] = [

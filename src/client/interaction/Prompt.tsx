@@ -7,7 +7,7 @@ import { SkillName, SkillTip } from '../ui/SkillTip'
 import { panels, useHideAll, usePanelMin } from '../ui/panelStore'
 import { Tip } from '../ui/Tooltip'
 import {
-  data, dataName, focus, getBundle, queries, useAttackPreview, useBoardGeometry, useChargeOdds, useFocus, useGame, useWaitingFor,
+  data, dataName, focus, getBundle, queries, useAttackPreview, useReadyPools, useShootOptions, useBoardGeometry, useChargeOdds, useFocus, useGame, useWaitingFor,
 } from '../contract'
 import type { DecisionOption, GameState, PendingDecision } from '../../engine/types'
 import type { Resource } from '../../data/types'
@@ -18,7 +18,7 @@ import { useDraftFor } from './hooks'
 import {
   activationMenu, batchMenu, chargeOptionFor, classify, hintFor, kindInfo, mentionedUnits, modelRef, pathPlan, sideOptions, verbOf, type Mode,
 } from './kinds'
-import { abilityHeading, firstChoiceWords, firstSentence, oneDp, payCardsWords, percent, poolLine, prettify, unitTag } from './text'
+import { abilityHeading, firstChoiceWords, firstSentence, oneDp, payCardsWords, percent, prettify, unitTag } from './text'
 import { draft } from './store'
 
 const HINT_KEY = 'nem.interaction.hints'
@@ -91,11 +91,15 @@ function ActivateBody({ pending }: { pending: PendingDecision }): ReactElement {
               const v = verbOf(o)
               const skill = optionSkill(getBundle(), state, o.action)
               const reach = o.action.type === 'move.run' ? queries.reachOf(open.unitId) : null
-              const hint = skill ? skill.text : reach && reach.run !== null ? `Move again, up to ${oneDp(reach.run)}" (the squad Speed).` : v.hint
+              // Ranged Attack is greyed with the engine's own reason when no weapon has a legal target (query.shootOptions).
+              const sh = o.action.type === 'shoot.go' ? queries.shootOptions(open.unitId) : null
+              const blocked = !!sh && !sh.canShoot
+              const why = blocked ? sh!.text ?? sh!.weapons.find((w) => w.text)?.text ?? 'No weapon has a legal target.' : ''
+              const hint = blocked ? why : skill ? skill.text : reach && reach.run !== null ? `Move again, up to ${oneDp(reach.run)}" (the squad Speed).` : v.hint
               return (
                 <SkillTip key={`${o.id}:${i}`} info={skill}>
-                  <button className="ix-btn primary" data-testid={`act-${o.id}`} onMouseEnter={() => setTip(hint)} onMouseLeave={() => setTip('')}
-                    onFocus={() => setTip(hint)} onBlur={() => setTip('')} onClick={() => answerOption(o)}>
+                  <button className={`ix-btn${blocked ? ' off' : ' primary'}`} data-testid={`act-${o.id}`} aria-disabled={blocked || undefined} data-why={blocked ? why : undefined} onMouseEnter={() => setTip(hint)} onMouseLeave={() => setTip('')}
+                    onFocus={() => setTip(hint)} onBlur={() => setTip('')} onClick={() => { if (!blocked) answerOption(o) }}>
                     <kbd>{i + 1}</kbd>{skill ? <SkillLabel info={skill} /> : v.label}
                   </button>
                 </SkillTip>
@@ -156,8 +160,14 @@ function weaponOf(state: GameState | null, unitId: string | null, weaponId: stri
 // ------------------------------------------------------------------ targets (shoot.batch and friends)
 const CHARGE_WHY: Record<string, string> = { outOfReach: 'Out of reach this turn.', noTarget: 'Pick at least one target.' }
 
+const HIT_NOTE: Record<string, string> = {
+  indirectFire: 'indirect fire', longRange: 'some models are at long range', cover: 'the target is in cover', highGround: 'the target holds the high ground', modifier: 'a modifier applies',
+}
 function AttackOdds({ attacker, weaponId, target }: { attacker: string; weaponId: string; target: string }): ReactElement | null {
   const pv = useAttackPreview(attacker, weaponId, target)
+  const so = useShootOptions(attacker)
+  const st = so?.weapons.find((w) => w.weaponId === weaponId)?.targets.find((t) => t.targetUnitId === target)
+  const tnNote = st?.hitNotes?.length ? `Hit ${st.hitTN ?? 'n/a'}+ instead of the printed ${st.printedHit ?? 'n/a'}+: ${st.hitNotes.map((n) => HIT_NOTE[n] ?? n).join(', ')}.` : ''
   if (!pv) return null
   if (!pv.legal) return <div className="ix-odds bad" data-testid="ix-odds">{pv.reason ?? 'Cannot fire at that target.'}</div>
   const dice = pv.perModel.reduce((n, m) => n + m.dice, 0)
@@ -165,6 +175,7 @@ function AttackOdds({ attacker, weaponId, target }: { attacker: string; weaponId
   return (
     <div className="ix-odds" data-testid="ix-odds">
       <span>{dice} dice, hit on {tn || 'n/a'}</span>
+      {tnNote && <span className="dim" data-testid="ix-hit-note">{tnNote}</span>}
       <span>Surge {pv.surge.dice ? (pv.surge.tagMatch ? 'matches' : 'no match') : 'none'}</span>
       <span>Armour {pv.armourTN !== null ? `${pv.armourTN}+` : 'none'}</span>
       <span>{pv.evadeTN !== null ? `Evade ${pv.evadeTN}+` : 'No Evade roll'}</span>
@@ -189,8 +200,11 @@ function TargetBody({ pending }: { pending: PendingDecision }): ReactElement {
   const d = useDraftFor(pending.id)
   const hover = useFocus((f) => f.hoverUnitId)
   const side = sideOptions(pending)
+  const shotUnit = pending.kind === 'shoot.batch' ? batchMenu(pending).unitId : null
+  const shots = useShootOptions(shotUnit)
   if (pending.kind === 'shoot.batch') {
     const menu = batchMenu(pending)
+    const offWeapons = (shots?.weapons ?? []).filter((x) => !menu.rows.some((r) => r.weaponId === x.weaponId))
     const w = activeWeapon(menu, d.weaponId)
     const row = menu.rows.find((r) => r.weaponId === w)
     const shown = d.armed?.unitId ?? (hover && row?.targets.includes(hover) ? hover : null)
@@ -207,6 +221,11 @@ function TargetBody({ pending }: { pending: PendingDecision }): ReactElement {
               </SkillTip>
             )
           })}
+          {offWeapons.map((x) => (
+            <button key={x.weaponId} className="ix-chip off" aria-disabled="true" data-testid={`weapon-off-${x.weaponId}`} onClick={(e) => e.preventDefault()}>
+              {x.name} <span className="dim">{x.text ?? 'Cannot fire now.'}</span>
+            </button>
+          ))}
         </div>
         <div className="ix-row">
           {row?.targets.map((t) => (
@@ -216,6 +235,19 @@ function TargetBody({ pending }: { pending: PendingDecision }): ReactElement {
             </button>
           ))}
         </div>
+        {(() => {
+          const blockedTargets = (shots?.weapons.find((x) => x.weaponId === w)?.targets ?? []).filter((t) => !t.eligible && !row?.targets.includes(t.targetUnitId))
+          return blockedTargets.length > 0 && (
+            <div className="ix-row" data-testid="ix-blocked" aria-label="Targets that cannot be shot">
+              {blockedTargets.map((t) => (
+                <button key={t.targetUnitId} className="ix-btn off" aria-disabled="true" data-testid={`blocked-${t.targetUnitId}`} onClick={(e) => e.preventDefault()}
+                  onMouseEnter={() => focus.hover(t.targetUnitId)} onMouseLeave={() => focus.hover(null)}>
+                  {unitTag(state, t.targetUnitId)} <span className="dim">{t.text ?? 'Not a legal target.'}</span>
+                </button>
+              ))}
+            </div>
+          )
+        })()}
         <div className="ix-slot" data-testid="ix-slot">
           {shown && w && menu.unitId ? <AttackOdds attacker={menu.unitId} weaponId={w} target={shown} /> : <div className="ix-note">{d.armed ? 'Press Fire, or click the target again.' : 'Hover a target to see the odds; click it to arm the shot.'}</div>}
         </div>
@@ -323,8 +355,16 @@ function PointBody({ pending }: { pending: PendingDecision }): ReactElement {
 }
 
 // ------------------------------------------------------------------ ability prompts: what is asked, what it costs, what you hold
+/** "You have 3 CP ready." from the engine's ready-pool read-out (query.readyPools). `only` limits it to one resource. */
+function readyLine(pools: { res: Resource; n: number }[] | null, only?: Resource): string {
+  const shown = (pools ?? []).filter((x) => !only || x.res === only)
+  if (!shown.length) return only ? `You have no ${only} ready.` : 'You have no resources ready.'
+  return `You have ${shown.map((x) => `${x.n} ${x.res}`).join(' and ')} ready.`
+}
+
 function AbilityStatus({ pending }: { pending: PendingDecision }): ReactElement | null {
   const { state } = useGame()
+  const pools = useReadyPools(pending.seat)
   if (!state || (pending.kind !== 'ability.window' && pending.kind !== 'ability.react' && pending.kind !== 'ability.pay')) return null
   const ctx = pending.context
   let lead = ''
@@ -337,7 +377,7 @@ function AbilityStatus({ pending }: { pending: PendingDecision }): ReactElement 
     lead = typeof ctx['n'] === 'number' && typeof ctx['res'] === 'string' ? `This costs ${ctx['n']} ${ctx['res']}. Pick which cards to exhaust; any surplus is lost.` : ''
   }
   const only = pending.kind === 'ability.pay' && typeof ctx['res'] === 'string' ? (ctx['res'] as Resource) : undefined
-  return <p className="ix-status-line" data-testid="ix-ability-status">{lead} {poolLine(state, pending.seat, only)}</p>
+  return <p className="ix-status-line" data-testid="ix-ability-status">{lead} {readyLine(pools, only)}</p>
 }
 
 // ------------------------------------------------------------------ the panel

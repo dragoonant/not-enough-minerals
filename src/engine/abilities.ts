@@ -17,6 +17,7 @@ import { CODE_NEEDS_POINT, codeCondition, runCode } from './code-hooks'
 import { eligible } from './turnflow'
 import { addEffect, abilitiesOf, conditionHolds, hasStatus, keywordOf, liveEffects, readyCards, removeEffects, setStatus, tableModels, unitDistance, unitToPoint, effectOps } from './effects'
 import { engagedWith } from './engage'
+import { baseRadius, dist } from './geometry'
 import type { HookCtx } from './hooks'
 import { modelDistance } from './measure'
 import { firePending, reposition, type PendingHook, type RepositionResult } from './movement'
@@ -24,7 +25,7 @@ import { arrive, queueArrival, raiseDeployNow, returnToReserves } from './reserv
 import { hitsBatch, resolveBatch } from './attack'
 import { removeModels, heal, addNonLethal } from './damage'
 import { option, pushEvents, raiseDecision, reject, resumeIn, updateUnit, type ActionDone, type ModuleDef, type StepResult } from './registry'
-import { placeFormation } from './squads'
+import { endProblem, placeFormation, squadCtx } from './squads'
 import { isRejection, TodoError } from './errors'
 import { canTarget, detect } from './visibility'
 import type {
@@ -237,7 +238,9 @@ export function effectiveAbility(state: GameState, bundle: EditionBundle, r: Abi
 }
 
 /** The cost of using `ability` once, with cost modifiers folded in (CARD-008), and which modifiers applied. */
-export function costOf(state: GameState, bundle: EditionBundle, r: AbilityRef, userUnitId: UnitId | null, optionId?: Id): { res: Resource; n: number; mods: AbilityRef[] } | null {
+export function costOf(state: GameState, bundle: EditionBundle, r: AbilityRef, userUnitId: UnitId | null, optionId?: Id,
+  /** 'skip' leaves out cost Reactions (Advanced Training): R p.82 10.4 makes using one the player's choice. */
+  reactions: 'use' | 'skip' = 'use'): { res: Resource; n: number; mods: AbilityRef[] } | null {
   const a = r.ability
   const base = optionId ? a.options?.find((o) => o.id === optionId)?.cost ?? a.cost : a.cost
   if (!base) return null
@@ -251,6 +254,7 @@ export function costOf(state: GameState, bundle: EditionBundle, r: AbilityRef, u
     const costRecs = l.ability.effects.filter((e) => e.op === 'costMod' && e.res === base.res && (e.ability === undefined || e.ability === a.id))
     if (costRecs.length === 0) continue
     if (t.event === 'usesAbility') {
+      if (reactions === 'skip' && l.ability.type === 'reaction') continue
       if (l.unitId && state.units[l.unitId]?.location !== 'table') continue
       if (l.seat !== r.seat || !matchTrigger(state, bundle, l, t, { unitId: userUnitId ?? undefined, seat: r.seat }, 'usesAbility')) continue
       if (!limitOk(state, l, userUnitId) || (l.ability.type === 'reaction' && !reactionFree) || n <= 0) continue
@@ -367,6 +371,8 @@ function evalNum(state: GameState, bundle: EditionBundle, x: unknown, ctx: Effec
 }
 
 function subjectsOf(state: GameState, bundle: EditionBundle, rec: DataEffect, ctx: EffectCtx): UnitId[] {
+  // a list cut short by a raised window carries the Units still waiting (RESPAWN / MORPH)
+  if (Array.isArray(rec.__subjects)) return uniq((rec.__subjects as UnitId[]).filter((x) => !!state.units[x]))
   const to = rec.to
   const dflt = ctx.targetUnitId ?? ctx.unitId ?? undefined
   let ids: (UnitId | undefined)[]
@@ -449,6 +455,8 @@ function execOne(state: GameState, bundle: EditionBundle, rec: DataEffect, ctx: 
   if (rec.when && !conditionHolds(s, bundle, rec.when as Condition, ctx.triggerUnitId ?? ctx.unitId ?? ctx.targetUnitId ?? null, { targetUnitId: ctx.targetUnitId, attackerUnitId: ctx.attackerUnitId, ...(ctx.hook?.first !== undefined ? { first: ctx.hook.first } : {}) })) return { state: s }
   if (rec.at) return { state: schedule(s, rec, ctx) }
   const subs = (): UnitId[] => subjectsOf(s, bundle, rec, ctx)
+  // engine-internal step (not data): the removal half of a MORPH whose arrival opened a Reaction window
+  if ((rec.op as string) === 'morphRemove') return { state: removeModels(s, bundle, String(rec.unit), (rec.ids as string[]).filter((id) => s.models[id]?.life === 'active'), 'morph') }
   switch (rec.op) {
     case 'buff': case 'debuff': case 'modify': case 'grantKeyword': case 'denyKeyword': {
       for (const u of subs()) s = storeEffect(s, u, rec, ctx)
@@ -519,21 +527,11 @@ function execOne(state: GameState, bundle: EditionBundle, rec: DataEffect, ctx: 
       if (CODE_NEEDS_POINT.has(String(rec.code)) && !isVec(ctx.point)) return askPoint(s, bundle, rec, ctx, rest)
       return runCodeEffect(s, bundle, rec, ctx)
     }
-    case 'respawn': {
-      for (const u of subs()) {
-        const r = respawnStep(s, bundle, u, evalNum(s, bundle, rec.x, ctx, u), ctx.sourceId)
-        s = r.state
-        if (r.raised) return parkRaised(s, rest, ctx, r.pending)
-      }
-      return { state: s }
-    }
-    case 'morph': {
-      for (const u of subs()) {
-        const r = morphStep(s, bundle, u, String(rec.unit), evalNum(s, bundle, rec.x, ctx, u), ctx.sourceId)
-        s = r.state
-        if (r.raised) return parkRaised(s, rest, ctx, r.pending)
-      }
-      return { state: s }
+    case 'respawn': case 'morph': {
+      // one Unit at a time: the player places each model; the Units still waiting resume after it (never skipped)
+      const list = subs()
+      if (list.length === 0) return { state: s }
+      return startNewModel(s, bundle, rec, ctx, list[0]!, list.slice(1), rest)
     }
     case 'aura': case 'setChar': case 'weaponMod': case 'costMod': case 'supplyOverride': case 'coherency': case 'moveThrough': case 'ignoreDisengage':
     case 'targetRestriction': case 'abilityMod': case 'chargeAgain': case 'denyStatus': case 'altEntry': {
@@ -637,6 +635,8 @@ type Cont =
   | { k: 'react'; trig: Trig; offers: Offer[] }
   | { k: 'recall'; unitId: UnitId; source: Id }
   | { k: 'khala'; cands: UnitId[]; unitId: UnitId }
+  | { k: 'costReact'; flow: Flow }
+  | { k: 'newModel'; op: 'respawn' | 'morph'; rec: DataEffect; ctx: EffectCtx; rest: DataEffect[]; unitId: UnitId; ids: string[]; pts: Vec2[]; into?: Id; x?: number; removed?: string[] }
 
 function stashCont(state: GameState, holder: UnitId, seat: SeatId, cont: Cont): GameState {
   return addEffect(state, holder, { source: '__cont', kind: 'mod', expires: 'endOfActivation', bySeat: seat, round: state.round, data: { op: 'cont', cont } })
@@ -765,73 +765,235 @@ function execPoint(state: GameState, bundle: EditionBundle, rec: DataEffect, ctx
   return continueList(r.state, bundle, rest, { ...ctx, point })
 }
 
-/** RESPAWN X: up to X lost models of a Unit on the table come back at full HP, set by the formation placer around the
- *  Leading Model (the others stay where they are). SUP-004: never more models than keep the Unit in its current Supply
- *  bracket (CSV never rises). RULING: a model with no linked spot does not come back. The models re-enter through the
- *  one repositioning mechanism (a `place` that keeps the Leading Model where it stands), so coherency is stored and the
- *  move-end hooks run. */
-export function respawnModels(state: GameState, bundle: EditionBundle, unitId: UnitId, x: number, source: Id): GameState {
-  return respawnStep(state, bundle, unitId, x, source).state
+// ---------------------------------------------------------------- RESPAWN and MORPH: models set in base contact
+const CONTACT_ANGLES = 24
+const CONTACT_TOL = 0.03
+const MAX_SPOTS = 12
+
+/** What a spot search needs: the base of the model to set, models of the same job already set, an enemy keep-out
+ *  distance (MORPH: Within 1"), and an extra yes/no (MORPH: the dry-run arrival). */
+interface SpotJob { base: number; chosen: { pos: Vec2; base: number }[]; avoid?: number; extra?: (p: Vec2) => boolean }
+
+const anchorsOf = (state: GameState, unitId: UnitId, job: SpotJob): { pos: Vec2; r: number }[] =>
+  [...tableModels(state, unitId).map((m) => ({ pos: m.pos, r: baseRadius(m.base) })), ...job.chosen.map((c) => ({ pos: c.pos, r: baseRadius(c.base) }))]
+
+/** Can a model of `job.base` stand at `p`: in base contact with an existing model of the Unit (or one just set), on legal
+ *  ground, and outside every enemy's Engagement Range (R p.91 RESPAWN, R p.90 MORPH)? */
+function spotLegal(state: GameState, bundle: EditionBundle, unitId: UnitId, job: SpotJob, p: Vec2): boolean {
+  const r = baseRadius(job.base)
+  const anchors = anchorsOf(state, unitId, job)
+  if (!anchors.some((a) => Math.abs(dist(a.pos, p) - (a.r + r)) <= CONTACT_TOL)) return false
+  if (endProblem(squadCtx(state, bundle, unitId), job.base, p, anchors, job.avoid !== undefined ? { avoidEnemyWithin: job.avoid } : {})) return false
+  return job.extra ? job.extra(p) : true
+}
+
+/** Legal base-contact spots, nearest the Leading Model first (at most MAX_SPOTS). */
+function contactSpots(state: GameState, bundle: EditionBundle, unitId: UnitId, job: SpotJob): Vec2[] {
+  const ctx = squadCtx(state, bundle, unitId)
+  const r = baseRadius(job.base)
+  const anchors = anchorsOf(state, unitId, job)
+  const lead = state.models[state.units[unitId]?.leadingModelId ?? '']
+  const from = lead?.pos ?? anchors[0]?.pos ?? { x: 0, z: 0 }
+  const seen = new Set<string>()
+  const cands: Vec2[] = []
+  for (const a of anchors) for (let i = 0; i < CONTACT_ANGLES; i++) {
+    const t = (i / CONTACT_ANGLES) * 2 * Math.PI
+    const p = { x: a.pos.x + Math.cos(t) * (a.r + r), z: a.pos.z + Math.sin(t) * (a.r + r) }
+    const key = `${Math.round(p.x * 20)}:${Math.round(p.z * 20)}`
+    if (seen.has(key)) continue
+    seen.add(key)
+    if (endProblem(ctx, job.base, p, anchors, job.avoid !== undefined ? { avoidEnemyWithin: job.avoid } : {})) continue
+    cands.push(p)
+  }
+  cands.sort((a, b) => dist(a, from) - dist(b, from))
+  const out: Vec2[] = []
+  for (const p of cands) {
+    if (job.extra && !job.extra(p)) continue
+    out.push(p)
+    if (out.length >= MAX_SPOTS) break
+  }
+  return out
 }
 
 /** What a respawn / morph step reports: the state, and when a Reaction window opened at an end hook, `raised` + the hooks left. */
 interface StepRaise { state: GameState; raised?: boolean; pending?: PendingHook[] }
 const raiseOf = (r: RepositionResult): Pick<StepRaise, 'raised' | 'pending'> => r.raised ? { raised: true, ...(r.pending ? { pending: r.pending } : {}) } : {}
 
-/** respawnModels, also reporting a raised Reaction window (the interpreter parks the rest of its list on it). */
-export function respawnStep(state: GameState, bundle: EditionBundle, unitId: UnitId, x: number, source: Id): StepRaise {
-  const none: StepRaise = { state }
+/** RESPAWN X: up to X Destroyed models return to the Unit at full HP, each set in base contact with an existing model of
+ *  the Unit and outside every enemy Engagement Range; a model with no legal spot cannot return (R p.91). SUP-004: never more
+ *  models than keep the Unit in its current Supply bracket. The models re-enter through the one repositioning mechanism
+ *  (kind 'place', the models already on the table stay put), so coherency is stored and the move-end hooks run. */
+function respawnPlan(state: GameState, bundle: EditionBundle, unitId: UnitId, x: number): string[] {
   const u = state.units[unitId]
   const def = u ? unitDef(bundle, u.profileId) : undefined
   const lead = u?.leadingModelId ? state.models[u.leadingModelId] : undefined
-  if (!u || !def || u.location !== 'table' || !lead || lead.life === 'dead' || x <= 0) return none
+  if (!u || !def || u.location !== 'table' || !lead || lead.life === 'dead' || x <= 0) return []
   const dead = u.modelIds.filter((id) => state.models[id]?.life === 'dead')
   const live = u.modelIds.length - dead.length
   const csv = bracketSupply(def, live)
   let k = Math.min(Math.floor(x), dead.length)
   while (k > 0 && bracketSupply(def, live + k) > csv) k--
-  if (k <= 0) return none
-  const lost = dead.slice(0, k)
-  const revive = (ids: readonly string[]): GameState => ({
+  return dead.slice(0, Math.max(0, k))
+}
+
+/** The spot search for the next returning model: `pts` are the spots already chosen for the first of `ids`. */
+const respawnJob = (state: GameState, ids: string[], pts: Vec2[]): SpotJob => ({
+  base: state.models[ids[pts.length]!]!.base, chosen: pts.map((pos, j) => ({ pos, base: state.models[ids[j]!]!.base })),
+})
+
+/** Bring `ids` back at `pts` (one spot each). */
+function respawnCommit(state: GameState, bundle: EditionBundle, unitId: UnitId, ids: string[], pts: Vec2[], source: Id): StepRaise {
+  const u = state.units[unitId]
+  const def = u ? unitDef(bundle, u.profileId) : undefined
+  const lead = u?.leadingModelId ? state.models[u.leadingModelId] : undefined
+  if (!u || !def || !lead || !ids.length) return { state }
+  const revived: GameState = {
     ...state, models: { ...state.models, ...Object.fromEntries(ids.map((id) => [id, { ...state.models[id]!, life: 'active' as const, offTable: true, hp: def.stats.hp }])) },
-  })
+  }
   const fixed = Object.fromEntries(tableModels(state, unitId).filter((m) => m.id !== lead.id).map((m) => [m.id, m.pos]))
-  const form = placeFormation(revive(lost), bundle, unitId, { leaderId: lead.id, leaderPos: lead.pos, fixed })
-  if (!form) return none
-  const back = lost.filter((id) => form.placement[id] && !form.casualties.includes(id))
-  if (!back.length) return none
-  const placement = { ...fixed, ...Object.fromEntries(back.map((id) => [id, form.placement[id]!])) }
-  const r = reposition(revive(back), bundle, unitId, { kind: 'place', leaderId: lead.id, path: [lead.pos], maxDist: Infinity, placement, returnTo: 'ability' })
-  if (isRejection(r)) return none
+  const placement = { ...fixed, ...Object.fromEntries(ids.map((id, i) => [id, pts[i]!])) }
+  const r = reposition(revived, bundle, unitId, { kind: 'place', leaderId: lead.id, path: [lead.pos], maxDist: Infinity, placement, returnTo: 'ability' })
+  if (isRejection(r)) return { state }
+  const back = ids.filter((id) => r.state.models[id]?.life === 'active')
   return { state: pushEvents(r.state, [{ type: 'respawn', unitId, modelIds: back, source }]), ...raiseOf(r) }
 }
 
-/** MORPH: X models of a Unit each become a new one-model Unit of `into`, set where the old model stood (removed with
- *  cause 'morph', which is not a Supply loss). The new Unit counts as already activated like the old one.
- *  RULING: if the new Unit's Supply does not fit or its base has no room, nothing changes for that model. */
+/** respawnModels, also reporting a raised Reaction window. The first legal spot is taken for each model (the interpreter
+ *  asks the player instead; this is the ready answer for callers with no player). */
+export function respawnStep(state: GameState, bundle: EditionBundle, unitId: UnitId, x: number, source: Id): StepRaise {
+  const ids = respawnPlan(state, bundle, unitId, x)
+  const pts: Vec2[] = []
+  for (let i = 0; i < ids.length; i++) {
+    const spot = contactSpots(state, bundle, unitId, respawnJob(state, ids, pts))[0]
+    if (!spot) break
+    pts.push(spot)
+  }
+  return pts.length ? respawnCommit(state, bundle, unitId, ids.slice(0, pts.length), pts, source) : { state }
+}
+export function respawnModels(state: GameState, bundle: EditionBundle, unitId: UnitId, x: number, source: Id): GameState {
+  return respawnStep(state, bundle, unitId, x, source).state
+}
+
+// ---- MORPH (Name) X: set ONE new model in base contact with a model of the Unit (not Within 1" of an enemy), then remove X
+// models from that Unit. The new model forms a new Unit that cannot activate this Round. Available Supply is checked first.
+interface MorphSetup { newId: UnitId; mu: ReturnType<typeof musterUnit>; t0: GameState; job: SpotJob }
+
+function morphArrival(bundle: EditionBundle, setup: { mu: ReturnType<typeof musterUnit> }, p: Vec2) {
+  return { leaderId: setup.mu.unit.leadingModelId!, path: [p], maxDist: Infinity, returnTo: 'ability', minEnemyDist: rule(bundle, 'engagementRange') + 1e-6 }
+}
+
+function morphSetup(state: GameState, bundle: EditionBundle, unitId: UnitId, into: Id): MorphSetup | null {
+  const u = state.units[unitId]
+  if (!u || u.location !== 'table' || !unitDef(bundle, into) || tableModels(state, unitId).length === 0) return null
+  const newId = `${u.owner}-s${Object.keys(state.units).length + 1}`
+  const mu = musterUnit(bundle, u.owner, into, 1, newId)
+  const t0: GameState = { ...state, units: { ...state.units, [newId]: { ...mu.unit, summoned: false } }, models: { ...state.models, ...Object.fromEntries(mu.models.map((m) => [m.id, m])) } }
+  const job: SpotJob = {
+    base: mu.models[0]!.base, chosen: [], avoid: rule(bundle, 'engagementRange'),
+    // the same arrival the commit will run, tried first: a spot it refuses (Supply, Zone, ...) is never offered
+    extra: (p) => !isRejection(arrive(t0, bundle, newId, { kind: 'place' }, morphArrival(bundle, { mu }, p))),
+  }
+  return { newId, mu, t0, job }
+}
+
+/** Two models are the same casualty when their HP and loadout match, as in damage.ts. */
+const sigOf = (m: { hp: number; weapons: string[] }): string => `${m.hp}|${m.weapons.join(',')}`
+
+/** Set the new model, then remove the chosen models. A Reaction window at the arrival parks the removal (`removeLeft`). */
+function morphCommit(state: GameState, bundle: EditionBundle, unitId: UnitId, pt: Vec2, removed: string[], source: Id, setup: MorphSetup): StepRaise & { removeLeft?: string[] } {
+  const u0 = state.units[unitId]!
+  const r = arrive(setup.t0, bundle, setup.newId, { kind: 'place' }, morphArrival(bundle, setup, pt))
+  if (isRejection(r)) return { state }
+  const s = pushEvents(updateUnit(r.state, setup.newId, { activation: u0.activation }), [{ type: 'morph', unitId, into: setup.newId, removed, source }])
+  if (r.raised) return { state: s, raised: true, ...(r.pending ? { pending: r.pending } : {}), removeLeft: removed }
+  return { state: removeModels(s, bundle, unitId, removed, 'morph') }
+}
+
+/** morphModels, with the first legal spot and the last (non-leading) models removed: the ready answer for callers with no player. */
+export function morphStep(state: GameState, bundle: EditionBundle, unitId: UnitId, into: Id, x: number, source: Id): StepRaise {
+  const setup = morphSetup(state, bundle, unitId, into)
+  if (!setup) return { state }
+  const spot = contactSpots(state, bundle, unitId, setup.job)[0]
+  if (!spot) return { state }
+  const u0 = state.units[unitId]!
+  const pool = tableModels(state, unitId).filter((m) => m.id !== u0.leadingModelId).reverse()
+  const lead = tableModels(state, unitId).find((m) => m.id === u0.leadingModelId)
+  if (lead) pool.push(lead)
+  const r = morphCommit(state, bundle, unitId, spot, pool.slice(0, Math.max(0, x)).map((m) => m.id), source, setup)
+  return { state: r.state, ...(r.raised ? { raised: true, ...(r.pending ? { pending: r.pending } : {}) } : {}) }
+}
 export function morphModels(state: GameState, bundle: EditionBundle, unitId: UnitId, into: Id, x: number, source: Id): GameState {
   return morphStep(state, bundle, unitId, into, x, source).state
 }
 
-/** morphModels, also reporting a raised Reaction window; the models still to morph are skipped once one opens. */
-export function morphStep(state: GameState, bundle: EditionBundle, unitId: UnitId, into: Id, x: number, source: Id): StepRaise {
-  let s = state
-  const u0 = s.units[unitId]
-  if (!u0 || u0.location !== 'table' || !unitDef(bundle, into)) return { state: s }
-  const picks = tableModels(s, unitId).filter((m) => m.id !== u0.leadingModelId).reverse()
-  const lead = tableModels(s, unitId).find((m) => m.id === u0.leadingModelId)
-  if (lead) picks.push(lead)
-  for (const m of picks.slice(0, Math.max(0, x))) {
-    const id = `${u0.owner}-s${Object.keys(s.units).length + 1}`
-    const mu = musterUnit(bundle, u0.owner, into, 1, id)
-    let t: GameState = { ...s, units: { ...s.units, [id]: { ...mu.unit, summoned: false } }, models: { ...s.models, ...Object.fromEntries(mu.models.map((x2) => [x2.id, x2])) } }
-    t = removeModels(t, bundle, unitId, [m.id], 'morph')
-    const r = arrive(t, bundle, id, { kind: 'place' }, { leaderId: mu.unit.leadingModelId!, path: [m.pos], maxDist: Infinity, returnTo: 'ability' })
-    if (isRejection(r)) continue
-    s = pushEvents(updateUnit(r.state, id, { activation: u0.activation }), [{ type: 'morph', unitId, modelId: m.id, into: id, source }])
-    if (r.raised) return { state: s, ...raiseOf(r) }
+/** The player-driven RESPAWN / MORPH: a chain of decisions (the spot of each model, then which models MORPH removes) whose
+ *  continuation is plain JSON in the decision context. Resumed by resolveTarget(); finished it runs the rest of the list. */
+type NewCont = Extract<Cont, { k: 'newModel' }>
+
+function newModelStep(state: GameState, bundle: EditionBundle, c: NewCont): Exec {
+  const u = state.units[c.unitId]
+  const done = (s: GameState): Exec => execList(s, bundle, c.rest, c.ctx)
+  if (!u || u.location !== 'table') return done(state)
+  const seat = u.owner
+  const ask = (spots: Vec2[], prompt: string, skip: string | null): Exec => ({
+    suspended: true,
+    state: raiseDecision(state, {
+      seat, kind: 'ability.target', context: { cont: c, prompt, points: spots }, canPass: skip !== null,
+      options: [...spotOptions(spots, prompt, seat), ...(skip !== null ? [option('skip', skip, 'ability.target', { mode: 'skip' }, seat)] : [])],
+    }),
+  })
+  if (c.op === 'respawn') {
+    const finish = (): Exec => {
+      if (!c.pts.length) return done(state)
+      const r = respawnCommit(state, bundle, c.unitId, c.ids.slice(0, c.pts.length), c.pts, c.ctx.sourceId)
+      return r.raised ? parkRaised(r.state, c.rest, c.ctx, r.pending) : done(r.state)
+    }
+    if (c.pts.length >= c.ids.length) return finish()
+    const spots = contactSpots(state, bundle, c.unitId, respawnJob(state, c.ids, c.pts))
+    return spots.length ? ask(spots, 'Return a model in base contact with the Unit', 'Return no more models') : finish()
   }
-  return { state: s }
+  // MORPH
+  const setup = morphSetup(state, bundle, c.unitId, c.into!)
+  if (!setup) return done(state)
+  if (c.pts.length === 0) {
+    const spots = contactSpots(state, bundle, c.unitId, setup.job)
+    return spots.length ? ask(spots, `Set the new ${c.into} model in base contact with the Unit`, null) : done(state)
+  }
+  const removed = [...(c.removed ?? [])]
+  for (;;) {
+    const left = (c.x ?? 1) - removed.length
+    const pool = tableModels(state, c.unitId).filter((m) => !removed.includes(m.id))
+    if (left <= 0 || pool.length === 0) break
+    if (new Set(pool.map(sigOf)).size > 1) {
+      const next: NewCont = { ...c, removed }
+      return {
+        suspended: true,
+        state: raiseDecision(state, {
+          seat, kind: 'ability.target', context: { cont: next, prompt: `Remove ${left} model${left > 1 ? 's' : ''} from the Unit` }, canPass: false,
+          options: pool.map((m) => option(`remove:${m.id}`, `Remove model ${m.id}`, 'ability.target', { mode: 'remove', modelId: m.id }, seat)),
+        }),
+      }
+    }
+    // equal models: no real choice; the last in muster order goes, the Leading Model last of all
+    const order = u.modelIds
+    const pick = [...pool].sort((a, b) => Number(a.id === u.leadingModelId) - Number(b.id === u.leadingModelId) || order.indexOf(b.id) - order.indexOf(a.id))[0]!
+    removed.push(pick.id)
+  }
+  const r = morphCommit(state, bundle, c.unitId, c.pts[0]!, removed, c.ctx.sourceId, setup)
+  if (r.raised) return parkRaised(r.state, [{ op: 'morphRemove' as DataEffect['op'], unit: c.unitId, ids: r.removeLeft ?? removed }, ...c.rest], c.ctx, r.pending)
+  return done(r.state)
+}
+
+/** Start RESPAWN / MORPH for one Unit of a subject list; `more` are the Units still waiting (they carry on after this one). */
+function startNewModel(state: GameState, bundle: EditionBundle, rec: DataEffect, ctx: EffectCtx, unitId: UnitId, more: UnitId[], rest: DataEffect[]): Exec {
+  const tail: DataEffect[] = more.length ? [{ ...rec, __subjects: more }, ...rest] : rest
+  const base = { k: 'newModel' as const, rec, ctx: { ...ctx, hook: undefined }, rest: tail, unitId, pts: [] as Vec2[] }
+  if (rec.op === 'respawn') {
+    const ids = respawnPlan(state, bundle, unitId, evalNum(state, bundle, rec.x, ctx, unitId))
+    if (!ids.length) return execList(state, bundle, tail, ctx)
+    return newModelStep(state, bundle, { ...base, op: 'respawn', ids })
+  }
+  return newModelStep(state, bundle, { ...base, op: 'morph', ids: [], into: String(rec.unit), x: Math.max(0, evalNum(state, bundle, rec.x, ctx, unitId)), removed: [] })
 }
 
 function continueList(state: GameState, bundle: EditionBundle, rest: DataEffect[], ctx: EffectCtx): Exec {
@@ -852,6 +1014,8 @@ interface Flow {
   point?: Vec2
   /** True once the price is paid (a pay decision resumes here). */
   paid?: boolean
+  /** The player's answer on a cost Reaction (Advanced Training): use it or pay the full price. Unset = not asked yet. */
+  costReact?: 'use' | 'skip'
   trig?: Trig
 }
 interface Trig { event: TriggerEvent; ctx: HookCtx; point?: string; seatsLeft: SeatId[]; returnTo?: string; prev?: PendingDecision; after?: After }
@@ -1028,10 +1192,25 @@ function advance(state: GameState, bundle: EditionBundle, flow: Flow): StepResul
         options: spots.length ? spotOptions(spots, 'Choose a spot', seat) : [option('cancel', 'No legal spot: do not use it', 'ability.target', { mode: 'cancel' }, seat)] }) }
     }
   }
+  // A Reaction that cuts the price (Advanced Training) is the player's choice and takes the one Reaction of this Activation:
+  // ask when it would change the price and the full price can be paid without it (else it is the only way to pay).
+  if (!flow.paid && flow.costReact === undefined) {
+    const withIt = costOf(state, bundle, ref, flow.unitId, flow.optionId)
+    const without = costOf(state, bundle, ref, flow.unitId, flow.optionId, 'skip')
+    if (withIt && without && withIt.n !== without.n && withIt.mods.some((m) => m.ability.type === 'reaction')) {
+      if (!canPay(state, bundle, seat, without.res, without.n)) return advance(state, bundle, { ...flow, costReact: 'use' })
+      const names = withIt.mods.filter((m) => m.ability.type === 'reaction').map((m) => m.ability.name).join(', ')
+      return { state: raiseDecision(state, { seat, kind: 'ability.target', context: { cont: { k: 'costReact', flow } satisfies Cont, prompt: `${names}?` }, canPass: false,
+        options: [
+          option('costReaction:use', `Use ${names}: pay ${withIt.n} ${withIt.res} (uses your Reaction)`, 'ability.target', { mode: 'costReaction', use: true }, seat),
+          option('costReaction:skip', `Pay the full ${without.n} ${without.res} and keep your Reaction`, 'ability.target', { mode: 'costReaction', use: false }, seat),
+        ] }) }
+    }
+  }
   // the price (ABL-002: paid before the effect), then the effect
   let s = state
   if (!flow.paid) {
-    const c = costOf(s, bundle, ref, flow.unitId, flow.optionId)
+    const c = costOf(s, bundle, ref, flow.unitId, flow.optionId, flow.costReact ?? 'use')
     if (ref.cardId) s = exhaustCard(s, seat, ref.cardId)
     if (c && c.n > 0) {
       if (!canPay(s, bundle, seat, c.res, c.n)) return reject('E_COST', `Cannot pay ${c.n} ${c.res}.`)
@@ -1130,11 +1309,30 @@ function passiveAfter(state: GameState, ctx: HookCtx, after?: After): After | un
   return undefined
 }
 
+/** "Its first weapon used" grants (Raynor's Orders, Wild Mutation, the Armory...) are used up by the first weapon the Unit
+ *  fires: once an action in which it fired a ranged weapon (grant for the Assault Phase) or fought (grant for the Combat
+ *  Phase) is over, the grant is gone (R p.81 10.2: it lasts to the End of the Round unless used). The grant reaches every Batch
+ *  of that one action. Scans the log back to the activation's `turn.begin`. */
+function spendFirstWeaponGrants(state: GameState, unitId: UnitId): GameState {
+  const u = state.units[unitId]
+  if (!u || !u.effects.some((e) => e.weapons?.first)) return state
+  let ranged = false, melee = false
+  for (let i = state.events.length - 1; i >= 0; i--) {
+    const e = state.events[i]! as unknown as { type: string; unitId?: string; fought?: boolean }
+    if (e.type === 'turn.begin' && e.unitId === unitId) break
+    if (e.type === 'shoot.fire' && e.unitId === unitId) ranged = true
+    if (e.type === 'melee.done' && e.unitId === unitId && e.fought) melee = true
+  }
+  if (!ranged && !melee) return state
+  return removeEffects(state, unitId, (e) => !!e.weapons?.first && (e.weapons.phase === 'assault' ? ranged : e.weapons.phase === 'combat' ? melee : ranged || melee))
+}
+
 /** Find the listeners of `event`, run the matching Passives now (active player's first, ABL-031) and offer the matching
  *  Reactions (one per player per Activation, active player first, ABL-042/043). A raised Reaction window returns
  *  `raised`: the caller stops and continues in its resume(); the window carries `after` / `returnTo`. */
 export function dispatch(state: GameState, bundle: EditionBundle, event: TriggerEvent, ctx: HookCtx, point?: string, after?: After): DispatchResult {
   let s = state
+  if (event === 'actionResolved' && ctx.unitId && !ctx.foldOnly) s = spendFirstWeaponGrants(s, ctx.unitId)
   const order = seatOrder(s)
   const refs = abilityRefs(s, bundle).filter((r) => r.ability.trigger?.event === event && r.ability.type !== 'active')
     .sort((a, b) => order.indexOf(a.seat) - order.indexOf(b.seat) || refKey(a).localeCompare(refKey(b)))
@@ -1289,6 +1487,28 @@ function resolveTarget(state: GameState, bundle: EditionBundle, action: Action):
       const seat = state.units[action.unitId]!.owner
       const s = addEffect(state, action.unitId, { source: 'bound-by-the-khala', kind: 'mod', expires: 'endOfActivation', bySeat: seat, round: state.round, data: { op: 'khalaActivate' } })
       return resumeIn(s, bundle, 'turn')
+    }
+    case 'costReact': {
+      if (mode !== 'costReaction' || typeof action.use !== 'boolean') return reject('E_BAD_PARAM', 'Say whether to use the Reaction.')
+      return advance(state, bundle, { ...cont.flow, costReact: action.use ? 'use' : 'skip' })
+    }
+    case 'newModel': {
+      let next: NewCont
+      if (mode === 'skip' && cont.op === 'respawn') next = { ...cont, ids: cont.ids.slice(0, cont.pts.length) }
+      else if (mode === 'remove' && cont.op === 'morph') {
+        const pool = tableModels(state, cont.unitId).map((m) => m.id).filter((id) => !(cont.removed ?? []).includes(id))
+        if (typeof action.modelId !== 'string' || !pool.includes(action.modelId)) return reject('E_BAD_TARGET', 'Not a model that can be removed.')
+        next = { ...cont, removed: [...(cont.removed ?? []), action.modelId] }
+      } else if (mode === 'point') {
+        const pt = answerPoint(state, action)
+        if (isRejection(pt)) return pt
+        const job = cont.op === 'respawn' ? respawnJob(state, cont.ids, cont.pts) : morphSetup(state, bundle, cont.unitId, cont.into!)?.job
+        if (!job || !spotLegal(state, bundle, cont.unitId, job, pt)) return reject('E_PLACEMENT', 'That spot is not in base contact with the Unit, or is within Engagement Range of an enemy.')
+        next = { ...cont, pts: [...cont.pts, { x: pt.x, z: pt.z }] }
+      } else return reject('E_BAD_PARAM', 'Choose a spot or a model.')
+      const r = newModelStep(state, bundle, next)
+      if (isRejection(r)) return r
+      return r.suspended ? { state: r.state } : finishAfter(r.state, bundle, cont.ctx.after)
     }
     default: return reject('E_BAD_PARAM', 'Unexpected decision.')
   }

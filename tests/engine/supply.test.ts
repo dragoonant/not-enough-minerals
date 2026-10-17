@@ -125,7 +125,7 @@ describe('supply', () => {
     expect(hasTacticalMass(touch(3, 4), b, 'm')).toBe(false) // 0 against 0
   })
 
-  it('VP-001 a bracket drop is written to the owner’s supply-lost ledger; summoned units add nothing', () => {
+  it('VP-001 a bracket drop is written to the owner’s supply-lost ledger; summoned units count like any drop (F p.5)', () => {
     const s = arena([
       { id: 'm', owner: 'A', profileId: 'marine', models: 9, at: { x: 0, z: 0 } },
       { id: 'w', owner: 'A', profileId: 'pylon', models: 1, at: { x: 0, z: 9 } },
@@ -134,6 +134,6 @@ describe('supply', () => {
     expect(recordSupplyLoss(hurt, b, 'm', 2).seats.A!.supplyLostThisRound).toBe(1)
     expect(recordSupplyLoss(hurt, b, 'm', 1).seats.A!.supplyLostThisRound).toBe(0)
     const summoned = { ...hurt, units: { ...hurt.units, w: { ...hurt.units.w!, summoned: true } } }
-    expect(recordSupplyLoss(summoned, b, 'w', 3).seats.A!.supplyLostThisRound).toBe(0)
+    expect(recordSupplyLoss(summoned, b, 'w', 3).seats.A!.supplyLostThisRound).toBe(3)
   })
 })

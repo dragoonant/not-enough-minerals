@@ -25,6 +25,7 @@ import { getBotDriver, setBotBrain, setTierBrains, startBotDriver, type TierBrai
 import type { BotBrain, BotContext } from './bot/randomBot'
 import type { Params } from './params'
 import { useAnnounceStore, type Banner, type NarrationLine } from './presentation/announceStore'
+import type { Placement } from '../engine/query'
 import type { AtkStageData, BannerTone, Cue, CueKind, CueOf, RolledDie, SeqEvent } from './presentation/cues'
 import { directorNow, onCue, setPaused, skipAll, skipBeat, type CueListener } from './presentation/director'
 import { conditionWord, dataName, modelName, narrate, phaseLabel, rollLabel, seatLabel, unitName } from './presentation/labels'
@@ -46,8 +47,11 @@ export type {
   RailId, ResolvedLaunch, RolledDie, SeatController, SeqEvent, Settings, ShownRoll, TierBrainFactory,
 }
 export type {
-  AttackPreview, ChargeOdds, CoherencyPreview, CoverLevel, MissionScore, ObjectiveStatus, PoolRow, Reach, SupplyStatus,
+  AttackPreview, ChargeOdds, CoherencyPreview, CoverLevel, DetectorView, MarkerGeometry, MissionScore, ObjectiveStatus, Placement, PoolRow,
+  ReadyPool, Reach, ShootOptions, ShotReason, ShotTarget, ShotWeapon, SupplyStatus,
 } from '../engine/query'
+/** Does this die face pass against this target number? (engine dice.succeeds: a natural 6 passes, a natural 1 fails, a null TN fails.) */
+export { succeeds as dieSucceeds } from '../engine/dice'
 export type { SeeVerdict, SeeReason } from '../engine/visibility'
 export type { Rect } from '../engine/edition'
 export { SPEED_PRESETS, MATCHUPS, matchupOf }
@@ -256,7 +260,7 @@ export const presentation = {
   setSpeed: (speed: number) => useSettingsStore.getState().set({ speed }),
 }
 
-export const useSettings = (): Settings => useSettingsStore(useShallow((s) => ({ speed: s.speed, narration: s.narration })))
+export const useSettings = (): Settings => useSettingsStore(useShallow((s) => ({ speed: s.speed, narration: s.narration, skipAbilityWindows: s.skipAbilityWindows })))
 export const settings = { set: (patch: Partial<Settings>) => useSettingsStore.getState().set(patch) }
 
 export const bots = {
@@ -320,7 +324,8 @@ export interface BoardGeometry {
   table: { w: number; d: number }
   edges: { seat: SeatId; colour: Colour; segments: [Vec2, Vec2][]; zones: Rect[] }[]
   markerSides: Record<number, Colour | 'neutral'>
-  /** Contest range in inches from the marker edge, marker radius in inches, ring radius = both (engine constants). */
+  /** Contest range in inches from the marker edge, marker radius in inches, ring radius = both (query.markerGeometry; on-table
+   *  markers carry the same numbers on ObjectiveStatus). */
   ring: { contestRange: number; markerRadius: number; radius: number }
 }
 export function useBoardGeometry(): BoardGeometry | null {
@@ -330,8 +335,7 @@ export function useBoardGeometry(): BoardGeometry | null {
   const table = usePresentedStore((s) => s.state?.scenario.table)
   return useMemo(() => {
     if (!b || !table) return null
-    const contestRange = rule(b, 'contestRange')
-    const markerRadius = rule(b, 'markerDiameterMm') / 25.4 / 2
+    const mg = query.markerGeometry(b)
     const edges: BoardGeometry['edges'] = []
     if (dep) {
       const size = { w: dep.size.w, h: dep.size.h }
@@ -345,7 +349,7 @@ export function useBoardGeometry(): BoardGeometry | null {
     }
     const markerSides: Record<number, Colour | 'neutral'> = {}
     for (const m of dep?.markers ?? []) markerSides[m.n] = markerSide(m.n)
-    return { table: dep ? tableOf(dep) : table, edges, markerSides, ring: { contestRange, markerRadius, radius: contestRange + markerRadius } }
+    return { table: dep ? tableOf(dep) : table, edges, markerSides, ring: { contestRange: mg.contestRange, markerRadius: mg.markerRadius, radius: mg.contestRadius } }
   }, [b, dep, seats.join('|'), table])
 }
 
@@ -383,12 +387,18 @@ export const useChargeOdds = (unitId: UnitId | null, targetIds: readonly UnitId[
   const key = targetIds ? targetIds.join(',') : ''
   return useQuery((s, b) => (unitId && targetIds && targetIds.length ? query.chargeOdds(s, b, unitId, [...targetIds]) : null), [unitId, key])
 }
-/** Can the actor unit target this unit (ranged, LoS), with reasons and the visible models. */
-export const useCanSee = (actorUnitId: UnitId | null, targetUnitId: UnitId | null) =>
-  useQuery((s, b) => (actorUnitId && targetUnitId ? query.canSee(s, b, actorUnitId, targetUnitId) : null), [actorUnitId, targetUnitId])
-export const useCover = (attackerUnitId: UnitId | null, targetUnitId: UnitId | null) =>
-  useQuery((s, b) => (attackerUnitId && targetUnitId ? query.coverFor(s, b, attackerUnitId, targetUnitId) : null), [attackerUnitId, targetUnitId])
-export const useEngaged = (unitId: UnitId | null) => useQuery((s, b) => (unitId ? query.engaged(s, b, unitId) : null), [unitId])
+/** Can the actor unit target this unit (ranged, LoS), with reasons and the visible models. Pass a memoised dry-run placement
+ *  to ask as if those models stood there. */
+export const useCanSee = (actorUnitId: UnitId | null, targetUnitId: UnitId | null, placement?: Placement | null) =>
+  useQuery((s, b) => (actorUnitId && targetUnitId ? query.canSee(s, b, actorUnitId, targetUnitId, placement) : null), [actorUnitId, targetUnitId, placement])
+export const useCover = (attackerUnitId: UnitId | null, targetUnitId: UnitId | null, placement?: Placement | null) =>
+  useQuery((s, b) => (attackerUnitId && targetUnitId ? query.coverFor(s, b, attackerUnitId, targetUnitId, placement) : null), [attackerUnitId, targetUnitId, placement])
+export const useEngaged = (unitId: UnitId | null, placement?: Placement | null) =>
+  useQuery((s, b) => (unitId ? query.engaged(s, b, unitId, placement) : null), [unitId, placement])
+/** Per weapon and enemy: eligible, or why not (our words in .text), and why the Hit TN differs from the printed one (hitNotes). */
+export const useShootOptions = (unitId: UnitId | null) => useQuery((s, b) => (unitId ? query.shootOptions(s, b, unitId) : null), [unitId])
+/** Ready resource value per resource (CP...) on a seat's cards: what an ability cost can be paid from now. */
+export const useReadyPools = (seat: SeatId | null) => useQuery((s) => (seat ? query.readyPools(s, seat) : null), [seat])
 /** Coherency of a proposed placement (pass a memoised placement object). */
 export const useCoherencyPreview = (unitId: UnitId | null, placement: Record<ModelId, Vec2> | null) =>
   useQuery((s, b) => (unitId && placement ? query.coherencyPreview(s, b, unitId, placement) : null), [unitId, placement])
@@ -408,6 +418,8 @@ export const useUnitSupply = (unitId: UnitId | null) => usePresentedQuery((s, b)
 export const useUnitSupplies = () => usePresentedQuery((s, b) => Object.fromEntries(Object.keys(s.units).map((id) => [id, query.unitSupply(s, b, id)])) as Record<UnitId, number>, [])
 /** The Supply Pool for every Round (null = unlimited). */
 export const usePoolTable = () => usePresentedQuery((s, b) => query.poolTable(s, b), [])
+/** Every detection area in force (stored ones and the self-centred detectors of passive abilities), resolved to table points. */
+export const useDetectorAreas = () => usePresentedQuery((s, b) => query.detectorAreas(s, b), [])
 /** Units inside an enemy detector area ('detected' status icon). */
 export const useDetectedUnits = () => usePresentedQuery((s, b) => query.detectedUnits(s, b), [])
 
@@ -415,9 +427,14 @@ export const useDetectedUnits = () => usePresentedQuery((s, b) => query.detected
 export const queries = {
   attackPreview: (a: UnitId, w: Id, t: UnitId) => { const x = truth(); return x ? safe(() => query.attackPreview(x.s, x.b, a, w, t)) : null },
   chargeOdds: (u: UnitId, targets: UnitId[]) => { const x = truth(); return x ? safe(() => query.chargeOdds(x.s, x.b, u, targets)) : null },
-  canSee: (a: UnitId, t: UnitId) => { const x = truth(); return x ? safe(() => query.canSee(x.s, x.b, a, t)) : null },
-  coverFor: (a: UnitId, t: UnitId) => { const x = truth(); return x ? safe(() => query.coverFor(x.s, x.b, a, t)) : null },
-  engaged: (u: UnitId) => { const x = truth(); return x ? safe(() => query.engaged(x.s, x.b, u)) : null },
+  /** canSee / coverFor / engaged take an optional dry-run placement (model id -> position) to answer as if the models stood there. */
+  canSee: (a: UnitId, t: UnitId, placement?: Placement | null) => { const x = truth(); return x ? safe(() => query.canSee(x.s, x.b, a, t, placement)) : null },
+  coverFor: (a: UnitId, t: UnitId, placement?: Placement | null) => { const x = truth(); return x ? safe(() => query.coverFor(x.s, x.b, a, t, placement)) : null },
+  engaged: (u: UnitId, placement?: Placement | null) => { const x = truth(); return x ? safe(() => query.engaged(x.s, x.b, u, placement)) : null },
+  shootOptions: (u: UnitId) => { const x = truth(); return x ? safe(() => query.shootOptions(x.s, x.b, u)) : null },
+  readyPools: (seat: SeatId) => { const x = truth(); return x ? safe(() => query.readyPools(x.s, seat)) : null },
+  detectorAreas: () => { const x = truth(); return x ? safe(() => query.detectorAreas(x.s, x.b)) : null },
+  markerGeometry: () => { const b = getBundle(); return b ? safe(() => query.markerGeometry(b)) : null },
   coherencyPreview: (u: UnitId, placement: Record<ModelId, Vec2>) => { const x = truth(); return x ? safe(() => query.coherencyPreview(x.s, x.b, u, placement)) : null },
   reachOf: (u: UnitId) => { const x = truth(); return x ? safe(() => query.reachOf(x.s, x.b, u)) : null },
   supplyStatus: (seat: SeatId) => { const x = truth(); return x ? safe(() => query.supplyStatus(x.s, x.b, seat)) : null },
@@ -470,3 +487,8 @@ export function startLaunch(launch: Launch, params: Params): ClientRejection | n
 // Additive changes after the M3 freeze:
 //  - M3 integration: useUnitSupply, useUnitSupplies, usePoolTable, useDetectedUnits (+ queries.unitSupply/poolTable/
 //    detectedUnits), type PoolRow; engine/query.ts unitSupply, poolTable, detectedUnits (spec 00 s10).
+//  - Integrator additions: useShootOptions / queries.shootOptions (+ types ShootOptions, ShotWeapon, ShotTarget, ShotReason),
+//    optional placement argument on useCanSee / useCover / useEngaged and queries.canSee / coverFor / engaged, useDetectorAreas /
+//    queries.detectorAreas (DetectorView), useReadyPools / queries.readyPools (ReadyPool), queries.markerGeometry (MarkerGeometry),
+//    dieSucceeds (engine dice.succeeds), useSettings().skipAbilityWindows. engine/query.ts: shootOptions reasons now come from
+//    shooting.checkTarget; ShotReason gains 'restricted'.

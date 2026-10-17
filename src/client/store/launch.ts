@@ -10,6 +10,7 @@ export type { SeatController }
 export { deploymentChoices, missionChoices, missionChoice, deploymentChoice, type CardChoice, type Scale } from './catalog'
 
 // ---------------------------------------------------------------- matchups
+export type MapChoice = 'roll' | 'sunken-shrine'
 export type Race = 'terran' | 'zerg' | 'protoss'
 export type MatchupId = 'founders' | 'tvz' | 'tvp' | 'zvp' | 'tvt' | 'zvz' | 'pvp'
   | 'tvz-x' | 'tvp-x' | 'zvp-x' | 'tvt-x' | 'zvz-x' | 'pvp-x' | 'first-battle'
@@ -84,6 +85,8 @@ export interface NewGameOptions {
   tier?: string
   /** The M0 placeholder table (tests and tools only). */
   demo?: boolean
+  /** Map: 'roll' (default, the rules' map roll) or 'sunken-shrine' (the original temple layout; ignored with draft). */
+  map?: MapChoice
 }
 
 /** A launch with every choice made: what the store builds the game from and what a save records. */
@@ -97,6 +100,8 @@ export interface ResolvedLaunch {
   demo: boolean
   tier: string
   edition: string
+  /** Absent in older saves = 'roll'. */
+  map?: MapChoice
 }
 
 /** Small stable string hash (FNV-1a) for seeded picks outside the engine RNG. */
@@ -118,7 +123,8 @@ export function resolveLaunch(opts: NewGameOptions, seed: string): ResolvedLaunc
   const draft = !!opts.draft
   const missionId = draft ? null : opts.missionId === RANDOM ? pick(missionChoices(m.scale), `${seed}:mission`)?.id ?? null : opts.missionId ?? null
   const deploymentId = draft ? null : opts.deploymentId === RANDOM ? pick(deploymentChoices(m.scale), `${seed}:deployment`)?.id ?? null : opts.deploymentId ?? null
-  return { matchup: m.id, armies: [...m.armies], missionId, deploymentId, preset: m.preset ?? null, draft, demo: false, tier, edition }
+  return { matchup: m.id, armies: [...m.armies], missionId, deploymentId, preset: m.preset ?? null, draft, demo: false, tier, edition,
+    ...(!draft && opts.map === 'sunken-shrine' ? { map: 'sunken-shrine' as const } : {}) }
 }
 
 // ---------------------------------------------------------------- screens

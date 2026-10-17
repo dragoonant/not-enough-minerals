@@ -6,6 +6,7 @@
 //   ?seed=<word>         repeatable games; put the seed in every bug report
 //   ?matchup=<id>        founders (default) | tvz | tvp | zvp | tvt | zvz | pvp | first-battle | demo (M0 placeholder table)
 //   ?mission=<id|random> Mission Card id (e.g. frontlines-skirmish) or random;  ?deployment=<id|random> likewise
+//   ?map=sunken-shrine   use the original Sunken Shrine temple map instead of the rules' map roll (default roll)
 //   ?draft=1             run the Mission / Deployment draft as decisions
 //   ?speed=fast          animation speed: instant | fast | normal | slow | <number> (0 = instant)
 //   ?tier=random|easy|normal  bot tier;  ?fps  frame-rate meter;  ?gallery  figure gallery
@@ -27,6 +28,8 @@ export interface Params {
   mission: string | null
   deployment: string | null
   draft: boolean
+  /** ?map=sunken-shrine, or null for the rolled map. */
+  map: 'sunken-shrine' | null
   /** Bot tier from ?tier (random | easy | normal), or null for the default. */
   tier: string | null
   /** Speed multiplier from ?speed, or null to keep the saved setting. */
@@ -64,12 +67,13 @@ export function readParams(search = typeof location === 'undefined' ? '' : locat
     mission: q.get('mission'),
     deployment: q.get('deployment'),
     draft,
+    map: q.get('map') === 'sunken-shrine' ? 'sunken-shrine' : null,
     tier: q.get('tier'),
     speed: parseSpeed(q.get('speed')),
     gallery: q.has('gallery'),
     fps: q.has('fps'),
     menu: q.get('menu') === '1',
-    autostart: q.get('menu') !== '1' && (test || seatsRaw !== null || q.has('matchup') || q.has('mission') || q.has('deployment') || draft || q.has('gallery')),
+    autostart: q.get('menu') !== '1' && (test || seatsRaw !== null || q.has('matchup') || q.has('mission') || q.has('deployment') || q.has('map') || draft || q.has('gallery')),
   }
 }
 
@@ -82,6 +86,7 @@ export function paramsLaunch(p: Params = readParams()): NewGameOptions {
     ...(p.mission ? { missionId: p.mission } : {}),
     ...(p.deployment ? { deploymentId: p.deployment } : {}),
     ...(p.draft ? { draft: true } : {}),
+    ...(p.map ? { map: p.map } : {}),
     ...(p.tier ? { tier: p.tier } : {}),
   }
 }

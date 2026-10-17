@@ -177,7 +177,7 @@
               "to": {
                 "first": true
               },
-              "duration": "endOfActivation"
+              "duration": "endOfRound"
             }
           ],
           "text": "Its next weapon used gets CRITICAL HIT 2."

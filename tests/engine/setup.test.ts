@@ -126,7 +126,7 @@ describe('setup (tables, armies, Mission and Deployment, draft)', () => {
     expect(s.pending).toMatchObject({ kind: 'setup.pick', seat: loser })
     s = step(s, (a) => a['index'] === 2)
     expect(s.pending).toMatchObject({ kind: 'setup.terrain', seat: loser }) // the Red seat picks the map
-    expect(legalActions(s).length).toBe(3) // TER-001: three Skirmish maps
+    expect(legalActions(s).length).toBe(3) // TER-001 (R p.80 9.3): D3 on a Skirmish table
     s = step(s, (a) => a['map'] === 2)
     expect(s).toMatchObject({ phase: 'play', round: 1, missionId: 'frontlines-skirmish', deploymentId: 'char-plains', maxRounds: 5 })
     expect(s.seats[loser]!.colour).toBe('red')

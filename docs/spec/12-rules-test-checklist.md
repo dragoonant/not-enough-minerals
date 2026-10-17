@@ -194,7 +194,7 @@ COV, MOVE, ENG, FLY, TOK, TABLE, TPL, WPN, MOD, XPORT, ST, CA, SET, BF, TER, DRF
 - SUP-060: "Enemy Supply destroyed this Round" scores in step 2 = summed CSV drops this Round. (R p.74 8.9.2)
 - SUP-061: Any drop scores, incl. friendly fire and Spillover; Marines 9->6->3->0 give 1+1+0 = 2 VP. (F p.5; RULING R15-4)
 - SUP-062: Return to Reserves gives 0 VP; Advanced Medic Facilities does not change VP. (RULING R15-1; CS1-T p.4)
-- SUP-063: Summoned Units' Supply losses give 0 VP. (R p.76 9.1.9; RULING R15-5)
+- SUP-063: Summoned Units' Supply losses score VP like any other drop. (F p.5; R p.78 9.1.9; corrected 2026-10-16, was RULING R15-5)
 - SUP-064: Round-limit Reserves sweep = FIN-001; not after a special win. (R p.72 8.10; RULING R15-6)
 - SUP-065: Elimination check counts summoned and STRUCTURE models. (R p.74 8.9.3)
 

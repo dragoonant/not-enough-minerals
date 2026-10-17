@@ -133,6 +133,7 @@ export function createOptsFor(launch: ResolvedLaunch, seed: string, seats: SeatI
     ...(launch.deploymentId ? { deploymentId: launch.deploymentId } : {}),
     ...(launch.preset ? { preset: launch.preset } : {}),
     ...(launch.draft ? { draft: true } : {}),
+    ...(launch.map === 'sunken-shrine' ? { map: 'sunken-shrine' as const } : {}),
   }
 }
 
@@ -280,6 +281,7 @@ export function rematch(): ClientRejection | null {
     seats: s.seatOrder.map((id) => s.controllers[id] ?? 'bot'), tier: l.tier, edition: l.edition,
     ...(l.demo ? { demo: true } : {}), ...(l.matchup ? { matchup: l.matchup } : {}), ...(l.draft ? { draft: true } : {}),
     ...(l.missionId ? { missionId: l.missionId } : {}), ...(l.deploymentId ? { deploymentId: l.deploymentId } : {}),
+    ...(l.map ? { map: l.map } : {}),
   })
 }
 

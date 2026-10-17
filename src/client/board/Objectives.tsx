@@ -1,6 +1,6 @@
-// Mission Markers and their control-zone rings (spec 50 s5). The ring radius is the engine constant (contest range from
-// the marker edge + marker radius, via useBoardGeometry); colour is the controller's side colour, grey when nobody holds
-// it, and it pulses while the contest totals show more than one seat present. The label (number, holder, totals) is DOM,
+// Mission Markers and their control-zone rings (spec 50 s5). Ring radius, marker radius and the contested flag are read from the
+// engine's ObjectiveStatus (contestRadius, markerRadius, contested); colour is the controller's side colour, grey when nobody
+// holds it, and it pulses while the engine reports the marker contested. Parked markers use the engine's markerGeometry. The label (number, holder, totals) is DOM,
 // see Labels.tsx.
 // Removed or claimed markers sit as dimmed tokens beside the table.
 import { useRef } from 'react'
@@ -61,7 +61,7 @@ export function Objectives() {
   const status = useObjectiveStatus()
   const showRings = useFocus((f) => f.overlays.rings)
   if (!geo || !state) return null
-  const { radius: ringR, markerRadius } = geo.ring
+  const { radius: ringR, markerRadius } = geo.ring // only for parked markers and before the first status read
   const seatColour = (s: SeatId | null) => (s ? state.seats[s]?.colour ?? null : null)
   let parked = 0
   return (
@@ -77,14 +77,13 @@ export function Objectives() {
           )
         }
         const st = status?.find((s) => s.n === m.n)
-        const present = st ? state.seatOrder.filter((s) => (st.totals[s] ?? 0) > 0) : []
-        const contested = present.length > 1
+        const contested = st?.contested ?? false
         const ctrl = st ? st.controller : m.controller
         const ringColour = ctrl ? sideHex(seatColour(ctrl)) : NEUTRAL_RING
         return (
           <group key={m.n} position={[m.pos.x, m.elev, m.pos.z]} name={`marker-${m.n}`}>
-            <Token m={m} radius={markerRadius} />
-            {showRings && <RingPulse radius={ringR} color={ringColour} pulsing={contested} />}
+            <Token m={m} radius={st?.markerRadius ?? markerRadius} />
+            {showRings && <RingPulse radius={st?.contestRadius ?? ringR} color={ringColour} pulsing={contested} />}
           </group>
         )
       })}

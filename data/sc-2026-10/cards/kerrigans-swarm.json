@@ -67,7 +67,7 @@
           "to": {
             "first": true
           },
-          "duration": "endOfActivation"
+          "duration": "endOfRound"
         }
       ],
       "text": "A Unit on Creep gets BUFF Speed 1 and PRECISION 1 on its first weapon used."

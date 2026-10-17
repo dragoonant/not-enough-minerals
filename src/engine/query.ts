@@ -2,7 +2,7 @@
 // delegates to the owning service or rules module, so the number shown is the number the rules use. Exact over the
 // dice (dice.ts distributions), never sampled; a Monte Carlo test checks attackPreview against the real pipeline.
 // Pure: hooks are read with noPrompt and their state changes are thrown away.
-import type { EditionBundle, Id } from '../data/types'
+import type { EditionBundle, Id, Resource } from '../data/types'
 import { buildBatch, evadeReasons, hasKw, kwX, modelRoa, weaponKeywords } from './attack'
 import { chargeNeeded, chargeTargets, impactOf } from './charge'
 import { contest } from './control'
@@ -16,13 +16,12 @@ import { missionOf, scoreRules, sideFor } from './missions'
 import { moveReach } from './movement'
 import { isRejection } from './errors'
 import { fightingRank, meleeTargets, supportingRank } from './melee'
-import { previewBatch } from './shooting'
 import { coherencyDistance, coherencyState, linkValid, squadCtx, tableModels, unitModels } from './squads'
-import { planBatches } from './shooting'
+import { carriers as shotCarriers, checkTarget, planBatches, previewBatch } from './shooting'
 import { modelDistance } from './measure'
 import { baseRadius, edgeDistance } from './geometry'
 import { available, canArrive, onTableSupply, poolFor, supplyFor } from './supply'
-import { detectorAreas, hasStatus, inDetection } from './effects'
+import { detectorAreas as allDetectorAreas, hasStatus, inDetection } from './effects'
 import { updateControl } from './control'
 import { canTarget, type SeeVerdict } from './visibility'
 import type { AttackBatch, GameState, ModelId, ModelState, SeatId, UnitId, Vec2 } from './types'
@@ -203,14 +202,26 @@ export function chargeOdds(state: GameState, bundle: EditionBundle, unitId: Unit
 }
 
 // ---------------------------------------------------------------- sight, cover, engagement
-/** visibility.canTarget with reasons, for the targeting overlay. */
-export function canSee(state: GameState, bundle: EditionBundle, actorUnitId: UnitId, targetUnitId: UnitId): SeeVerdict {
-  return canTarget(state, bundle, actorUnitId, targetUnitId, { ranged: true, needsLos: true })
+/** A placement is a dry run: where some models would stand. The sight, cover and Engagement queries below take one and read a
+ *  copy of the state with those models moved (the models map is replaced, so engage's cache keys on it correctly). */
+export type Placement = Record<ModelId, Vec2>
+function withPlacement(state: GameState, placement?: Placement | null): GameState {
+  if (!placement) return state
+  const ids = Object.keys(placement).filter((id) => state.models[id])
+  if (!ids.length) return state
+  const models = { ...state.models }
+  for (const id of ids) models[id] = { ...models[id]!, pos: placement[id]! }
+  return { ...state, models }
+}
+/** visibility.canTarget with reasons, for the targeting overlay. With a placement, as if those models stood there. */
+export function canSee(state: GameState, bundle: EditionBundle, actorUnitId: UnitId, targetUnitId: UnitId, placement?: Placement | null): SeeVerdict {
+  return canTarget(withPlacement(state, placement), bundle, actorUnitId, targetUnitId, { ranged: true, needsLos: true })
 }
 export type CoverLevel = 'none' | 'direct' | 'full' | 'highGround'
 /** Cover the target would get against this attacker (spec 14 s7): HIGH GROUND, else what blocks every line between the
- *  two units ('direct' when some line is stopped only by Direct Cover), else none. */
-export function coverFor(state: GameState, bundle: EditionBundle, attackerUnitId: UnitId, targetUnitId: UnitId): CoverLevel {
+ *  two units ('direct' when some line is stopped only by Direct Cover), else none. With a placement, as if those models stood there. */
+export function coverFor(state: GameState, bundle: EditionBundle, attackerUnitId: UnitId, targetUnitId: UnitId, placement?: Placement | null): CoverLevel {
+  state = withPlacement(state, placement)
   if (highGroundCover(state, bundle, attackerUnitId, targetUnitId)) return 'highGround'
   let best: CoverLevel | null = null
   for (const a of tableModels(state, attackerUnitId)) for (const t of tableModels(state, targetUnitId)) {
@@ -221,9 +232,9 @@ export function coverFor(state: GameState, bundle: EditionBundle, attackerUnitId
   }
   return best ?? 'none'
 }
-/** Units Engaged with this one (engage.engagedWith). */
-export function engaged(state: GameState, bundle: EditionBundle, unitId: UnitId): UnitId[] {
-  return engagedWith(state, bundle, unitId)
+/** Units Engaged with this one (engage.engagedWith). With a placement, the Engagement Range it would have standing there. */
+export function engaged(state: GameState, bundle: EditionBundle, unitId: UnitId, placement?: Placement | null): UnitId[] {
+  return engagedWith(withPlacement(state, placement), bundle, unitId)
 }
 
 // ---------------------------------------------------------------- supply, objectives, mission
@@ -271,9 +282,9 @@ export function objectiveStatus(state: GameState, bundle: EditionBundle): Object
         if (r.kind === 'activatedMarkerCash' && state.round >= r.fromRound && m.active) vpNow[c.controller]! += m.activatedRound ?? 0
       }
     }
-    const markerRadius = baseRadius(rule(bundle, 'markerDiameterMm'))
+    const { markerRadius, contestRadius } = markerGeometry(bundle)
     const contested = state.seatOrder.filter((x) => c.contesters[x]!.length > 0).length > 1
-    return { n: m.n, totals: c.totals, controller: c.controller, active: m.active, vpNow, markerRadius, contestRadius: markerRadius + rule(bundle, 'contestRange'), contested }
+    return { n: m.n, totals: c.totals, controller: c.controller, active: m.active, vpNow, markerRadius, contestRadius, contested }
   })
 }
 
@@ -339,11 +350,45 @@ export function poolTable(state: GameState, bundle: EditionBundle): PoolRow[] {
 
 /** Units on the table inside an enemy detector area (effects.inDetection): the 'detected' status icon. */
 export function detectedUnits(state: GameState, bundle: EditionBundle): UnitId[] {
-  if (detectorAreas(state, bundle).length === 0) return []
+  if (allDetectorAreas(state, bundle).length === 0) return []
   return Object.values(state.units).filter((u) => u.location === 'table' && inDetection(state, bundle, u.id)).map((u) => u.id).sort()
 }
+export interface DetectorView {
+  id: string; owner: SeatId; /** The ability or effect that made it. */ source: string; radius: number
+  /** Where the radius is measured from: one point, or (a self-centred unit detector) the centre of each model of the unit,
+   *  since the area reaches radius inches from the nearest model. */
+  centres: Vec2[]
+}
+/** Every detection area now in force, stored ones and the self-centred detectors of passive abilities, resolved to table
+ *  positions (effects.detectorAreas), for the detection overlay. */
+export function detectorAreas(state: GameState, bundle: EditionBundle): DetectorView[] {
+  return allDetectorAreas(state, bundle).flatMap((a): DetectorView[] => {
+    let centres: Vec2[] = []
+    if (a.centre.kind === 'point') centres = [a.centre.pos]
+    else if (a.centre.kind === 'token') { const id = a.centre.tokenId; const t = state.tokens.find((x) => x.id === id); centres = t ? [t.pos] : [] }
+    else centres = tableModels(state, a.centre.unitId).map((m) => m.pos)
+    return centres.length ? [{ id: a.id, owner: a.owner, source: a.source, radius: a.radius, centres }] : []
+  })
+}
+
+export interface MarkerGeometry { markerRadius: number; contestRange: number; contestRadius: number }
+/** Mission Marker disc radius and control-zone ring radius in inches (rules.json markerDiameterMm and contestRange). */
+export function markerGeometry(bundle: EditionBundle): MarkerGeometry {
+  const markerRadius = baseRadius(rule(bundle, 'markerDiameterMm'))
+  const contestRange = rule(bundle, 'contestRange')
+  return { markerRadius, contestRange, contestRadius: markerRadius + contestRange }
+}
+
+export interface ReadyPool { res: Resource; n: number }
+/** Ready (not exhausted) resource value on a seat's cards, per resource: what an ability cost can be paid from now. */
+export function readyPools(state: GameState, seat: SeatId): ReadyPool[] {
+  const sums = new Map<Resource, number>()
+  for (const c of state.cards[seat] ?? []) if (!c.exhausted && c.resource && c.resource.n > 0) sums.set(c.resource.res, (sums.get(c.resource.res) ?? 0) + c.resource.n)
+  return [...sums].map(([res, n]) => ({ res, n }))
+}
+
 // ---------------------------------------------------------------- shooting options with reasons (M3 fix)
-export type ShotReason = 'wrongPhase' | 'notOnTable' | 'disengaged' | 'burrowed' | 'wrongStatus' | 'bulkyEngaged' | 'spent'
+export type ShotReason = 'restricted' | 'wrongPhase' | 'notOnTable' | 'disengaged' | 'burrowed' | 'wrongStatus' | 'bulkyEngaged' | 'spent'
   | 'targetTag' | 'engagedShooter' | 'engagedTarget' | 'noLos' | 'outOfRange' | 'hidden' | 'other'
 export interface ShotTarget {
   targetUnitId: UnitId
@@ -368,7 +413,7 @@ const SHOT_TEXT: Record<ShotReason, string> = {
   wrongStatus: 'This weapon needs a status the unit does not have.', bulkyEngaged: 'Bulky weapons cannot fire while Engaged.',
   spent: 'Already fired this Round.', targetTag: 'This weapon cannot target that kind of unit.',
   engagedShooter: 'Engaged units may only shoot what they are Engaged with.', engagedTarget: 'The target is Engaged with friendly models.',
-  noLos: 'No line of sight.', outOfRange: 'Out of range.', hidden: 'The target is hidden.', other: 'Not a legal target.',
+  restricted: 'A restriction bars targeting units Engaged with this one.', noLos: 'No line of sight.', outOfRange: 'Out of range.', hidden: 'The target is hidden.', other: 'Not a legal target.',
 }
 
 /** Per weapon and enemy unit: eligible, or the reason with numbers. Eligibility is shooting.planBatches itself; reasons are
@@ -395,7 +440,7 @@ export function shootOptions(state: GameState, bundle: EditionBundle, unitId: Un
     const wFail = (reason: ShotReason): ShotWeapon => ({ weaponId: wid, name, eligible: false, reason, text: SHOT_TEXT[reason], targets: enemies.map((t) => ({ targetUnitId: t, eligible: false, reason, text: SHOT_TEXT[reason] })) })
     if (base.requiresStatus && !hasStatus(state, unitId, base.requiresStatus)) { weapons.push(wFail('wrongStatus')); continue }
     if (engagedNow.length && hasKw(base.keywords, 'BULKY')) { weapons.push(wFail('bulkyEngaged')); continue }
-    const carriers = models.filter((m) => m.weapons.includes(wid) && !Object.keys(unit.usage).some((k) => k.startsWith('shoot.fired:'+state.round+':'+m.id)))
+    const carriers = shotCarriers(state, unit, base)
     if (!carriers.length) { weapons.push(wFail('spent')); continue }
     const range = typeof base.range === 'number' ? base.range : 0
     const printed = finalTN(bundle, base.hit)
@@ -413,20 +458,19 @@ export function shootOptions(state: GameState, bundle: EditionBundle, unitId: Un
         }
         return { targetUnitId: t, eligible: true, printedHit: printed, hitTN: best, ...(notes.length ? { hitNotes: notes } : {}) }
       }
-      const tags = unitDef(bundle, state.units[t]!.profileId)?.combatTags ?? []
-      const tagOk = base.target === 'all' ? tags.includes('ground') || tags.includes('flying') : tags.includes(base.target)
+      const prof = weaponProfile(state, bundle, unitId, wid, { attack: 'ranged', targetUnitId: t }) ?? base
+      const chk = checkTarget(state, bundle, unit, prof, carriers, state.units[t]!)
       const near = Math.min(...carriers.flatMap((c) => tableModels(state, t).map((m) => modelDistance(c, m))))
       const fail = (reason: ShotReason, extra: Partial<ShotTarget> = {}): ShotTarget => ({ targetUnitId: t, eligible: false, reason, text: SHOT_TEXT[reason], ...extra })
-      if (!tagOk) return fail('targetTag')
-      if (engagedNow.length && !engagedNow.includes(t)) return fail('engagedShooter')
-      if (isEngaged(state, bundle, t) && !engagedNow.includes(t) && !hasKw(base.keywords, 'PINPOINT')) return fail('engagedTarget')
-      const v = canTarget(state, bundle, unitId, t, { ranged: true, needsLos: !hasKw(base.keywords, 'INDIRECT_FIRE'), actorModelIds: carriers.map((m) => m.id) })
       const dTxt = `${near.toFixed(1)}" away, range ${range}"`
-      if (!v.ok) {
-        if (v.reasons.some((r) => String(r).toLowerCase().includes('hidden'))) return fail('hidden')
-        return fail('noLos', { distance: near, range, text: `No line of sight (${dTxt}).` })
+      // The reason is checkTarget's own (shooting.ts), so Point Blank and Coordinated Strike read exactly as the rules apply them.
+      switch (chk.reason) {
+        case 'targetTag': case 'engagedShooter': case 'engagedTarget': case 'hidden': return fail(chk.reason)
+        case 'restricted': return fail('restricted')
+        case 'noLos': return fail('noLos', { distance: near, range, text: `No line of sight (${dTxt}).` })
+        case 'outOfRange': return fail('outOfRange', { distance: near, range, text: `Out of range: ${dTxt}.` })
+        default: return fail('other')
       }
-      return fail('outOfRange', { distance: near, range, text: `Out of range: ${dTxt}.` })
     })
     weapons.push({ weaponId: wid, name, eligible: !!cand?.targets.length, ...(cand?.targets.length ? {} : { reason: 'other' as ShotReason, text: 'No legal target.' }), targets })
   }

@@ -80,6 +80,37 @@ function Prism({ f, h, look }: { f: TerrainInstance['footprint']; h: number; loo
   }
   return <mesh geometry={geo!} rotation={[-Math.PI / 2, 0, 0]} castShadow receiveShadow><LookMaterial look={look} /></mesh>
 }
+const SAND_A: Look = { color: '#c9b08a', metal: 0, rough: 0.92 }
+const SAND_B: Look = { color: '#b49a74', metal: 0, rough: 0.95 }
+const SAND_DARK: Look = { color: '#8d775a', metal: 0, rough: 1 }
+/** A ramp as a flight of sandstone steps rising from 0 at local -x to h at local +x (same envelope as the engine's wedge). */
+function SteppedRamp({ f, h }: { f: TerrainInstance['footprint']; h: number }) {
+  const w = 'rect' in f ? f.rect.w : 1, d = 'rect' in f ? f.rect.d : 1
+  const n = Math.max(4, Math.round(w * 2))
+  return (
+    <>
+      {Array.from({ length: n }, (_, i) => {
+        const top = (h * (i + 1)) / n
+        return (
+          <mesh key={i} position={[-w / 2 + ((i + 0.5) * w) / n, top / 2, 0]} castShadow receiveShadow>
+            <boxGeometry args={[w / n, top, d]} /><LookMaterial look={i % 2 ? SAND_B : SAND_A} />
+          </mesh>
+        )
+      })}
+    </>
+  )
+}
+/** The raised central plateau (High Ground): a sandstone platform at the rules height, with a plinth and a lighter coping. */
+function Plateau({ f, h }: { f: TerrainInstance['footprint']; h: number }) {
+  const w = 'rect' in f ? f.rect.w : 1, d = 'rect' in f ? f.rect.d : 1
+  return (
+    <>
+      <mesh position={[0, h / 2 - 0.15, 0]} castShadow receiveShadow><boxGeometry args={[w, h - 0.3, d]} /><LookMaterial look={SAND_B} /></mesh>
+      <mesh position={[0, 0.2, 0]} castShadow receiveShadow><boxGeometry args={[w + 0.12, 0.4, d + 0.12]} /><LookMaterial look={SAND_DARK} /></mesh>
+      <mesh position={[0, h - 0.15, 0]} castShadow receiveShadow><boxGeometry args={[w + 0.1, 0.3, d + 0.1]} /><LookMaterial look={SAND_A} /></mesh>
+    </>
+  )
+}
 function LookMaterial({ look: l }: { look: Look }) {
   return <meshStandardMaterial color={l.color} roughness={l.rough} metalness={l.metal} emissive={l.emissive ?? '#000000'} emissiveIntensity={l.emissive ? 0.35 : 0}
     transparent={l.opacity !== undefined} opacity={l.opacity ?? 1} side={DoubleSide} />
@@ -218,7 +249,7 @@ function Piece({ t, pick, waiting, theme }: { t: TerrainInstance; pick: TerrainP
     <group ref={ref} position={[t.pos.x, 0, t.pos.z]} rotation={[0, t.rot, 0]} name={`terrain-${t.id}`}
       onPointerOver={over} onPointerMove={over} onPointerOut={out}
       userData={{ terrainId: t.id, rulesType: t.rulesType, height: t.height, model: fitted ? pick?.model.slug : null }}>
-      {fitted ? <primitive object={fitted} /> : <Prism f={t.footprint} h={h} look={look} />}
+      {fitted ? <primitive object={fitted} /> : t.props['ramp'] === true && 'rect' in t.footprint ? <SteppedRamp f={t.footprint} h={h} /> : t.props['plateau'] === true && 'rect' in t.footprint ? <Plateau f={t.footprint} h={h} /> : <Prism f={t.footprint} h={h} look={look} />}
       {t.rulesType === 'forest' && <Trees t={t} />}
       {hover && <FootprintOutline f={t.footprint} />}
     </group>

@@ -174,7 +174,11 @@ function weaponMenu(state: GameState, b: EditionBundle, unitId: UnitId, targets:
   return out
 }
 
-function launch(state: GameState, b: EditionBundle, unitId: UnitId, surgeTarget: UnitId, assign: Record<ModelId, UnitId>, weapons: Record<ModelId, Id> = {}): StepResult {
+/** The attacker's allocation of one split keyword (PRECISION / CRITICAL HIT): amount per target pool, summing to X. */
+type KwAlloc = Record<string, Record<UnitId, number>>
+const SPLIT_KWS = ['PRECISION', 'CRITICAL_HIT'] as const
+
+function launch(state: GameState, b: EditionBundle, unitId: UnitId, surgeTarget: UnitId, assign: Record<ModelId, UnitId>, weapons: Record<ModelId, Id> = {}, kwAlloc: KwAlloc = {}): StepResult {
   const unit = state.units[unitId]!
   const ranks = [...fightingRank(state, b, unitId), ...supportingRank(state, b, unitId)]
   type Pool = { profile: WeaponProfile; target: UnitId; models: ModelId[] }
@@ -193,14 +197,42 @@ function launch(state: GameState, b: EditionBundle, unitId: UnitId, surgeTarget:
   }
   const byWeapon = new Map<Id, Pool[]>()
   for (const p of pools.values()) byWeapon.set(p.profile.id, [...(byWeapon.get(p.profile.id) ?? []), p])
+  // F p.5 / R p.70 8.8.1 step 4: a split is one Batch. Only the Surge Die is locked to its declared target; the attacker
+  // allocates PRECISION and CRITICAL HIT (X) entirely to one pool or across the pools, so ask for each one that matters.
+  for (const list of byWeapon.values()) {
+    if (list.length < 2) continue
+    list.sort((a, c) => Number(c.target === surgeTarget) - Number(a.target === surgeTarget))
+    for (const kw of SPLIT_KWS) {
+      const ref = list[0]!.profile.keywords.find((k) => k.kw === kw && (k.x ?? 0) > 0)
+      const key = `${list[0]!.profile.id}|${kw}`
+      if (!ref || kwAlloc[key]) continue
+      const targets = list.map((p) => p.target)
+      const x = ref.x!
+      const mk = (to: string) => option(`kw:${key}:${to}`, to === 'even' ? `Split ${kw.replace('_', ' ')} (${x}) evenly` : `All ${kw.replace('_', ' ')} (${x}) against ${to}`,
+        'melee.keywords', { unitId, key, to }, unit.owner)
+      return {
+        state: raiseDecision(state, {
+          seat: unit.owner, kind: 'melee.keywords', canPass: false,
+          context: { unitId, surgeTarget, assign, weapons, kwAlloc, key, kw, x, targets },
+          options: [...targets.map(mk), ...(x >= 2 ? [mk('even')] : [])],
+        }),
+      }
+    }
+  }
   const batches: AttackBatch[] = []
   for (const list of byWeapon.values()) {
     list.sort((a, c) => Number(c.target === surgeTarget) - Number(a.target === surgeTarget))
     const split = list.length > 1
     for (const p of list) {
       const hasSurge = p.target === surgeTarget
-      // One split Batch: its PRECISION / CRITICAL HIT go to the Surge target's pool (F p.5, ruling in the owner log).
-      const keywords = split && !hasSurge ? p.profile.keywords.filter((k) => k.kw !== 'PRECISION' && k.kw !== 'CRITICAL_HIT') : p.profile.keywords
+      let keywords = p.profile.keywords
+      if (split) {
+        keywords = keywords.filter((k) => !(SPLIT_KWS as readonly string[]).includes(k.kw))
+        for (const kw of SPLIT_KWS) {
+          const n = kwAlloc[`${p.profile.id}|${kw}`]?.[p.target] ?? 0
+          if (n > 0) keywords = [...keywords, { kw, x: n }]
+        }
+      }
       batches.push(buildBatch(state, b, {
         seat: unit.owner, attackerUnitId: unitId, profile: p.profile, kind: 'closeCombat', targetUnitId: p.target,
         contributors: p.models.map((modelId) => ({ modelId })), eligible: null, keywords, surge: hasSurge || !split,
@@ -250,6 +282,15 @@ export const melee: ModuleDef = {
           }
         }
         return launch(state, bundle, unitId, target, assign, weapons)
+      }
+      case 'melee.keywords': {
+        const ctx = state.pending.context as { surgeTarget: UnitId; assign: Record<ModelId, UnitId>; weapons: Record<ModelId, Id>; kwAlloc: KwAlloc; key: string; x: number; targets: UnitId[] }
+        const to = action.to
+        if (typeof to !== 'string' || (to !== 'even' && !ctx.targets.includes(to))) return reject('E_BAD_TARGET', 'Pick one of the pools or an even split.')
+        const n = ctx.targets.length
+        const alloc: Record<UnitId, number> = {}
+        ctx.targets.forEach((t, i) => { alloc[t] = to === 'even' ? Math.floor(ctx.x / n) + (i < ctx.x % n ? 1 : 0) : t === to ? ctx.x : 0 })
+        return launch(state, bundle, unitId, ctx.surgeTarget, ctx.assign, ctx.weapons, { ...ctx.kwAlloc, [ctx.key]: alloc })
       }
       default:
         return reject('E_UNKNOWN_KIND', `The melee module does not handle ${action.type}.`)

@@ -13,7 +13,7 @@ import { highlightsFor, type Highlights, type Role } from './highlights'
 import { useDraftFor } from './hooks'
 import { entrySegment } from './attention'
 import { classify, pathPlan } from './kinds'
-import { limitFor } from './preview'
+import { limitFor, type PathPreview } from './preview'
 import { draft, useDraft } from './store'
 
 const ROLE_COLOUR: Record<Role | 'candidate', string> = {
@@ -178,6 +178,20 @@ function Ghost({ x, z, y, r, colour, opacity = 0.45 }: { x: number; z: number; y
   )
 }
 
+/** Enemy squads the dry-run end point would be Engaged with (red rings) or could see (cyan; amber when the engine reports cover for us). */
+function PreviewMarks({ pv }: { pv: PathPreview }): ReactElement | null {
+  const models = usePresentedModels()
+  if (!models) return null
+  const items: ReactElement[] = []
+  for (const m of Object.values(models)) {
+    if (m.offTable || m.life === 'dead') continue
+    if (pv.engaged.includes(m.unitId)) { items.push(<Ring key={`eng-${m.id}`} x={m.pos.x} z={m.pos.z} y={m.elev} r={baseRadiusIn(m.base)} colour="#ff5a3c" speed={6} width={0.3} />); continue }
+    const s = pv.sights.find((x) => x.unitId === m.unitId)
+    if (s?.sees) items.push(<Ring key={`see-${m.id}`} x={m.pos.x} z={m.pos.z} y={m.elev} r={baseRadiusIn(m.base)} colour={s.cover && s.cover !== 'none' ? '#e0a03a' : '#59b8d6'} speed={2} width={0.12} />)
+  }
+  return <>{items}</>
+}
+
 function PathPreviewLayer({ pending }: { pending: PendingDecision }): ReactElement | null {
   const { state } = useGame()
   const d = useDraftFor(pending.id)
@@ -193,13 +207,11 @@ function PathPreviewLayer({ pending }: { pending: PendingDecision }): ReactEleme
   const colour = pv ? (pv.ok ? OK : BAD) : '#59b8d6'
   const y = (leader?.elev ?? 0) + 0.12
   const coh = pv?.placement && pv.ok ? queries.coherencyPreview(plan.unitId, pv.placement) : null
-  // Links come only from the engine's coherency read-out (coherencyPreview.links, when the engine provides it).
+  // Coherency lines: the engine's own link pairs (coherencyPreview.links).
   const links: [Vec2, Vec2][] = []
-  const rawLinks = (coh as { links?: unknown } | null)?.links
-  if (pv?.placement && Array.isArray(rawLinks)) {
-    for (const l of rawLinks) {
-      const [ia, ib] = Array.isArray(l) ? l as [string, string] : [(l as { a?: string }).a, (l as { b?: string }).b]
-      const pa = ia ? pv.placement[ia] : undefined, pb = ib ? pv.placement[ib] : undefined
+  if (pv?.placement && coh) {
+    for (const [ia, ib] of coh.links) {
+      const pa = pv.placement[ia], pb = pv.placement[ib]
       if (pa && pb) links.push([pa, pb])
     }
   }
@@ -221,6 +233,7 @@ function PathPreviewLayer({ pending }: { pending: PendingDecision }): ReactEleme
         })
         : d.waypoints.length > 0 && leader && <Ghost x={route[route.length - 1]!.x} z={route[route.length - 1]!.z} y={leader.elev} r={baseRadiusIn(leader.base)} colour={BAD} opacity={0.5} />}
       {links.map(([a, b], i) => <Line key={i} points={[[a.x, y + 0.3, a.z], [b.x, y + 0.3, b.z]]} color="#ffffff" lineWidth={1.5} transparent opacity={0.55} />)}
+      {pv?.ok && <PreviewMarks pv={pv} />}
       {pv?.placement && pv.red.map((id) => {
         const p = pv.placement![id]!
         return <Ring key={`red-${id}`} x={p.x} z={p.z} y={state.models[id]!.elev} r={baseRadiusIn(state.models[id]!.base)} colour={BAD} speed={8} width={0.3} />
@@ -228,7 +241,7 @@ function PathPreviewLayer({ pending }: { pending: PendingDecision }): ReactEleme
       {pv && route.length >= 1 && (pv.limit !== null || !pv.ok) && (
         <Html position={[pv.end.x, y + 1.6, pv.end.z]} center zIndexRange={[5, 0]} style={{ pointerEvents: 'none' }}>
           <div className={`ix-ruler${over || !pv.ok ? ' bad' : ''}`} data-testid="ruler-label">
-            {pv.limit !== null ? `${(Math.round(pv.length * 10) / 10).toString()}" / ${pv.limit}"` : pv.ok ? 'ok' : 'blocked'}
+            {pv.limit !== null ? `${(Math.round(pv.length * 10) / 10).toString()}" / ${pv.limit}"` : pv.ok ? 'ok' : 'blocked'}{pv.ok && pv.engaged.length > 0 ? ` | Engaged with ${pv.engaged.length}` : ''}
           </div>
         </Html>
       )}

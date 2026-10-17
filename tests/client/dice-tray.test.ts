@@ -49,10 +49,10 @@ describe('dice tray working', () => {
 })
 
 describe('dice tray targets and outcomes', () => {
-  it('DICE-T3 faceMeets agrees with the engine dice.succeeds for every face and TN', async () => {
-    const { faceMeets } = await import('../../src/client/dice/diceView')
+  it('DICE-T3 the tray colours dice with the engine dice.succeeds (natural 6 passes, natural 1 fails, null TN fails)', async () => {
+    const { dieSucceeds } = await import('../../src/client/contract')
     const { succeeds } = await import('../../src/engine/dice')
-    for (const tn of [null, 2, 3, 4, 5, 6]) for (let f = 1; f <= 6; f++) expect(faceMeets(f, tn), `face ${f} tn ${tn}`).toBe(succeeds(f, tn))
+    for (const tn of [null, 2, 3, 4, 5, 6]) for (let f = 1; f <= 6; f++) expect(dieSucceeds(f, tn), `face ${f} tn ${tn}`).toBe(succeeds(f, tn))
   })
   it('DICE-T4 a null TN reads as a failure, a natural 6 as a success, and the TN is spelled out', async () => {
     const { needsText } = await import('../../src/client/dice/diceView')

@@ -1,9 +1,7 @@
 // Pure view helpers for the dice tray (no React, no store). The tray shows the working of an attack from the
 // atk.stage payloads the engine logged (carried by attackStage cues); it never rolls or re-derives a rules number.
-// Colouring uses faceMeets(), a mirror of the engine's dice.succeeds (natural 6 wins, natural 1 fails, null TN fails);
-// tests/client/dice-tray.test.ts checks it against the engine for every face and TN. A per-die `pass` array in the
-// atk.stage payloads (asked of the engine owner) would replace it.
-import type { AtkStageData, CueOf, RolledDie, ShownRoll } from '../contract'
+// Colouring uses the engine's own dice.succeeds (natural 6 wins, natural 1 fails, null TN fails), re-exported by the contract.
+import { dieSucceeds, type AtkStageData, type CueOf, type RolledDie, type ShownRoll } from '../contract'
 
 export interface DieView {
   key: string
@@ -59,17 +57,9 @@ export interface BatchView {
   totals: { hits: number | null; saved: number | null; evaded: number | null; damage: number | null }
 }
 
-/** Mirror of engine dice.succeeds (DICE-023): natural 6 always succeeds, natural 1 always fails, a null TN fails. */
-export function faceMeets(face: number, tn: number | null): boolean {
-  if (tn === null) return false
-  if (face >= 6) return true
-  if (face <= 1) return false
-  return face >= tn
-}
-
 /** `neutral` leaves pass null (Impact dice: the payload gives only the count that passed). */
 const plain = (key: string, faces: readonly number[], tn: number | null, neutral = false): PlainDie[] =>
-  faces.map((face, i) => ({ key: `${key}:${i}`, face, pass: neutral ? null : faceMeets(face, tn) }))
+  faces.map((face, i) => ({ key: `${key}:${i}`, face, pass: neutral ? null : dieSucceeds(face, tn) }))
 
 /** "needs 4+" for a pool's target number; "automatic fail" when there is none. */
 export const needsText = (tn: number | null): string => (tn === null ? 'no target number (every die fails)' : `needs ${tn}+`)

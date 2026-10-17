@@ -71,3 +71,17 @@ export function useGlbsSettled(urls: readonly string[]): boolean {
   urls.forEach((u) => request(u))
   return urls.every((u) => { const st = cache.get(u)?.status; return st === 'ready' || st === 'failed' })
 }
+
+/** The shared (uncloned) scene of a loaded GLB, for instancing; null while loading / if unavailable. Never mutate it. */
+export function useGlbScene(url: string | undefined): Object3D | null {
+  const [, setTick] = useState(0)
+  if (url) request(url)
+  useEffect(() => {
+    if (!url) return
+    const l = () => setTick((n) => n + 1)
+    listeners.add(l)
+    return () => { listeners.delete(l) }
+  }, [url])
+  const e = url ? cache.get(url) : undefined
+  return e?.status === 'ready' ? e.scene ?? null : null
+}

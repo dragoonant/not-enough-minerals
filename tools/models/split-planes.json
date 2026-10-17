@@ -1,0 +1,8 @@
+{
+  "siege-tank": { "file": "siege-tank.glb", "normal": [0, 1, 0], "frac": 0.45, "below": "lower", "above": "upper" },
+  "goliath": { "file": "goliath.glb", "normal": [0, 1, 0], "frac": 0.4, "below": "lower", "above": "upper" },
+  "hydralisk": { "file": "hydralisk.glb", "normal": [0, 1, 0], "frac": 0.4, "below": "lower", "above": "upper" },
+  "queen": { "file": "queen.glb", "normal": [0, 1, 0], "frac": 0.4, "below": "lower", "above": "upper" },
+  "ravager": { "file": "ravager.glb", "normal": [0, 1, 0], "frac": 0.4, "below": "lower", "above": "upper" },
+  "omega-worm": { "file": "omega-worm.glb", "normal": [0, 1, 0], "frac": 0.4, "below": "lower", "above": "upper" }
+}

@@ -38,15 +38,17 @@ function enemyUnits(state: GameState, unit: UnitState): UnitState[] {
   return Object.values(state.units).filter((u) => u.owner !== unit.owner && u.location === 'table' && unitModels(state, u.id).length > 0)
 }
 
-function carriers(state: GameState, unit: UnitState, profile: WeaponProfile): ModelState[] {
+export function carriers(state: GameState, unit: UnitState, profile: WeaponProfile): ModelState[] {
   const sidearm = isSidearm(profile)
   return unitModels(state, unit.id).filter((m) => m.weapons.includes(profile.id) && !unit.usage[sidearm ? firedKey(state.round, m.id, profile.id) : firedKey(state.round, m.id)])
 }
 
-interface TargetCheck { ok: boolean; reason?: string; contributors: { modelId: ModelId; far: boolean }[]; seen: ModelId[] }
+/** Result of checkTarget. `reason` (when not ok): friendly, reserves, targetTag, engagedShooter, engagedTarget, restricted,
+ *  or a SeeReason word (hidden, noLos, destroyed) or outOfRange. */
+export interface TargetCheck { ok: boolean; reason?: string; contributors: { modelId: ModelId; far: boolean }[]; seen: ModelId[] }
 
 /** All of ATK-010..014 and ATK-020 for one profile, one target and the models that would fire. */
-function checkTarget(state: GameState, b: EditionBundle, unit: UnitState, profile: WeaponProfile, car: ModelState[], target: UnitState): TargetCheck {
+export function checkTarget(state: GameState, b: EditionBundle, unit: UnitState, profile: WeaponProfile, car: ModelState[], target: UnitState): TargetCheck {
   const fail = (reason: string): TargetCheck => ({ ok: false, reason, contributors: [], seen: [] })
   if (target.owner === unit.owner) return fail('friendly')
   if (target.location !== 'table') return fail('reserves')

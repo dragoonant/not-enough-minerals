@@ -105,15 +105,23 @@ export function planCharge(state: GameState, b: EditionBundle, unitId: UnitId, t
 
 /** Smallest D6 face that makes the Charge succeed against all `targetIds` (null = impossible even on a 6).
  *  The same planner as the Charge itself, started at the straight-line lower bound. query.chargeOdds turns it into odds. */
-export function chargeNeeded(state: GameState, bundle: EditionBundle, unitId: UnitId, targetIds: UnitId[]): number | null {
+export function chargeNeeded(state: GameState, bundle: EditionBundle, unitId: UnitId, targetIds: UnitId[], again = false): number | null {
   const unit = state.units[unitId]
   if (!unit || !targetIds.length) return null
   const speed = statOf(state, bundle, unitId, 'speed', { phase: 'assault' })
   const lead = bestLeader(state, bundle, unit, targetIds)
   if (speed === null || !lead) return null
   const lo = Math.max(1, Math.ceil(lead.travel - speed - 1e-9))
-  for (let face = lo; face <= 6; face++) if (planCharge(state, bundle, unitId, targetIds, speed + face, 1).length) return face
-  return null
+  // a longer roll only widens what the Leading Model may reach, so success is monotone in the face: test a 6, then bisect
+  const works = (face: number): boolean => planCharge(state, bundle, unitId, targetIds, speed + face, 1, again).length > 0
+  if (lo > 6 || !works(6)) return null
+  let a = lo, z = 6
+  while (a < z) {
+    const mid = Math.floor((a + z) / 2)
+    if (works(mid)) z = mid
+    else a = mid + 1
+  }
+  return a
 }
 
 // ---------------------------------------------------------------- event-backed progress
@@ -142,7 +150,9 @@ const wantsBest2 = (state: GameState, b: EditionBundle, unitId: UnitId): boolean
 function declare(state: GameState, b: EditionBundle, unit: UnitState, targets: UnitId[], again = false): StepResult {
   const legal = again ? againTargets(state, b, unit.id) : chargeTargets(state, b, unit.id)
   if (!targets.length || targets.some((t) => !legal.includes(t))) return reject('E_BAD_TARGET', 'Every Charge target must be an enemy Ground unit.')
-  let s = pushEvents(state, [{ type: 'charge.declared', unitId: unit.id, targets, round: state.round, ...(again ? { again: true } : {}) }])
+  // `needed`: the smallest D6 face that makes this Charge succeed (null = out of reach), so the UI cue can show it
+  const needed = chargeNeeded(state, b, unit.id, targets, again)
+  let s = pushEvents(state, [{ type: 'charge.declared', unitId: unit.id, targets, needed, round: state.round, ...(again ? { again: true } : {}) }])
   for (const t of targets) {
     const h = runHook(s, b, 'onTargeted', { seat: unit.owner, unitId: unit.id, targetUnitId: t, phase: 'assault', returnTo: 'charge' })
     s = h.state
@@ -164,7 +174,8 @@ function rollStep(state: GameState, b: EditionBundle, unitId: UnitId): StepResul
   if (isRejection(r)) return r
   const face = two ? Math.max(...r.dice.map((d) => d.face)) : r.value
   const distance = face + speed
-  let s = pushEvents(r.state, [r.event, { type: 'charge.rolled', unitId, roll: face, speed, distance, best2: two }])
+  const needed = (decl?.needed as number | null | undefined) ?? null
+  let s = pushEvents(r.state, [r.event, { type: 'charge.rolled', unitId, roll: face, speed, distance, best2: two, needed }])
   const h = runHook(s, b, 'onChargeRoll', { seat: unit.owner, unitId, targetUnitId: targets[0], phase: 'assault', cause: 'chargeDistance', value: distance, returnTo: 'charge' })
   s = h.state
   if (h.raised) return { state: s }
@@ -185,7 +196,7 @@ function afterRollWindow(state: GameState, b: EditionBundle, unitId: UnitId): St
     const r = rollExpr(s, 'D6', 'charge', unit.owner)
     if (isRejection(r)) return r
     roll = Math.max(roll, r.value)
-    s = pushEvents(r.state, [r.event, { type: 'charge.rolled', unitId, roll, speed, distance: roll + speed, best2: true }])
+    s = pushEvents(r.state, [r.event, { type: 'charge.rolled', unitId, roll, speed, distance: roll + speed, best2: true, needed: (rolled.needed as number | null | undefined) ?? null }])
   }
   const h = runHook(s, b, 'onChargeRoll', { seat: unit.owner, unitId, targetUnitId: targets[0], phase: 'assault', cause: 'chargeDistance', value: roll + speed, foldOnly: true, returnTo: 'charge' })
   s = pushEvents(h.state, [{ type: 'charge.distance', unitId, distance: Math.max(0, h.value ?? roll + speed) }])
@@ -335,8 +346,9 @@ function impactRanked(state: GameState, b: EditionBundle, unitId: UnitId): { mod
     .filter((r) => r.targets.length > 0)
 }
 
-/** IMPACT (X) Y right after a successful Charge (ATK-091): X dice per ranked model. A model that can reach several
- *  targets splits its dice as the player chooses; the even split is the ready answer. */
+/** IMPACT (X) Y right after a successful Charge (ATK-091): X dice per ranked model. A model in the Fighting or Supporting
+ *  Rank against several Enemy Units: the controlling player splits its dice (R p.88). The decision offers even, all at
+ *  one target, and a custom per-model `split` for the UI; the bot answers from the ready options. */
 function impactStep(state: GameState, b: EditionBundle, unitId: UnitId): StepResult {
   const unit = state.units[unitId]!
   const imp = impactOf(state, b, unitId)
@@ -351,6 +363,9 @@ function impactStep(state: GameState, b: EditionBundle, unitId: UnitId): StepRes
       options: [
         option('even', 'Split the IMPACT dice evenly', 'charge.impact', { unitId, even: true }, unit.owner),
         ...all.map((t) => option(`all:${t}`, `Aim the IMPACT dice at ${t}`, 'charge.impact', { unitId, all: t }, unit.owner)),
+        // R p.88 IMPACT: the controlling player splits each model's dice. The action also carries `split`
+        // ({modelId: {targetUnitId: dice}}, each model's dice adding up to X); without it this entry means "even".
+        option('custom', 'Split the IMPACT dice model by model', 'charge.impact', { unitId, custom: true }, unit.owner),
       ],
     }),
   }
