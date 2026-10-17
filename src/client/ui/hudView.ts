@@ -77,7 +77,7 @@ export const GENERAL_HINTS: readonly string[] = [
   'Hover an enemy while attacking to see the odds before you commit.',
 ]
 const HINT_BY_KIND: Record<string, string> = {
-  'turn.activate': 'Players take turns activating one squad at a time. Pass when you have nothing more to do this Phase.',
+  'turn.activate': 'Your turn to act: click a squad on the table (or bring one in from Reserves in the left panel), then choose what it does. Pass if you are done for this Phase.',
   'turn.first': 'You hold the First Player Marker, so you choose who takes the first turn this Phase.',
   'turn.choose': 'Choose how the Round continues.',
   'setup.firstPlayer': 'The roll-off winner decides who acts first. Going first lets you grab markers early; going second lets you answer.',
