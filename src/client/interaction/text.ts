@@ -98,3 +98,27 @@ export function payCardsWords(state: GameState | null, seat: string, cards: read
 export function firstChoiceWords(holder: string, first: string): string {
   return first === holder ? 'I take the first turn' : `${seatLabel(first)} takes the first turn`
 }
+
+// ---------- greyed entries (query.shootOptions): the reason each one is off ----------
+export interface ShootInfo { canShoot: boolean; text?: string; weapons: { weaponId: string; name: string; eligible?: boolean; text?: string; targets: { targetUnitId: string; eligible: boolean; text?: string; printedHit?: number | null; hitTN?: number | null; hitNotes?: string[] }[] }[] }
+/** Why Ranged Attack is greyed in the action menu ('' when it is usable). */
+export function shootBlockedWhy(sh: ShootInfo | null): string {
+  if (!sh || sh.canShoot) return ''
+  return sh.text ?? sh.weapons.find((w) => w.text)?.text ?? 'No weapon has a legal target.'
+}
+/** Weapons the weapon panel shows greyed: known to the query, absent from the engine's batch options. */
+export function offWeaponRows(sh: ShootInfo | null, offeredIds: readonly string[]): { weaponId: string; name: string; why: string }[] {
+  return (sh?.weapons ?? []).filter((w) => !offeredIds.includes(w.weaponId)).map((w) => ({ weaponId: w.weaponId, name: w.name, why: w.text ?? 'Cannot fire now.' }))
+}
+/** Targets of the active weapon the panel shows greyed, each with the engine's reason. */
+export function blockedTargetRows(sh: ShootInfo | null, weaponId: string | null, offeredTargets: readonly string[]): { unitId: string; why: string }[] {
+  const w = sh?.weapons.find((x) => x.weaponId === weaponId)
+  return (w?.targets ?? []).filter((t) => !t.eligible && !offeredTargets.includes(t.targetUnitId)).map((t) => ({ unitId: t.targetUnitId, why: t.text ?? 'Not a legal target.' }))
+}
+const HIT_NOTE: Record<string, string> = {
+  indirectFire: 'indirect fire', longRange: 'some models are at long range', cover: 'the target is in cover', highGround: 'the target holds the high ground', modifier: 'a modifier applies',
+}
+/** The odds-row line explaining why the Hit number differs from the printed one ('' when it does not). */
+export function hitNoteLine(t: { printedHit?: number | null; hitTN?: number | null; hitNotes?: string[] } | undefined): string {
+  return t?.hitNotes?.length ? `Hit ${t.hitTN ?? 'n/a'}+ instead of the printed ${t.printedHit ?? 'n/a'}+: ${t.hitNotes.map((n) => HIT_NOTE[n] ?? n).join(', ')}.` : ''
+}

@@ -27,7 +27,7 @@ describe('I-KIND every decision kind has a controller', () => {
     'turn.start': 'list', 'turn.first': 'list', 'turn.activate': 'activate', 'turn.order': 'list', 'turn.over': 'list', 'turn.choose': 'list',
     'move.path': 'path', 'move.place': 'path', 'deploy.entry': 'entry', 'deploy.drop': 'list', 'deploy.path': 'path',
     'shoot.batch': 'target', 'shoot.template': 'models', 'charge.targets': 'target', 'charge.impact': 'target', 'charge.path': 'path',
-    'melee.closeRanks': 'list', 'melee.split': 'target', 'atk.reroll': 'list', 'atk.precision': 'list', 'atk.tough': 'list', 'atk.casualty': 'models',
+    'melee.closeRanks': 'list', 'melee.split': 'target', 'melee.keywords': 'list', 'atk.reroll': 'list', 'atk.precision': 'list', 'atk.tough': 'list', 'atk.casualty': 'models',
     'ability.window': 'list', 'ability.target': 'list', 'ability.pay': 'list', 'ability.react': 'list', 'mission.choose': 'list', 'mission.claim': 'list', 'score.order': 'list',
   }
   it('INT-001 DECISION_KINDS lists every kind of spec 00 s3.2 and each has our-words copy', () => {

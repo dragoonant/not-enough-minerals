@@ -57,3 +57,15 @@
 .ix-status-line { margin: 2px 0 6px; font-size: 12.5px; opacity: .9; line-height: 1.35; }
 .ix-btn.has-effect { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; white-space: normal; max-width: 340px; }
 .ix-effect { font-size: 11.5px; font-weight: 400; opacity: .78; line-height: 1.3; }
+
+/* charge.impact split editor */
+.ix-split { display: grid; gap: 4px; max-height: 180px; overflow-y: auto; padding: 6px 8px; border-radius: 4px; background: rgba(89,184,214,.08); border-left: 3px solid var(--cyan, #59b8d6); }
+.ix-split-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; font-size: 13px; }
+.ix-split-name { min-width: 92px; }
+.ix-step { display: inline-flex; align-items: center; gap: 4px; }
+.ix-step b { min-width: 1.2em; text-align: center; }
+
+/* ability windows list several effect cards: a wider panel lays them out two to a row instead of one tall column */
+.ix-prompt[data-kind="ability.window"], .ix-prompt[data-kind="ability.react"] { width: min(660px, calc(100% - 24px)); }
+.ix-prompt[data-kind="ability.window"] .ix-btn.has-effect, .ix-prompt[data-kind="ability.react"] .ix-btn.has-effect { flex: 1 1 calc(50% - 6px); max-width: none; }
+.ix-prompt[data-kind="ability.window"] .ix-wrap, .ix-prompt[data-kind="ability.react"] .ix-wrap { max-height: 34vh; }

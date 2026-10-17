@@ -5,7 +5,7 @@ import type { Page } from '@playwright/test'
 export function captureErrors(page: Page): string[] {
   const errors: string[] = []
   const benign = /GPU stall|WebGL|swiftshader|Automatic fallback to software|favicon/i
-  page.on('console', (m) => { if (m.type() === 'error' && !benign.test(m.text())) errors.push(m.text().slice(0, 400)) })
+  page.on('console', (m) => { if (m.type() === 'error' && !benign.test(m.text()) && !/favicon/i.test(m.location().url)) errors.push(m.text().slice(0, 400)) })
   page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`))
   return errors
 }

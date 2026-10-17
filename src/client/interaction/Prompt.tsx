@@ -7,7 +7,7 @@ import { SkillName, SkillTip } from '../ui/SkillTip'
 import { panels, useHideAll, usePanelMin } from '../ui/panelStore'
 import { Tip } from '../ui/Tooltip'
 import {
-  data, dataName, focus, getBundle, queries, useAttackPreview, useReadyPools, useShootOptions, useBoardGeometry, useChargeOdds, useFocus, useGame, useWaitingFor,
+  data, dataName, focus, game, getBundle, queries, useAttackPreview, useReadyPools, useShootOptions, useBoardGeometry, useChargeOdds, useFocus, useGame, useWaitingFor,
 } from '../contract'
 import type { DecisionOption, GameState, PendingDecision } from '../../engine/types'
 import type { Resource } from '../../data/types'
@@ -16,9 +16,9 @@ import { attentionPoints, dockSide, midOf, sideName } from './attention'
 import { activeWeapon } from './highlights'
 import { useDraftFor } from './hooks'
 import {
-  activationMenu, batchMenu, chargeOptionFor, classify, hintFor, kindInfo, mentionedUnits, modelRef, pathPlan, sideOptions, verbOf, type Mode,
+  activationMenu, batchMenu, chargeOptionFor, classify, hintFor, kindInfo, stepLine, mentionedUnits, modelRef, pathPlan, sideOptions, verbOf, type Mode,
 } from './kinds'
-import { abilityHeading, firstChoiceWords, firstSentence, oneDp, payCardsWords, percent, prettify, unitTag } from './text'
+import { abilityHeading, blockedTargetRows, firstChoiceWords, hitNoteLine, offWeaponRows, shootBlockedWhy, firstSentence, oneDp, payCardsWords, percent, prettify, unitTag } from './text'
 import { draft } from './store'
 
 const HINT_KEY = 'nem.interaction.hints'
@@ -93,8 +93,8 @@ function ActivateBody({ pending }: { pending: PendingDecision }): ReactElement {
               const reach = o.action.type === 'move.run' ? queries.reachOf(open.unitId) : null
               // Ranged Attack is greyed with the engine's own reason when no weapon has a legal target (query.shootOptions).
               const sh = o.action.type === 'shoot.go' ? queries.shootOptions(open.unitId) : null
-              const blocked = !!sh && !sh.canShoot
-              const why = blocked ? sh!.text ?? sh!.weapons.find((w) => w.text)?.text ?? 'No weapon has a legal target.' : ''
+              const why = shootBlockedWhy(sh)
+              const blocked = why !== ''
               const hint = blocked ? why : skill ? skill.text : reach && reach.run !== null ? `Move again, up to ${oneDp(reach.run)}" (the squad Speed).` : v.hint
               return (
                 <SkillTip key={`${o.id}:${i}`} info={skill}>
@@ -160,14 +160,11 @@ function weaponOf(state: GameState | null, unitId: string | null, weaponId: stri
 // ------------------------------------------------------------------ targets (shoot.batch and friends)
 const CHARGE_WHY: Record<string, string> = { outOfReach: 'Out of reach this turn.', noTarget: 'Pick at least one target.' }
 
-const HIT_NOTE: Record<string, string> = {
-  indirectFire: 'indirect fire', longRange: 'some models are at long range', cover: 'the target is in cover', highGround: 'the target holds the high ground', modifier: 'a modifier applies',
-}
 function AttackOdds({ attacker, weaponId, target }: { attacker: string; weaponId: string; target: string }): ReactElement | null {
   const pv = useAttackPreview(attacker, weaponId, target)
   const so = useShootOptions(attacker)
   const st = so?.weapons.find((w) => w.weaponId === weaponId)?.targets.find((t) => t.targetUnitId === target)
-  const tnNote = st?.hitNotes?.length ? `Hit ${st.hitTN ?? 'n/a'}+ instead of the printed ${st.printedHit ?? 'n/a'}+: ${st.hitNotes.map((n) => HIT_NOTE[n] ?? n).join(', ')}.` : ''
+  const tnNote = hitNoteLine(st)
   if (!pv) return null
   if (!pv.legal) return <div className="ix-odds bad" data-testid="ix-odds">{pv.reason ?? 'Cannot fire at that target.'}</div>
   const dice = pv.perModel.reduce((n, m) => n + m.dice, 0)
@@ -204,7 +201,7 @@ function TargetBody({ pending }: { pending: PendingDecision }): ReactElement {
   const shots = useShootOptions(shotUnit)
   if (pending.kind === 'shoot.batch') {
     const menu = batchMenu(pending)
-    const offWeapons = (shots?.weapons ?? []).filter((x) => !menu.rows.some((r) => r.weaponId === x.weaponId))
+    const offWeapons = offWeaponRows(shots, menu.rows.map((r) => r.weaponId))
     const w = activeWeapon(menu, d.weaponId)
     const row = menu.rows.find((r) => r.weaponId === w)
     const shown = d.armed?.unitId ?? (hover && row?.targets.includes(hover) ? hover : null)
@@ -223,7 +220,7 @@ function TargetBody({ pending }: { pending: PendingDecision }): ReactElement {
           })}
           {offWeapons.map((x) => (
             <button key={x.weaponId} className="ix-chip off" aria-disabled="true" data-testid={`weapon-off-${x.weaponId}`} onClick={(e) => e.preventDefault()}>
-              {x.name} <span className="dim">{x.text ?? 'Cannot fire now.'}</span>
+              {x.name} <span className="dim">{x.why}</span>
             </button>
           ))}
         </div>
@@ -236,13 +233,13 @@ function TargetBody({ pending }: { pending: PendingDecision }): ReactElement {
           ))}
         </div>
         {(() => {
-          const blockedTargets = (shots?.weapons.find((x) => x.weaponId === w)?.targets ?? []).filter((t) => !t.eligible && !row?.targets.includes(t.targetUnitId))
+          const blockedTargets = blockedTargetRows(shots, w, row?.targets ?? [])
           return blockedTargets.length > 0 && (
             <div className="ix-row" data-testid="ix-blocked" aria-label="Targets that cannot be shot">
               {blockedTargets.map((t) => (
-                <button key={t.targetUnitId} className="ix-btn off" aria-disabled="true" data-testid={`blocked-${t.targetUnitId}`} onClick={(e) => e.preventDefault()}
-                  onMouseEnter={() => focus.hover(t.targetUnitId)} onMouseLeave={() => focus.hover(null)}>
-                  {unitTag(state, t.targetUnitId)} <span className="dim">{t.text ?? 'Not a legal target.'}</span>
+                <button key={t.unitId} className="ix-btn off" aria-disabled="true" data-testid={`blocked-${t.unitId}`} onClick={(e) => e.preventDefault()}
+                  onMouseEnter={() => focus.hover(t.unitId)} onMouseLeave={() => focus.hover(null)}>
+                  {unitTag(state, t.unitId)} <span className="dim">{t.why}</span>
                 </button>
               ))}
             </div>
@@ -289,7 +286,8 @@ function TargetBody({ pending }: { pending: PendingDecision }): ReactElement {
       </div>
     )
   }
-  // melee.split, charge.impact, ability target: one button per target, plus the table
+  if (pending.kind === 'charge.impact') return <ImpactBody key={pending.id} pending={pending} />
+  // melee.split, ability target: one button per target, plus the table
   const armedOpt = d.armed ? optionForTarget(pending, d.armed.unitId, null) : null
   return (
     <div className="ix-body" data-testid="ix-target">
@@ -299,6 +297,58 @@ function TargetBody({ pending }: { pending: PendingDecision }): ReactElement {
       <div className="ix-row">
         <button className="ix-btn primary" disabled={!armedOpt} data-testid="fire-confirm" onClick={() => fireArmed(pending)}><kbd>Enter</kbd>Confirm pick</button>
       </div>
+    </div>
+  )
+}
+
+// ------------------------------------------------------------------ charge.impact: ready choices plus a model-by-model split editor
+interface RankedModel { modelId: string; targets: string[] }
+/** Even spread of `x` dice over the targets (the same shape the engine's even split uses). */
+const evenSplit = (x: number, ts: string[]): Record<string, number> => Object.fromEntries(ts.map((t, i) => [t, Math.floor(x / ts.length) + (i < x % ts.length ? 1 : 0)]))
+
+function ImpactBody({ pending }: { pending: PendingDecision }): ReactElement {
+  const { state } = useGame()
+  const x = typeof pending.context['x'] === 'number' ? (pending.context['x'] as number) : 0
+  const ranked = (Array.isArray(pending.context['ranked']) ? pending.context['ranked'] : []) as RankedModel[]
+  const unitId = typeof pending.context['unitId'] === 'string' ? (pending.context['unitId'] as string) : ''
+  const [open, setOpen] = useState(false)
+  const [split, setSplit] = useState<Record<string, Record<string, number>>>(() => Object.fromEntries(ranked.map((r) => [r.modelId, evenSplit(x, r.targets)])))
+  const ready = pending.options.filter((o) => o.id !== 'custom')
+  // Moving one die keeps the model's total at X: + takes a die from the first other target that has one, - hands one to the next target.
+  const bump = (mid: string, ts: string[], t: string, dir: 1 | -1) => setSplit((cur) => {
+    const row = { ...(cur[mid] ?? evenSplit(x, ts)) }
+    if (dir === 1) { const from = ts.find((o) => o !== t && (row[o] ?? 0) > 0); if (!from) return cur; row[from] = (row[from] ?? 0) - 1; row[t] = (row[t] ?? 0) + 1 }
+    else { if ((row[t] ?? 0) <= 0) return cur; const to = ts[(ts.indexOf(t) + 1) % ts.length]!; row[t] = (row[t] ?? 0) - 1; row[to] = (row[to] ?? 0) + 1 }
+    return { ...cur, [mid]: row }
+  })
+  const totals = new Map<string, number>()
+  for (const r of ranked) for (const t of r.targets) totals.set(t, (totals.get(t) ?? 0) + (split[r.modelId]?.[t] ?? 0))
+  const ok = ranked.length > 0 && ranked.every((r) => r.targets.reduce((n, t) => n + (split[r.modelId]?.[t] ?? 0), 0) === x)
+  return (
+    <div className="ix-body" data-testid="ix-target">
+      <div className="ix-row ix-wrap">
+        {ready.map((o, i) => <OptionButton key={`${o.id}:${i}`} o={o} index={i} />)}
+        {ranked.length > 0 && <button className={`ix-btn${open ? ' primary' : ''}`} data-testid="impact-custom" aria-expanded={open} onClick={() => setOpen(!open)}>Split model by model</button>}
+      </div>
+      {open && (
+        <div className="ix-split" data-testid="impact-editor">
+          {ranked.map((r, mi) => (
+            <div key={r.modelId} className="ix-split-row" data-testid={`impact-model-${r.modelId}`}>
+              <span className="ix-split-name">Model {mi + 1} <span className="dim">({x} dice)</span></span>
+              {r.targets.map((t) => (
+                <span key={t} className="ix-step">
+                  <button className="ix-icon" aria-label={`Fewer dice at ${unitTag(state, t)}`} data-testid={`impact-minus-${r.modelId}-${t}`} onClick={() => bump(r.modelId, r.targets, t, -1)}>-</button>
+                  <b data-testid={`impact-n-${r.modelId}-${t}`}>{split[r.modelId]?.[t] ?? 0}</b>
+                  <button className="ix-icon" aria-label={`More dice at ${unitTag(state, t)}`} data-testid={`impact-plus-${r.modelId}-${t}`} onClick={() => bump(r.modelId, r.targets, t, 1)}>+</button>
+                  <span className="dim">{unitTag(state, t)}</span>
+                </span>
+              ))}
+            </div>
+          ))}
+          <div className="ix-note" data-testid="impact-totals">{[...totals].map(([t, n]) => `${unitTag(state, t)}: ${n}`).join(' | ')}</div>
+          <button className="ix-btn primary" disabled={!ok} data-testid="impact-confirm" onClick={() => game.answer({ type: 'charge.impact', unitId, custom: true, split })}>Throw the dice this way</button>
+        </div>
+      )}
     </div>
   )
 }
@@ -451,6 +501,7 @@ export function Prompt({ pending }: { pending: PendingDecision }): ReactElement 
         <>
           {ability && ability.line && <p className="ix-hint" data-testid="ix-ability">{ability.line}</p>}
           {hints && !ability && <p className="ix-hint" data-testid="ix-hint">{hintFor(pending, (id) => state?.units[id]?.location === 'table')}</p>}
+          {stepLine(pending) && <p className="ix-hint" data-testid="ix-step-line">{stepLine(pending)}</p>}
           <AbilityStatus pending={pending} />
           <HintStrip pending={pending} />
           {mode === 'activate' ? <ActivateBody pending={pending} />

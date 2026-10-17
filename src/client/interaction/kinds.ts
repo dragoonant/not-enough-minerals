@@ -21,7 +21,7 @@ export const DECISION_KINDS = [
   'deploy.entry', 'deploy.drop', 'deploy.path',
   'shoot.batch', 'shoot.template',
   'charge.targets', 'charge.impact', 'charge.path',
-  'melee.closeRanks', 'melee.split',
+  'melee.closeRanks', 'melee.split', 'melee.keywords',
   'atk.reroll', 'atk.precision', 'atk.tough', 'atk.casualty',
   'ability.window', 'ability.target', 'ability.pay', 'ability.react',
   'mission.choose', 'mission.claim',
@@ -56,6 +56,7 @@ export const KIND_INFO: Record<string, KindInfo> = {
   'charge.path': { title: 'Charge into contact', hint: 'Drag a model toward the enemy, or let the game take the first legal route.' },
   'melee.closeRanks': { title: 'Close ranks?', hint: 'Step the squad up against the enemy before fighting, or hold the line.' },
   'melee.split': { title: 'Fight: aim the Surge Die', hint: 'Click the enemy squad that should receive the Surge Die for this fight.' },
+  'melee.keywords': { title: 'Share out a keyword bonus', hint: 'The fight is split between enemy squads, so choose where this keyword bonus lands.' },
   'atk.reroll': { title: 'Re-roll dice?', hint: 'An effect lets you re-roll. Choose what to re-roll, or decline.' },
   'atk.precision': { title: 'Precision: pick a model', hint: 'Choose which model takes the damage.' },
   'atk.tough': { title: 'Toughness', hint: 'Choose how to apply the effect.' },
@@ -75,6 +76,34 @@ export function kindInfo(kind: string): KindInfo {
   const ns = kind.split('.')[0] ?? ''
   const label = ns ? ns[0]!.toUpperCase() + ns.slice(1) : 'Decision'
   return { title: `${label}: your choice`, hint: 'Pick one of the choices below.' }
+}
+
+/** One line saying what the current choice means, for the prompts whose option labels alone are terse. '' when there is nothing to add. */
+export function stepLine(p: PendingDecision): string {
+  const c = p.context
+  if (p.kind === 'melee.keywords') {
+    const kw = typeof c['kw'] === 'string' ? (c['kw'] as string).replace(/_/g, ' ').toLowerCase() : 'keyword'
+    const x = typeof c['x'] === 'number' ? c['x'] : null
+    return `${x !== null ? `${kw} (${x})` : kw} applies once for this fight: put all of it against one enemy squad, or share it out as evenly as possible.`
+  }
+  if (p.kind === 'charge.impact') {
+    const x = typeof c['x'] === 'number' ? c['x'] : null
+    return `Each charging model with IMPACT rolls ${x ?? 'its'} dice. Send them all one way, share them evenly, or place each model's dice yourself.`
+  }
+  if (p.kind !== 'ability.target') return ''
+  const cont = c['cont'] as { k?: string; op?: string; ids?: unknown[]; pts?: unknown[]; removed?: unknown[]; x?: number } | undefined
+  if (!cont) return ''
+  if (cont.k === 'costReact') return 'Using this Reaction makes the cost cheaper but spends your Reaction for this activation. Paying in full keeps the Reaction.'
+  if (cont.k === 'newModel' && cont.op === 'respawn') {
+    const total = cont.ids?.length ?? 0, placed = cont.pts?.length ?? 0
+    return `RESPAWN: click a marked spot touching the squad to bring back a model (${Math.min(placed + 1, total)} of up to ${total}). You may stop early.`
+  }
+  if (cont.k === 'newModel' && cont.op === 'morph') {
+    if (!cont.pts?.length) return 'MORPH: click a marked spot touching the squad for the new model. Models are removed afterwards.'
+    const left = (cont.x ?? 1) - (cont.removed?.length ?? 0)
+    return `MORPH: pick ${left} model${left === 1 ? '' : 's'} of the squad to remove in exchange for the new one.`
+  }
+  return ''
 }
 
 export const PATH_KINDS = ['move.path', 'deploy.path', 'charge.path', 'move.place'] as const
@@ -145,7 +174,7 @@ export const modelRef = (a: Action): ModelId | null => (typeof a['modelId'] === 
 /** Every unit id an option mentions (hover on a list button lights these on the table). */
 export function mentionedUnits(a: Action): UnitId[] {
   const out: UnitId[] = []
-  for (const k of ['unitId', 'targetUnitId', 'surgeTarget', 'all']) if (typeof a[k] === 'string') out.push(a[k] as string)
+  for (const k of ['unitId', 'targetUnitId', 'surgeTarget', 'all', 'to']) if (typeof a[k] === 'string') out.push(a[k] as string)
   for (const k of ['targetIds']) if (Array.isArray(a[k])) for (const x of a[k] as unknown[]) if (typeof x === 'string') out.push(x)
   return [...new Set(out)]
 }
